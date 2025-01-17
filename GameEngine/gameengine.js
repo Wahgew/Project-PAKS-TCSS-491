@@ -72,8 +72,9 @@ class GameEngine {
             this.rightclick = getXandY(e);
         });
 
-        this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key] = true);
-        this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key] = false);
+        this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key.toLowerCase()] = true); // CHECK IF .toLowerCase() is super jank, maybe change in future
+        this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key.toLowerCase()] = false); // same as above
+        // for wasd and arrow keys, have a check that syncs up state of respective keys?
     };
 
     addEntity(entity) {
