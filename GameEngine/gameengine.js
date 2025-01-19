@@ -3,7 +3,6 @@
 class GameEngine {
     constructor(options) {
         // What you will use to draw
-        // Documentation: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
         this.ctx = null;
 
         // Everything that will be updated and drawn each frame
@@ -17,31 +16,45 @@ class GameEngine {
 
         // Options and the Details
         this.options = options || {
-            debugging: false,
+            debugging: true,
         };
-    };
+    }
 
     init(ctx) {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
-    };
+    }
 
     start() {
         this.running = true;
         const gameLoop = () => {
             this.loop();
-            requestAnimFrame(gameLoop, this.ctx.canvas);
+            if (this.running) {
+                requestAnimFrame(gameLoop, this.ctx.canvas);
+            }
         };
         gameLoop();
-    };
+    }
 
     startInput() {
+        // Move keyboard events to window instead of canvas
+        window.addEventListener("keydown", event => {
+            console.log("Key pressed:", event.key.toLowerCase());
+            this.keys[event.key.toLowerCase()] = true;
+        });
+
+        window.addEventListener("keyup", event => {
+            console.log("Key released:", event.key.toLowerCase());
+            this.keys[event.key.toLowerCase()] = false;
+        });
+
+        // Mouse events remain on canvas
         const getXandY = e => ({
             x: e.clientX - this.ctx.canvas.getBoundingClientRect().left,
             y: e.clientY - this.ctx.canvas.getBoundingClientRect().top
         });
-        
+
         this.ctx.canvas.addEventListener("mousemove", e => {
             if (this.options.debugging) {
                 console.log("MOUSE_MOVE", getXandY(e));
@@ -71,25 +84,57 @@ class GameEngine {
             e.preventDefault(); // Prevent Context Menu
             this.rightclick = getXandY(e);
         });
-
-        this.ctx.canvas.addEventListener("keydown", event => this.keys[event.key.toLowerCase()] = true); // CHECK IF .toLowerCase() is super jank, maybe change in future
-        this.ctx.canvas.addEventListener("keyup", event => this.keys[event.key.toLowerCase()] = false); // same as above
-        // for wasd and arrow keys, have a check that syncs up state of respective keys?
-    };
+    }
 
     addEntity(entity) {
+        if (this.options.debugging) {
+            console.log("Adding entity:", entity);
+        }
         this.entities.push(entity);
-    };
+    }
 
     draw() {
-        // Clear the whole canvas with transparent color (rgba(0, 0, 0, 0))
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-
-        // Draw latest things first
-        for (let i = this.entities.length - 1; i >= 0; i--) {
-            this.entities[i].draw(this.ctx, this);
+        if (!this.ctx) {
+            console.error("No context found in GameEngine");
+            return;
         }
-    };
+
+        // Log canvas state before clearing
+        console.log("Canvas state before clear:", {
+            width: this.ctx.canvas.width,
+            height: this.ctx.canvas.height,
+            transform: this.ctx.getTransform()
+        });
+
+        // Clear with a visible color first to verify clearing works
+        this.ctx.fillStyle = 'white';
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+        // Reset any transformations
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // Draw from front to back (map first, then entities)
+        // Find and draw map first
+        const mapEntity = this.entities.find(entity => entity instanceof testMap);
+        if (mapEntity) {
+            this.ctx.save();
+            mapEntity.draw(this.ctx);
+            this.ctx.restore();
+        }
+
+        // Then draw all other entities
+        this.entities.forEach(entity => {
+            if (!(entity instanceof testMap)) {
+                if (this.options.debugging) {
+                    console.log("Drawing entity:", entity);
+                }
+
+                this.ctx.save();
+                entity.draw(this.ctx);
+                this.ctx.restore();
+            }
+        });
+    }
 
     update() {
         let entitiesCount = this.entities.length;
@@ -102,18 +147,15 @@ class GameEngine {
             }
         }
 
-        for (let i = this.entities.length - 1; i >= 0; --i) {
-            if (this.entities[i].removeFromWorld) {
-                this.entities.splice(i, 1);
-            }
-        }
-    };
+        // Remove dead entities
+        this.entities = this.entities.filter(entity => !entity.removeFromWorld);
+    }
 
     loop() {
         this.clockTick = this.timer.tick();
         this.update();
         this.draw();
-    };
+    }
 
 };
 
