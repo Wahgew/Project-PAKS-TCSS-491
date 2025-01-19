@@ -7,6 +7,10 @@ class Animator {
     }
 
     drawFrame(tick, ctx, x, y) {
+        this.elapsedTime += tick;
+        if (this.elapsedTime > this.totalTime) this.elapsedTime -= this.totalTime;
+        const frame = this.currentFrame();
+
         if (!ctx || !ctx.drawImage) {
             console.error("Invalid context passed to Animator.drawFrame");
             return;
@@ -21,7 +25,7 @@ class Animator {
             // Draw the sprite frame
             ctx.drawImage(
                 this.spritesheet,
-                this.xStart, this.yStart,    // Source X, Y
+                this.xStart + this.width * frame, this.yStart,    // Source X, Y
                 this.width, this.height,     // Source width, height
                 x, y,                        // Destination X, Y
                 this.width, this.height      // Destination width, height
