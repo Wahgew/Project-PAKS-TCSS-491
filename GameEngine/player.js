@@ -2,8 +2,11 @@ class Player {
     constructor(game, x, y) {
         Object.assign(this, {game, x, y});
 
-        this.height = 240;
-        this.width = 219;
+        this.height = 120;
+        this.width = 109;
+        this.xScale = 120; // Used to scale sprite, but hitbox is still same as height and width 
+        this.yScale = 109; // see above
+        this.isGrounded = true;
 
         this.game.Player = this;
 
@@ -48,7 +51,8 @@ class Player {
         const STOP_FALL_A = 450;
         const WALK_FALL_A = 421.875;
         const RUN_FALL_A = 562.5;
-        const MAX_FALL = 270;
+        const MAX_FALL = 1350;
+        const MAX_JUMP = 750;
 
         // HORIZONTAL MOVEMENT/PHYSICS
         if (this.state !== 4) { // if player is not jumping
@@ -98,7 +102,40 @@ class Player {
                     }
                 }
             }
-        }
+
+            if ((this.game.keys['space'] || this.game.keys['w']) && this.isGrounded) { // jump is infinite, need to have
+                if (Math.abs(this.velocity.x) < MIN_WALK) { // collisions to detect if grounded implemented.
+                    this.velocity.y = -MAX_JUMP;
+                    this.fallAcc = STOP_FALL;
+                }
+                else if (Math.abs(this.velocity.x) < MAX_WALK) {
+                    this.velocity.y = -MAX_JUMP;
+                    this.fallAcc = WALK_FALL;
+                }
+                else {
+                    this.velocity.y = -MAX_JUMP;
+                    this.fallAcc = RUN_FALL;
+                }
+                this.state = 4;
+                this.isGrounded = false;
+            }
+
+        } else { // player is in air
+            /* if (this.velocity.y < 0 && (this.game.keys['w'] || this.game.keys['space'])) { // velocity.y physics
+                if (this.fallAcc === STOP_FALL) this.velocity.y -= (STOP_FALL - STOP_FALL_A) * TICK;
+                if (this.fallAcc === WALK_FALL) this.velocity.y -= (WALK_FALL - WALK_FALL_A) * TICK;
+                if (this.fallAcc === RUN_FALL) this.velocity.y -= (RUN_FALL - RUN_FALL_A) * TICK;
+            }  */
+            if (this.game.keys['a'] && !this.game.keys['d']) { // velocity.x physics
+                if (Math.abs(this.velocity.x) > MAX_WALK) {
+                    this.velocity.x -= ACC_RUN * TICK;
+                } else this.velocity.x -= ACC_WALK * TICK;
+            } else if (this.game.keys['d'] && !this.game.keys['a']) {
+                if (Math.abs(this.velocity.x) > MAX_WALK) {
+                    this.velocity.x += ACC_RUN * TICK;
+                } else this.velocity.x += ACC_WALK * TICK;
+            }
+        } 
 
         // Apply fall acceleration
         this.velocity.y += this.fallAcc * TICK;
@@ -109,12 +146,28 @@ class Player {
         if (this.velocity.x >= MAX_WALK && !this.game.keys['shift']) this.velocity.x = MAX_WALK;
         if (this.velocity.x <= -MAX_WALK && !this.game.keys['shift']) this.velocity.x = -MAX_WALK;
 
-        if (this.velocity.y >= MAX_FALL) this.velocity.y = MAX_FALL;
+        // if (this.velocity.y >= MAX_JUMP) this.velocity.y = MAX_JUMP;
         if (this.velocity.y <= -MAX_FALL) this.velocity.y = -MAX_FALL;
 
         // Update position
         this.x += this.velocity.x * TICK;
         this.y += this.velocity.y * TICK;
+
+        // Update State of player
+        if (this.state != 4) {
+            if (this.game.keys['s']) this.state = 5;
+            else if (Math.abs(this.velocity.x) > MAX_WALK) this.state = 2;
+            else if (Math.abs(this.velocity.x) >= MIN_WALK) this.state = 1;
+            else this.state = 0;
+        } else if (this.state == 4 && this.isGrounded) {
+            if (Math.abs(this.velocity.x) > MAX_RUN) {
+                this.state = 2;
+            } else if (Math.abs(this.velocity.x) > MAX_WALK) {
+                this.state = 1;
+            } else {
+                this.state = 0;
+            }
+        }
 
         // Update facing
         if (this.velocity.x < 0) this.facing = 0;
@@ -144,12 +197,17 @@ class Player {
 
         // Debug logging
         if (this.game.options.debugging) {
-            console.log("Player state:", {
-                position: {x: this.x, y: this.y},
-                velocity: {x: this.velocity.x, y: this.velocity.y},
-                state: this.state,
-                facing: this.facing
-            });
+            const time = Date.now();
+            if (!this.lastDebugLogTime || time - this.lastDebugLogTime >= 3000) {
+                console.log("Player state:", {
+                    position: {x: this.x, y: this.y},
+                    velocity: {x: this.velocity.x, y: this.velocity.y},
+                    state: this.state,
+                    facing: this.facing,
+                    isGrounded: this.isGrounded
+                });
+                this.lastDebugLogTime = time;
+            }
         }
     }
 
@@ -163,7 +221,7 @@ class Player {
         }
 
         // Draw the sprite
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, this.xScale, this.yScale);
     }
 
 }
