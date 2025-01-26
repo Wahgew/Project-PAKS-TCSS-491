@@ -6,7 +6,6 @@ class Player {
         this.width = 109;
         this.xScale = 120; // Used to scale sprite, but hitbox is still same as height and width 
         this.yScale = 109; // see above
-        this.isGrounded = true;
 
         this.game.Player = this;
 
@@ -19,11 +18,12 @@ class Player {
         this.facing = 1; // 0 = left, 1 = right
         this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = in air, 5 = crouching/sliding
         this.dead = false;
+        this.isGrounded = true;
+        this.fallAcc = 550; // should be same value as GRAVITY const in update();
 
         this.velocity = {x: 0, y: 0};
-        this.fallAcc = 562.5;
 
-        this.map = this.game.entities.find(entity => entity instanceof testMap); 
+        this.map = this.game.entities.find(entity => entity instanceof testMap); // should this be in player?
         if (this.map) {
             console.log("Map found, tile size:", this.map.testSize);
         } else {
@@ -39,19 +39,16 @@ class Player {
         const MIN_WALK = 20;
         const MAX_WALK = 500;
         const MAX_RUN = 1000;
+
         const ACC_WALK = 650;
         const ACC_RUN = 1250;
+
         const DEC_REL = 900;
         const DEC_SKID = 1800;
-        const MIN_SKID = 180; // not used?
 
-        const STOP_FALL = 1575;
-        const WALK_FALL = 1800;
-        const RUN_FALL = 2025;
-        const STOP_FALL_A = 450;
-        const WALK_FALL_A = 421.875;
-        const RUN_FALL_A = 562.5;
-        const MAX_FALL = 1350;
+        const MAX_FALL = 2000;
+        const GRAVITY = 1500;
+        const GRAVITY_JUMP = 350; // Lowered "gravity" for holding jump
         const MAX_JUMP = 750;
 
         // HORIZONTAL MOVEMENT/PHYSICS
@@ -104,27 +101,15 @@ class Player {
             }
 
             if ((this.game.keys['space'] || this.game.keys['w']) && this.isGrounded) { // jump is infinite, need to have
-                if (Math.abs(this.velocity.x) < MIN_WALK) { // collisions to detect if grounded implemented.
-                    this.velocity.y = -MAX_JUMP;
-                    this.fallAcc = STOP_FALL;
-                }
-                else if (Math.abs(this.velocity.x) < MAX_WALK) {
-                    this.velocity.y = -MAX_JUMP;
-                    this.fallAcc = WALK_FALL;
-                }
-                else {
-                    this.velocity.y = -MAX_JUMP;
-                    this.fallAcc = RUN_FALL;
-                }
+                this.velocity.y = -MAX_JUMP;                            // collisions to detect if grounded implemented.
                 this.state = 4;
                 this.isGrounded = false;
             }
 
         } else { // player is in air
+            this.fallAcc = GRAVITY; // check implementation of this, make sure fallAcc is switching correctly
             /* if (this.velocity.y < 0 && (this.game.keys['w'] || this.game.keys['space'])) { // velocity.y physics
-                if (this.fallAcc === STOP_FALL) this.velocity.y -= (STOP_FALL - STOP_FALL_A) * TICK;
-                if (this.fallAcc === WALK_FALL) this.velocity.y -= (WALK_FALL - WALK_FALL_A) * TICK;
-                if (this.fallAcc === RUN_FALL) this.velocity.y -= (RUN_FALL - RUN_FALL_A) * TICK;
+                this.fallAcc = GRAVITY_JUMP;
             }  */
             if (this.game.keys['a'] && !this.game.keys['d']) { // velocity.x physics
                 if (Math.abs(this.velocity.x) > MAX_WALK) {
@@ -146,7 +131,7 @@ class Player {
         if (this.velocity.x >= MAX_WALK && !this.game.keys['shift']) this.velocity.x = MAX_WALK;
         if (this.velocity.x <= -MAX_WALK && !this.game.keys['shift']) this.velocity.x = -MAX_WALK;
 
-        // if (this.velocity.y >= MAX_JUMP) this.velocity.y = MAX_JUMP;
+        // if (this.velocity.y >= MAX_JUMP) this.velocity.y = MAX_JUMP; // is this even needed?
         if (this.velocity.y <= -MAX_FALL) this.velocity.y = -MAX_FALL;
 
         // Update position
@@ -197,7 +182,7 @@ class Player {
 
         // Debug logging
         if (this.game.options.debugging) {
-            const time = Date.now();
+            const time = Date.now(); // this seems jank but i don't know how to do it better
             if (!this.lastDebugLogTime || time - this.lastDebugLogTime >= 3000) {
                 console.log("Player state:", {
                     position: {x: this.x, y: this.y},
