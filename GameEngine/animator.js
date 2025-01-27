@@ -6,7 +6,7 @@ class Animator {
         this.totalTime = frameCount * frameDuration;
     }
 
-    drawFrame(tick, ctx, x, y) {
+    drawFrame(tick, ctx, x, y, xScale, yScale) {
         this.elapsedTime += tick;
         if (this.elapsedTime > this.totalTime) this.elapsedTime -= this.totalTime;
         const frame = this.currentFrame();
@@ -28,7 +28,7 @@ class Animator {
                 this.xStart + this.width * frame, this.yStart,    // Source X, Y
                 this.width, this.height,     // Source width, height
                 x, y,                        // Destination X, Y
-                this.width, this.height      // Destination width, height
+                xScale, yScale      // Destination width, height of sprite
             );
         } catch (e) {
             console.error("Draw error:", e);

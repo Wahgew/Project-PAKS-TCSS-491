@@ -18,8 +18,8 @@ ASSET_MANAGER.downloadAll(() => {
 	gameEngine.addEntity(map);
 
 	// Player position calculations
-	const playerWidth = 219;  // Player sprite width
-	const playerHeight = 240; // Player sprite height
+	const playerWidth = 109;  // Player sprite width
+	const playerHeight = 120; // Player sprite height
 
 	// Position player in tile [16][2] - adjusting calculation to properly align with tiles
 	const playerX = 2 * TILE_SIZE; // Align with left edge of tile

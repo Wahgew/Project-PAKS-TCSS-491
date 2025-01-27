@@ -100,11 +100,11 @@ class GameEngine {
         }
 
         // Log canvas state before clearing
-        console.log("Canvas state before clear:", {
+        /* console.log("Canvas state before clear:", {
             width: this.ctx.canvas.width,
             height: this.ctx.canvas.height,
             transform: this.ctx.getTransform()
-        });
+        }); */
 
         // Clear with a visible color first to verify clearing works
         this.ctx.fillStyle = 'white';
@@ -126,9 +126,12 @@ class GameEngine {
         this.entities.forEach(entity => {
             if (!(entity instanceof testMap)) {
                 if (this.options.debugging) {
-                    console.log("Drawing entity:", entity);
+                    const time = Date.now()
+                    if (!this.lastDebugLogTime || time - this.lastDebugLogTime >= 3000) {
+                        console.log("Drawing entity:", entity);
+                        this.lastDebugLogTime = time;
+                    }
                 }
-
                 this.ctx.save();
                 entity.draw(this.ctx);
                 this.ctx.restore();
