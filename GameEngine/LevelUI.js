@@ -1,10 +1,18 @@
 class LevelUI {
+
+    /**
+     * Constructs a LevelUI instance.
+     * @param {object} gameEngine The game engine instance used for timing and game logic.
+     */
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
         this.isDisplayingComplete = false;
         this.bestTime = Infinity;
     }
 
+    /**
+     * Displays the level complete screen and updates the best time if applicable.
+     */
     showLevelComplete() {
         this.isDisplayingComplete = true;
         // Only update best time if we have a valid timer
@@ -16,10 +24,18 @@ class LevelUI {
         }
     }
 
+    /**
+     * Hides the level complete screen.
+     */
     hideLevelComplete() {
         this.isDisplayingComplete = false;
     }
 
+    /**
+     * Formats a given time into a string with minutes, seconds, and milliseconds.
+     * @param {number} time The time to format, in seconds.
+     * @returns {string} The formatted time as "MM:SS:MS".
+     */
     formatTime(time) {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
@@ -27,6 +43,10 @@ class LevelUI {
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`;
     }
 
+    /**
+     * Retrieves the current time from the game engine timer, formatted as a string.
+     * @returns {string} The formatted current time or "--:--:--" if unavailable.
+     */
     getCurrentTime() {
         if (this.gameEngine && this.gameEngine.timer) {
             return this.formatTime(this.gameEngine.timer.getDisplayTime());
@@ -34,6 +54,10 @@ class LevelUI {
         return '--:--:--';
     }
 
+    /**
+     * Draws the level complete screen onto the provided canvas context.
+     * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
+     */
     draw(ctx) {
         if (!this.isDisplayingComplete) return;
 
