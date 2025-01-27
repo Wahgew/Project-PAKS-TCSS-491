@@ -60,4 +60,4 @@ class Timer {
     getDisplayTime() {
         return this.isRunning ? this.gameTime : this.savedTime;
     }
-};
+}

@@ -218,6 +218,6 @@ class GameEngine {
         this.draw();
     }
 
-};
+}
 
 // KV Le was here :)
