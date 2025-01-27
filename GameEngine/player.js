@@ -7,7 +7,7 @@ class Player {
         console.log("Timer in game engine:", this.game.timer);
         this.height = 120;
         this.width = 109;
-        this.xScale = 120; // Used to scale sprite, but hitbox is still same as height and width 
+        this.xScale = 120; // Used to scale sprite, but hitbox is still same as height and width
         this.yScale = 109; // see above
         this.isGrounded = true;
 
@@ -26,7 +26,7 @@ class Player {
         this.velocity = {x: 0, y: 0};
         this.fallAcc = 562.5;
 
-        this.map = this.game.entities.find(entity => entity instanceof testMap); 
+        this.map = this.game.entities.find(entity => entity instanceof testMap);
         if (this.map) {
             console.log("Map found, tile size:", this.map.testSize);
         } else {
@@ -38,7 +38,7 @@ class Player {
     update() {
         const TICK = this.game.clockTick;
 
-        // Movement constants, currently same values for Mario's movement in SMB from Marriott.
+        // Movement constants
         const MIN_WALK = 20;
         const MAX_WALK = 500;
         const MAX_RUN = 1000;
@@ -46,20 +46,86 @@ class Player {
         const ACC_RUN = 1250;
         const DEC_REL = 900;
         const DEC_SKID = 1800;
-        const MIN_SKID = 180; // not used?
-
         const STOP_FALL = 1575;
         const WALK_FALL = 1800;
         const RUN_FALL = 2025;
-        const STOP_FALL_A = 450;
-        const WALK_FALL_A = 421.875;
-        const RUN_FALL_A = 562.5;
         const MAX_FALL = 1350;
         const MAX_JUMP = 750;
 
-        // HORIZONTAL MOVEMENT/PHYSICS
-        if (this.state !== 4) { // if player is not jumping
-            // idle, walking, running, skidding ground physics
+        // Block collision detection
+        if (this.map) {
+            // Get the tiles the player might be colliding with
+            const tileSize = this.map.testSize;
+
+            // Calculate the tiles the player is intersecting with
+            const leftTile = Math.floor(this.x / tileSize);
+            const rightTile = Math.floor((this.x + this.width) / tileSize);
+            const topTile = Math.floor(this.y / tileSize);
+            const bottomTile = Math.floor((this.y + this.height) / tileSize);
+
+            this.isGrounded = false; // Reset grounded state
+
+            // Check each potentially colliding tile
+            for (let row = topTile; row <= bottomTile; row++) {
+                for (let col = leftTile; col <= rightTile; col++) {
+                    // Make sure we're within map bounds
+                    if (row >= 0 && row < this.map.map.length &&
+                        col >= 0 && col < this.map.map[0].length) {
+
+                        if (this.map.map[row][col] === 1) { // If it's a solid block
+                            // Calculate overlap areas
+                            const blockLeft = col * tileSize;
+                            const blockRight = blockLeft + tileSize;
+                            const blockTop = row * tileSize;
+                            const blockBottom = blockTop + tileSize;
+
+                            // Collision resolution
+                            if (this.x + this.width > blockLeft &&
+                                this.x < blockRight &&
+                                this.y + this.height > blockTop &&
+                                this.y < blockBottom) {
+
+                                // Calculate overlap amounts
+                                const overlapLeft = (this.x + this.width) - blockLeft;
+                                const overlapRight = blockRight - this.x;
+                                const overlapTop = (this.y + this.height) - blockTop;
+                                const overlapBottom = blockBottom - this.y;
+
+                                // Find smallest overlap
+                                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                                // Resolve based on smallest overlap
+                                if (minOverlap === overlapTop && this.velocity.y >= 0) {
+                                    // Landing on top of block
+                                    this.y = blockTop - this.height;
+                                    this.velocity.y = 0;
+                                    this.isGrounded = true;
+                                }
+                                else if (minOverlap === overlapBottom && this.velocity.y < 0) {
+                                    // Hitting bottom of block
+                                    this.y = blockBottom;
+                                    this.velocity.y = 0;
+                                }
+                                else if (minOverlap === overlapLeft && this.velocity.x > 0) {
+                                    // Hitting left side of block
+                                    this.x = blockLeft - this.width;
+                                    this.velocity.x = 0;
+                                }
+                                else if (minOverlap === overlapRight && this.velocity.x < 0) {
+                                    // Hitting right side of block
+                                    this.x = blockRight;
+                                    this.velocity.x = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // HORIZONTAL MOVEMENT
+        if (this.isGrounded) {
+            // Ground movement physics
             if (Math.abs(this.velocity.x) < MIN_WALK) {
                 this.velocity.x = 0;
                 this.state = 0;
@@ -73,134 +139,92 @@ class Player {
                 if (this.game.keys['d'] && !this.game.keys['s']) {
                     this.velocity.x += MIN_WALK;
                 }
-            } else if (Math.abs(this.velocity.x) >= MIN_WALK) { // accelerating or decelerating
+            } else if (Math.abs(this.velocity.x) >= MIN_WALK) {
                 if (this.facing === 0) { // left
-                    if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // moving
-                        if (this.game.keys['shift']) { // if sprinting
+                    if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) {
+                        if (this.game.keys['shift']) {
                             this.velocity.x -= ACC_RUN * TICK;
                             this.state = 2;
                         } else {
                             this.velocity.x -= ACC_WALK * TICK;
                             this.state = 1;
                         }
-                    } else if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // skidding
+                    } else if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) {
                         this.velocity.x += DEC_SKID * TICK;
-                        this.state = 3
-                    } else { // holding nothing
+                        this.state = 3;
+                    } else {
                         this.velocity.x += DEC_REL * TICK;
                         this.state = 1;
                     }
                 }
                 if (this.facing === 1) { // right
-                    if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // moving
-                        if (this.game.keys['shift']) { // if sprinting
+                    if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) {
+                        if (this.game.keys['shift']) {
                             this.velocity.x += ACC_RUN * TICK;
                             this.state = 2;
                         } else {
                             this.velocity.x += ACC_WALK * TICK;
                             this.state = 1;
-                        } 
-                    } else if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // skidding
+                        }
+                    } else if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) {
                         this.velocity.x -= DEC_SKID * TICK;
-                        this.state = 3
-                    } else { // holding nothing
+                        this.state = 3;
+                    } else {
                         this.velocity.x -= DEC_REL * TICK;
                         this.state = 1;
                     }
                 }
             }
 
-            if ((this.game.keys['space'] || this.game.keys['w']) && this.isGrounded) { // jump is infinite, need to have
-                if (Math.abs(this.velocity.x) < MIN_WALK) { // collisions to detect if grounded implemented.
-                    this.velocity.y = -MAX_JUMP;
-                    this.fallAcc = STOP_FALL;
-                }
-                else if (Math.abs(this.velocity.x) < MAX_WALK) {
-                    this.velocity.y = -MAX_JUMP;
-                    this.fallAcc = WALK_FALL;
-                }
-                else {
-                    this.velocity.y = -MAX_JUMP;
-                    this.fallAcc = RUN_FALL;
-                }
+            // Jump initialization
+            if ((this.game.keys['space'] || this.game.keys['w'])) {
+                this.velocity.y = -MAX_JUMP;
+                this.fallAcc = Math.abs(this.velocity.x) < MIN_WALK ? STOP_FALL :
+                    Math.abs(this.velocity.x) < MAX_WALK ? WALK_FALL : RUN_FALL;
                 this.state = 4;
                 this.isGrounded = false;
             }
-
-        } else { // player is in air
-            /* if (this.velocity.y < 0 && (this.game.keys['w'] || this.game.keys['space'])) { // velocity.y physics
-                if (this.fallAcc === STOP_FALL) this.velocity.y -= (STOP_FALL - STOP_FALL_A) * TICK;
-                if (this.fallAcc === WALK_FALL) this.velocity.y -= (WALK_FALL - WALK_FALL_A) * TICK;
-                if (this.fallAcc === RUN_FALL) this.velocity.y -= (RUN_FALL - RUN_FALL_A) * TICK;
-            }  */
-            if (this.game.keys['a'] && !this.game.keys['d']) { // velocity.x physics
-                if (Math.abs(this.velocity.x) > MAX_WALK) {
-                    this.velocity.x -= ACC_RUN * TICK;
-                } else this.velocity.x -= ACC_WALK * TICK;
+        } else {
+            // Air movement physics
+            if (this.game.keys['a'] && !this.game.keys['d']) {
+                this.velocity.x -= (Math.abs(this.velocity.x) > MAX_WALK ? ACC_RUN : ACC_WALK) * TICK;
             } else if (this.game.keys['d'] && !this.game.keys['a']) {
-                if (Math.abs(this.velocity.x) > MAX_WALK) {
-                    this.velocity.x += ACC_RUN * TICK;
-                } else this.velocity.x += ACC_WALK * TICK;
+                this.velocity.x += (Math.abs(this.velocity.x) > MAX_WALK ? ACC_RUN : ACC_WALK) * TICK;
             }
-        } 
+        }
 
-        // Apply fall acceleration
-        this.velocity.y += this.fallAcc * TICK;
+        // Apply gravity only when not grounded
+        if (!this.isGrounded) {
+            this.velocity.y += this.fallAcc * TICK;
+        }
 
         // Max velocity calculations
-        if (this.velocity.x >= MAX_RUN) this.velocity.x = MAX_RUN;
-        if (this.velocity.x <= -MAX_RUN) this.velocity.x = -MAX_RUN;
-        if (this.velocity.x >= MAX_WALK && !this.game.keys['shift']) this.velocity.x = MAX_WALK;
-        if (this.velocity.x <= -MAX_WALK && !this.game.keys['shift']) this.velocity.x = -MAX_WALK;
-
-        // if (this.velocity.y >= MAX_JUMP) this.velocity.y = MAX_JUMP;
-        if (this.velocity.y <= -MAX_FALL) this.velocity.y = -MAX_FALL;
+        this.velocity.x = Math.max(-MAX_RUN, Math.min(MAX_RUN, this.velocity.x));
+        if (!this.game.keys['shift']) {
+            this.velocity.x = Math.max(-MAX_WALK, Math.min(MAX_WALK, this.velocity.x));
+        }
+        this.velocity.y = Math.max(-MAX_FALL, Math.min(MAX_FALL, this.velocity.y));
 
         // Update position
         this.x += this.velocity.x * TICK;
         this.y += this.velocity.y * TICK;
-
-        // Update State of player
-        if (this.state != 4) {
-            if (this.game.keys['s']) this.state = 5;
-            else if (Math.abs(this.velocity.x) > MAX_WALK) this.state = 2;
-            else if (Math.abs(this.velocity.x) >= MIN_WALK) this.state = 1;
-            else this.state = 0;
-        } else if (this.state == 4 && this.isGrounded) {
-            if (Math.abs(this.velocity.x) > MAX_RUN) {
-                this.state = 2;
-            } else if (Math.abs(this.velocity.x) > MAX_WALK) {
-                this.state = 1;
-            } else {
-                this.state = 0;
-            }
-        }
-
-        // Update facing
-        if (this.velocity.x < 0) this.facing = 0;
-        if (this.velocity.x > 0) this.facing = 1;
-
-        // Ground collision
-        if (this.map) {
-            const groundY = (this.map.map.length - 1) * this.map.testSize - this.height;
-            if (this.y >= groundY) {
-                this.y = groundY;
-                this.velocity.y = 0;
-            }
-        }
 
         // Wall collisions
         if (this.map) {
             const mapWidth = this.map.map[0].length * this.map.testSize;
             if (this.x < 0) {
                 this.x = 0;
-                this.velocity.x = 0; // Stop horizontal movement at wall
+                this.velocity.x = 0;
             }
             if (this.x > mapWidth - this.width) {
                 this.x = mapWidth - this.width;
-                this.velocity.x = 0; // Stop horizontal movement at wall
+                this.velocity.x = 0;
             }
         }
+
+        // Update facing direction
+        if (this.velocity.x < 0) this.facing = 0;
+        if (this.velocity.x > 0) this.facing = 1;
 
         // Debug logging
         if (this.game.options.debugging) {
@@ -222,13 +246,10 @@ class Player {
         if (!ctx) return;
 
         if (this.game.options.debugging) {
-            // Draw debug box
             ctx.strokeStyle = 'red';
             ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
 
-        // Draw the sprite
         this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, this.xScale, this.yScale);
     }
-
 }
