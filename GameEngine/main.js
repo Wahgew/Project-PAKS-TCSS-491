@@ -4,6 +4,7 @@ const ASSET_MANAGER = new AssetManager();
 
 ASSET_MANAGER.queueDownload("./sprites/block.png");
 ASSET_MANAGER.queueDownload("./sprites/temptest.png");
+ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
