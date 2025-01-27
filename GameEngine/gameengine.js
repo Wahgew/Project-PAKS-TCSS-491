@@ -5,6 +5,13 @@ class GameEngine {
         // What you will use to draw
         this.ctx = null;
 
+        // timer initialization
+        this.timer = null;
+        this.running = false;
+
+        // display level ending ui
+        this.levelUI = new LevelUI(this.ctx);
+
         // Everything that will be updated and drawn each frame
         this.entities = [];
 
@@ -13,9 +20,6 @@ class GameEngine {
         this.mouse = null;
         this.wheel = null;
         this.keys = {};
-
-        this.timer = null;
-        this.running = false;
 
         // Options and the Details
         this.options = options || {
@@ -27,6 +31,7 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
+        this.levelUI = new LevelUI(this);
     }
 
     start() {
@@ -89,6 +94,7 @@ class GameEngine {
         });
 
         // test timer reset and stop
+        // test level completion display
         window.addEventListener("keydown", event => {
             this.keys[event.key.toLowerCase()] = true;
 
@@ -97,7 +103,9 @@ class GameEngine {
                 console.log("Stopping timer...");
                 if (this.timer) {
                     this.timer.stop();
+
                     // re-draw timer display
+                    this.levelUI.showLevelComplete();
                     this.draw();
                 }
             }
@@ -106,6 +114,7 @@ class GameEngine {
                 console.log("Resetting timer...");
                 if (this.timer) {
                     this.timer.reset();
+                    this.levelUI.hideLevelComplete();
                 }
             }
         });
@@ -165,6 +174,7 @@ class GameEngine {
             }
         });
 
+        // draw timer
         if (this.timer) {
             const displayTime = this.timer.getDisplayTime();
             const minutes = Math.floor(displayTime / 60);
@@ -194,6 +204,8 @@ class GameEngine {
                 this.timer.start();
             }
         }
+
+        this.levelUI.draw(this.ctx);
 
     }
 
