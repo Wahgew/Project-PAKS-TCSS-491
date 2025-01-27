@@ -2,6 +2,9 @@ class Player {
     constructor(game, x, y) {
         Object.assign(this, {game, x, y});
 
+
+        console.log("Game engine in player:", this.game);
+        console.log("Timer in game engine:", this.game.timer);
         this.height = 120;
         this.width = 109;
         this.xScale = 120; // Used to scale sprite, but hitbox is still same as height and width 
@@ -62,6 +65,10 @@ class Player {
                 this.state = 0;
                 if (this.game.keys['a'] && !this.game.keys['s']) {
                     this.velocity.x -= MIN_WALK;
+                    // console.log("Game engine in player:", this.game);
+                    // console.log("Timer in game engine:", this.game.timer);
+                    // this.game.timer.stop();
+                    // console.log("Timer in game engine:", this.game.timer);
                 }
                 if (this.game.keys['d'] && !this.game.keys['s']) {
                     this.velocity.x += MIN_WALK;
