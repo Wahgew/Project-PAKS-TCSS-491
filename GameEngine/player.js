@@ -2,8 +2,8 @@ class Player {
     constructor(game, x, y) {
         Object.assign(this, {game, x, y});
 
-        this.height = 150;
-        this.width = 96;
+        this.height = 76;
+        this.width = 60;
 
         this.game.Player = this;
 
@@ -275,7 +275,7 @@ class Player {
         // }
 
         // Draw the sprite for current state and facing direction
-        this.animations[this.state][0][this.facing].drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
+        this.animations[this.state][0][this.facing].drawFrame(this.game.clockTick, ctx, this.x, this.y, 0.5);
     }
 
 }
