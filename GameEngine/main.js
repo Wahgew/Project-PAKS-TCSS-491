@@ -3,8 +3,13 @@ const gameEngine = new GameEngine();
 const ASSET_MANAGER = new AssetManager();
 
 ASSET_MANAGER.queueDownload("./sprites/block.png");
+ASSET_MANAGER.queueDownload("./sprites/idle.png");
+ASSET_MANAGER.queueDownload("./sprites/run.png");
+ASSET_MANAGER.queueDownload("./sprites/jump.png");
 ASSET_MANAGER.queueDownload("./sprites/temptest.png");
 ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
+ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
+ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

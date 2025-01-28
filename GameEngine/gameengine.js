@@ -65,7 +65,7 @@ class GameEngine {
 
         this.ctx.canvas.addEventListener("mousemove", e => {
             if (this.options.debugging) {
-                console.log("MOUSE_MOVE", getXandY(e));
+        //        console.log("MOUSE_MOVE", getXandY(e)); 
             }
             this.mouse = getXandY(e);
         });
