@@ -19,6 +19,8 @@ class Player {
         this.velocity = {x: 0, y: 0};
         this.fallAcc = 562.5;
 
+        //this.updateBB();
+
         this.animations = [];
         this.loadAnimations();
 
@@ -85,6 +87,19 @@ class Player {
             0, 0, 181, 175, 2, 0.2
         );
     }
+
+    // updateBB() {
+    //     if (this.size === 0 || this.size === 3) {
+    //         this.BB = new BoundingBox(this.x, this.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
+    //     }
+    //     else {
+    //         if (this.game.down) // big mario is crouching
+    //             this.BB = new BoundingBox(this.x, this.y + PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
+    //         else 
+    //             this.BB = new BoundingBox(this.x, this.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH * 2);
+    //     }
+    // };
+
 
     update() {
         const TICK = this.game.clockTick;
