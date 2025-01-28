@@ -32,7 +32,7 @@ class ProjectileLauncher {
         }
 
         // Draw the sprite
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, this.width, this.height);
+        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
     }
 }
 
@@ -135,7 +135,7 @@ class Spike {
         }
 
         // Draw the sprite
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, this.width, this.height);
+        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
     }
 }
 
