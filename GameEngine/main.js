@@ -3,7 +3,9 @@ const gameEngine = new GameEngine();
 const ASSET_MANAGER = new AssetManager();
 
 ASSET_MANAGER.queueDownload("./sprites/block.png");
-ASSET_MANAGER.queueDownload("./sprites/temptest.png");
+ASSET_MANAGER.queueDownload("./sprites/idle.png");
+ASSET_MANAGER.queueDownload("./sprites/run.png");
+ASSET_MANAGER.queueDownload("./sprites/jump.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
@@ -18,15 +20,17 @@ ASSET_MANAGER.downloadAll(() => {
 	gameEngine.addEntity(map);
 
 	// Player position calculations
-	const playerWidth = 109;  // Player sprite width
-	const playerHeight = 120; // Player sprite height
+	//const playerWidth = 109;  // Player sprite width
+	//const playerHeight = 120; // Player sprite height
 
 	// Position player in tile [16][2] - adjusting calculation to properly align with tiles
-	const playerX = 2 * TILE_SIZE; // Align with left edge of tile
-	const playerY = 16 * TILE_SIZE - playerHeight + TILE_SIZE; // Align with bottom of tile, adding TILE_SIZE to offset
+	//const playerX = 2 * TILE_SIZE; // Align with left edge of tile
+	//const playerY = 16 * TILE_SIZE - playerHeight + TILE_SIZE; // Align with bottom of tile, adding TILE_SIZE to offset
 
-	console.log(`Spawning player at tile [16][2] (${playerX}, ${playerY})`);
-	gameEngine.addEntity(new Player(gameEngine, playerX, playerY));
-
+	//console.log(`Spawning player at tile [16][2] (${playerX}, ${playerY})`);
+	//gameEngine.addEntity(new Player(gameEngine, playerX, playerY));
+	
+	const player = new Player(gameEngine, 2 * TILE_SIZE, 1 * TILE_SIZE);
+	gameEngine.addEntity(player);
 	gameEngine.start();
 });
