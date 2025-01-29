@@ -58,6 +58,10 @@ class Timer {
 
     // Get the time to display (either current running time or saved stopped time)
     getDisplayTime() {
-        return this.isRunning ? this.gameTime : this.savedTime;
+        if (this.isRunning) {
+            return this.gameTime;
+        } else {
+            return this.savedTime;
+        }
     }
 }

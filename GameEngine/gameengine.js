@@ -229,7 +229,5 @@ class GameEngine {
         this.update();
         this.draw();
     }
-
 }
-
 // KV Le was here :)
