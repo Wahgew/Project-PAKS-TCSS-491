@@ -63,4 +63,5 @@ class Timer {
         } else {
             return this.savedTime;
         }
+    }
 }
