@@ -5,6 +5,13 @@ class GameEngine {
         // What you will use to draw
         this.ctx = null;
 
+        // timer initialization
+        this.timer = null;
+        this.running = false;
+
+        // display level ending ui
+        this.levelUI = new LevelUI(this.ctx);
+
         // Everything that will be updated and drawn each frame
         this.entities = [];
 
@@ -24,6 +31,7 @@ class GameEngine {
         this.ctx = ctx;
         this.startInput();
         this.timer = new Timer();
+        this.levelUI = new LevelUI(this);
     }
 
     start() {
@@ -84,6 +92,34 @@ class GameEngine {
             e.preventDefault(); // Prevent Context Menu
             this.rightclick = getXandY(e);
         });
+
+        // test timer reset and stop
+        // test level completion display
+        window.addEventListener("keydown", event => {
+            this.keys[event.key.toLowerCase()] = true;
+
+            // Test level completion with 'L' key
+            if (event.key.toLowerCase() === 'l') {
+                console.log("Stopping timer...");
+                if (this.timer) {
+                    this.timer.stop();
+
+                    // re-draw timer display
+                    this.levelUI.showLevelComplete();
+                    this.draw();
+                }
+            }
+            // Test level reset with 'R' key
+            if (event.key.toLowerCase() === 'r') {
+                console.log("Resetting timer...");
+                if (this.timer) {
+                    this.timer.reset();
+                    this.levelUI.hideLevelComplete();
+                }
+            }
+        });
+
+
     }
 
     addEntity(entity) {
@@ -137,6 +173,40 @@ class GameEngine {
                 this.ctx.restore();
             }
         });
+
+        // draw timer
+        if (this.timer) {
+            const displayTime = this.timer.getDisplayTime();
+            const minutes = Math.floor(displayTime / 60);
+            const seconds = Math.floor(displayTime % 60);
+            const milliseconds = Math.floor((displayTime % 1) * 100);
+
+
+            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`;
+
+            // text style
+            this.ctx.font = '20px monospace';
+
+            // Create background for better readability
+            const padding = 5;
+            const textMetrics = this.ctx.measureText(formattedTime);
+            const textHeight = 24;
+
+            this.ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+            this.ctx.fillRect(0, 0, textMetrics.width + padding * 2, textHeight + padding * 2);
+
+            // Draw text
+            this.ctx.fillStyle = 'black';
+            this.ctx.fillText(formattedTime, 5, 25);
+
+            // Only start the timer if it's not explicitly stopped
+            if (this.timer.isRunning) {
+                this.timer.start();
+            }
+        }
+
+        this.levelUI.draw(this.ctx);
+
     }
 
     update() {
@@ -159,7 +229,5 @@ class GameEngine {
         this.update();
         this.draw();
     }
-
-};
-
+}
 // KV Le was here :)
