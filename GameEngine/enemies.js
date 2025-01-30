@@ -19,7 +19,7 @@ class ProjectileLauncher {
     }
 
     update() {
-        if (this.moving) updateMovement(this);
+        if (this.moving) updateMovement(this.game, this);
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
     }
@@ -82,10 +82,10 @@ class Projectile {
  *  @param {bool} moving if the spike should move, if true AND tracking is false, then direction needs to be set
  *  @param {string} direction "UP", "DOWN", "LEFT", "RIGHT" determines starting moving direction
  *  @param {bool} tracking Determines if spike will move toward center of player's body
- *  @param {int} reverseTime determines how long until spike reverses its direction if moving, 200 is a second roughly?
+ *  @param {int} reverseTime determines how long until spike reverses its direction if moving in seconds?
  */
 class Spike {
-    constructor({gameEngine, x, y, speed, moving, direction, tracking, reverseTime}) {
+    constructor({gameEngine, x, y, speed, moving, direction, tracking, reverseTime}) { 
         this.game = gameEngine;
         Object.assign(this, { x, y, speed, moving, direction, tracking, reverseTime});
 
@@ -121,7 +121,7 @@ class Spike {
                 }
             });
         } else if (this.moving && !this.tracking) { // CHANGE THIS TO USE timer.js implementation.
-           updateMovement(this)
+           updateMovement(this.game, this)
         }
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
@@ -139,8 +139,13 @@ class Spike {
     }
 }
 
-function updateMovement(object) {
-    if (object.moving && !object.tracking) {
+/**
+ * Update movement for if enemy entity is moving but !tracking.
+ * @param {gameEngine} game 
+ * @param {enemies} object 
+ */
+function updateMovement(game, object) { // consider option to make reverse coord based, so spikes can move in same location but staggered start.
+    if (object.moving && !object.tracking) { // make option for based on distance from starting, i.e. move until x is like -50 from start coord.
         switch (object.direction) {
             case 'UP':
                 if (!object.reverse) object.velocity.y = object.speed;
@@ -149,7 +154,7 @@ function updateMovement(object) {
                     object.time = 0;
                     object.reverse = !object.reverse;
                 }
-                object.time++;
+                object.time += game.clockTick;
                 break;
             case 'DOWN':
                 if (object.reverse) object.velocity.y = object.speed;
@@ -158,7 +163,7 @@ function updateMovement(object) {
                     object.time = 0;
                     object.reverse = !object.reverse;
                 }
-                object.time++;
+                object.time += game.clockTick;
                 break;
             case 'RIGHT':
                 if (object.reverse) object.velocity.x = object.speed;
@@ -167,7 +172,7 @@ function updateMovement(object) {
                     object.time = 0;
                     object.reverse = !object.reverse;
                 }
-                object.time++;
+                object.time += game.clockTick;
                 break;
             case 'LEFT':
                 if (!object.reverse) object.velocity.x = object.speed;
@@ -176,7 +181,7 @@ function updateMovement(object) {
                     object.time = 0;
                     object.reverse = !object.reverse;
                 }
-                object.time++;
+                object.time += game.clockTick;
                 break;
         }
     }

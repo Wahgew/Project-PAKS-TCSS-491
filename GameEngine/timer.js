@@ -9,6 +9,10 @@ class Timer {
         this.savedTime = 0;
     };
 
+    /**
+     * @returns gameDelta, the time in seconds since the last tick. Very small value,
+     * is 0.006-0.008 seconds on my machine. (Ken)
+     */
     tick() {
         if (!this.isRunning) {
             return 0;  // Return 0 delta when stopped
