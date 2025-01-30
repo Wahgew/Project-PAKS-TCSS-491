@@ -9,6 +9,7 @@ ASSET_MANAGER.queueDownload("./sprites/jump.png");
 ASSET_MANAGER.queueDownload("./sprites/temptest.png");
 ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
 ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
+ASSET_MANAGER.queueDownload("./sprites/tempproj3.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
@@ -38,7 +39,8 @@ ASSET_MANAGER.downloadAll(() => {
 	gameEngine.addEntity(new Spike({gameEngine, x: 500, y: 250, speed: 50, moving: true, direction: null, tracking: true, reverseTime: 0}));
 	gameEngine.addEntity(new Spike({gameEngine, x: 500, y: 125, speed: 100, moving: true, direction: "LEFT", tracking: false, reverseTime: 4}));
 	gameEngine.addEntity(new Spike({gameEngine, x: 350, y: 125, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}));
-	gameEngine.addEntity(new ProjectileLauncher({gameEngine, x: 975, y: 325, speed: 0, moving: false, direction: false, reverseTime: 0}));
+	gameEngine.addEntity(new ProjectileLauncher({gameEngine, x: 975, y: 325, speed: 0, moving: false, direction: null, 
+														reverseTime: 0, atkspd: 2, projspd: 100, shotdirec: "LEFT"}));
 	
 	gameEngine.start();
 });
