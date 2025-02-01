@@ -170,7 +170,7 @@ class Player {
                 }
             }
 
-            if ((this.game.keys['space'] || this.game.keys['w']) && this.isGrounded) { // jump is infinite, need to have
+            if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) { // jump is infinite, need to have
                 this.velocity.y = -MAX_JUMP;                            // collisions to detect if grounded implemented.
                 this.state = 4;
                 this.isGrounded = false;
