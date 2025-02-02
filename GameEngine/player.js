@@ -89,17 +89,14 @@ class Player {
         );
     }
 
-    // updateBB() {
-    //     if (this.size === 0 || this.size === 3) {
-    //         this.BB = new BoundingBox(this.x, this.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
-    //     }
-    //     else {
-    //         if (this.game.down) // big mario is crouching
-    //             this.BB = new BoundingBox(this.x, this.y + PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH);
-    //         else 
-    //             this.BB = new BoundingBox(this.x, this.y, PARAMS.BLOCKWIDTH, PARAMS.BLOCKWIDTH * 2);
-    //     }
-    // };
+    updateBB() {
+        if (this.state != 5) { // player not crouching/sliding
+            this.BB = new BoundingBox(this.x, this.y, this.height, this.width);
+        }
+        else { // player is crouching
+            this.BB = new BoundingBox(this.x, this.y + (this.height / 2, this.width, this.height) )
+        }
+    };
 
 
     update() {

@@ -220,6 +220,41 @@ function updateMovement(game, object) { // consider option to make reverse coord
     }
 }   
 
+class Laser {
+    constructor({gameEngine, x, y, speed, moving, direction, reverseTime, shotdirec, length}) {
+        this.game = gameEngine;
+        Object.assign(this, {x, y, speed, moving, direction, reverseTime, shotdirec, length});
+
+        this.height = 0;
+        this.width = 0;
+
+        // Load spritesheet
+        this.spritesheet = ASSET_MANAGER.getAsset("./sprites/laser.png");
+
+        // Create animator with full sprite dimensions
+        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.velocity = {x: 0, y: 0};
+        
+    }
+    update() {
+        if (this.moving) updateMovement(this);
+        this.x += this.game.clockTick * this.velocity.x; 
+        this.y += this.game.clockTick * this.velocity.y;
+    }
+
+    draw(ctx) {
+        if (this.game.options.debugging) {
+            // Draw debug box
+            ctx.strokeStyle = 'red';
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+
+        // Draw the sprite
+        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+    }
+
+}
+
 /* class templateExample {
     constructor(game, x, y) {
         Object.assign(this, {game, x, y});
