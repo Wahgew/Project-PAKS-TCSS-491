@@ -91,12 +91,17 @@ class Player {
 
     updateBB() {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         if (this.state != 5) { // player not crouching/sliding
             this.BB = new BoundingBox(this.x, this.y, this.height, this.width);
         }
         else { // player is crouching
             this.BB = new BoundingBox(this.x, this.y + (this.height / 2, this.width, this.height) )
         }
+=======
+        if (this.game.keys['s']) this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+        else this.BB = new BoundingBox(this.x, this.y, this.width, this.height / 2);
+>>>>>>> Stashed changes
 =======
         if (this.game.keys['s']) this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
         else this.BB = new BoundingBox(this.x, this.y, this.width, this.height / 2);
