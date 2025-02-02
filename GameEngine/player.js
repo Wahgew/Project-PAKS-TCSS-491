@@ -20,7 +20,7 @@ class Player {
 
         this.velocity = {x: 0, y: 0};
 
-        //this.updateBB();
+        this.updateBB();
 
         this.animations = [];
         this.loadAnimations();
@@ -90,14 +90,22 @@ class Player {
     }
 
     updateBB() {
+<<<<<<< Updated upstream
         if (this.state != 5) { // player not crouching/sliding
             this.BB = new BoundingBox(this.x, this.y, this.height, this.width);
         }
         else { // player is crouching
             this.BB = new BoundingBox(this.x, this.y + (this.height / 2, this.width, this.height) )
         }
+=======
+        if (this.game.keys['s']) this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+        else this.BB = new BoundingBox(this.x, this.y, this.width, this.height / 2);
+>>>>>>> Stashed changes
     };
 
+    updateLastBB() {
+        this.lastBB = this.BB;
+    };
 
     update() {
         const TICK = this.game.clockTick;
@@ -224,6 +232,10 @@ class Player {
         // Update facing
         if (this.velocity.x < 0) this.facing = 0;
         if (this.velocity.x > 0) this.facing = 1;
+        
+        // Update BoundingBoxes
+        this.updateLastBB();
+        this.updateBB();
 
         // Ground collision
         if (this.map) {
