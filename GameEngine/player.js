@@ -12,6 +12,9 @@ class Player {
         this.runSpritesheet = ASSET_MANAGER.getAsset("./sprites/run.png");
         this.jumpSpritesheet = ASSET_MANAGER.getAsset("./sprites/jump.png");
 
+        this.testSprite = ASSET_MANAGER.getAsset("./sprites/temptest.png");
+        this.testAnimator = new Animator(this.testSprite, 0, 0, 54, 60, 1, 1);
+
         this.facing = 1; // 0 = left, 1 = right
         this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = in air, 5 = crouching/sliding
         this.dead = false;
@@ -90,22 +93,12 @@ class Player {
     }
 
     updateBB() {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
         if (this.state != 5) { // player not crouching/sliding
-            this.BB = new BoundingBox(this.x, this.y, this.height, this.width);
+            this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
         }
         else { // player is crouching
-            this.BB = new BoundingBox(this.x, this.y + (this.height / 2, this.width, this.height) )
+            this.BB = new BoundingBox(this.x, this.y + this.height / 2, this.width, this.height / 2);
         }
-=======
-        if (this.game.keys['s']) this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
-        else this.BB = new BoundingBox(this.x, this.y, this.width, this.height / 2);
->>>>>>> Stashed changes
-=======
-        if (this.game.keys['s']) this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
-        else this.BB = new BoundingBox(this.x, this.y, this.width, this.height / 2);
->>>>>>> Stashed changes
     };
 
     updateLastBB() {
@@ -123,7 +116,7 @@ class Player {
         const ACC_WALK = 650;
         const ACC_RUN = 1250;
 
-        const DEC_REL = 900;
+        const DEC_REL = 600;
         const DEC_SKID = 1800;
 
         const MAX_FALL = 2000;
@@ -242,6 +235,14 @@ class Player {
         this.updateLastBB();
         this.updateBB();
 
+        var that = this;
+        this.game.entities.forEach(function (entity) {
+            if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
+                entity.removeFromWorld = true;
+                that.dead = true;
+            }
+        });
+
         // Ground collision
         if (this.map) {
             const groundY = (this.map.map.length - 1) * this.map.testSize - this.height;
@@ -283,14 +284,20 @@ class Player {
     draw(ctx) {
         if (!ctx) return;
 
-        // if (this.game.options.debugging) {
-        //     // Draw debug box
-        //     ctx.strokeStyle = 'red';
-        //     ctx.strokeRect(this.x, this.y, this.width, this.height);
-        // }
+        if (this.game.options.debugging) {
+            // Draw debug box
+            if (this.state === 5) {
+                ctx.strokeStyle = 'red';
+                ctx.strokeRect(this.x, this.y + this.height / 2, this.width, this.height / 2);
+            } else {
+                ctx.strokeStyle = 'red';
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+            }
+        } 
 
         // Draw the sprite for current state and facing direction
-        this.animations[this.state][0][this.facing].drawFrame(this.game.clockTick, ctx, this.x, this.y, 0.5);
+        //this.animations[this.state][0][this.facing].drawFrame(this.game.clockTick, ctx, this.x, this.y, 0.5);
+        this.testAnimator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     }
 
 }
