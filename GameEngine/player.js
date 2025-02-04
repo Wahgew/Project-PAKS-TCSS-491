@@ -321,12 +321,14 @@ class Player {
         }
 
         // Draw debug box
-        if (this.state === 5) {
-            ctx.strokeStyle = 'red';
-            ctx.strokeRect(this.x, this.y + this.height / 2, this.width, this.height / 2);
-        } else {
-            ctx.strokeStyle = 'red';
-            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        if (this.game.options.debugging) {
+            if (this.state === 5) {
+                ctx.strokeStyle = 'red';
+                ctx.strokeRect(this.x, this.y + this.height / 2, this.width, this.height / 2);
+            } else {
+                ctx.strokeStyle = 'red';
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+            }
         }
     }
 }
