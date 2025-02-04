@@ -125,7 +125,7 @@ class Player {
         this.updateState();
 
         // Jump input handling
-        if ((this.game.keys['space'] || this.game.keys['w']) && this.isGrounded) {
+        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) {
             this.velocity.y = -MAX_JUMP;
             this.state = 4;
             this.isGrounded = false;
