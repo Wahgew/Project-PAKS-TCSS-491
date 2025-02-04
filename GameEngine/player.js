@@ -131,6 +131,18 @@ class Player {
             this.isGrounded = false;
         }
 
+        // Update BoundingBoxes
+        this.updateLastBB();
+        this.updateBB();
+
+        var that = this;
+        this.game.entities.forEach(function (entity) {
+            if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
+                entity.removeFromWorld = true;
+                that.dead = true;
+            }
+        });
+
         // Horizontal movement
         this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID);
 
@@ -205,18 +217,7 @@ class Player {
         // Update facing
         if (this.velocity.x < 0) this.facing = 0;
         if (this.velocity.x > 0) this.facing = 1;
-        
-        // Update BoundingBoxes
-        this.updateLastBB();
-        this.updateBB();
-
-        var that = this;
-        this.game.entities.forEach(function (entity) {
-            if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
-                entity.removeFromWorld = true;
-                that.dead = true;
-            }
-        });
+    
     }
 
     // Applies maximum velocity limits to both horizontal and vertical movement
