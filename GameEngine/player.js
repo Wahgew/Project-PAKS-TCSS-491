@@ -11,6 +11,9 @@ class Player {
         this.idleSpritesheet = ASSET_MANAGER.getAsset("./sprites/idle.png");
         this.runSpritesheet = ASSET_MANAGER.getAsset("./sprites/run.png");
         this.jumpSpritesheet = ASSET_MANAGER.getAsset("./sprites/jump.png");
+        this.slideSpritesheet = ASSET_MANAGER.getAsset("./sprites/slide.png");
+        this.walkSpritesheet = ASSET_MANAGER.getAsset("./sprites/walk.png");
+
 
         this.testSprite = ASSET_MANAGER.getAsset("./sprites/temptest.png");
         this.testAnimator = new Animator(this.testSprite, 0, 0, 54, 60, 1, 1);
@@ -51,21 +54,21 @@ class Player {
         // Idle animation
         this.animations[0][0][1] = new Animator(
             this.idleSpritesheet, 
-            0, 5, 170, 175, 2, 0.17
+            0, 5, 170, 175, 4, 0.15
         );
         this.animations[0][0][0] = new Animator(
             this.idleSpritesheet,
-            0, 0, 181, 175, 5, 0.17
+            0, 5, 170, 175, 4, 0.15
         );
 
         // Run animation
         this.animations[1][0][1] = new Animator(
-            this.runSpritesheet,
-            0, 0, 181, 175, 5, 0.1
+            this.walkSpritesheet,
+            0, 13, 144, 190, 5, 0.1
         );
         this.animations[1][0][0] = new Animator(
-            this.runSpritesheet,
-            0, 0, 181, 175, 5, 0.1
+            this.walkSpritesheet,
+            0, 13, 144, 190, 5, 0.1
         );
 
         // Running animation (faster)
@@ -89,6 +92,16 @@ class Player {
                 0, 0, 181, 175, 2, 0.2
             );
         }
+
+        // Slide animation
+        this.animations[5][0][1] = new Animator(
+            this.slideSpritesheet,
+            0, 0, 200, 120, 3, 0.1
+        );
+        this.animations[5][0][0] = new Animator(
+            this.slideSpritesheet,
+            0, 0, 200, 120, 3, 0.1
+        );
     }
 
     updateBB() {
@@ -306,6 +319,12 @@ class Player {
     draw(ctx) {
         if (!ctx) return;
 
+        // Adjust vertical position when sliding 
+        let adjustedY = this.y;
+        if (this.state === 5) {
+            adjustedY = this.y + this.height/4; // Move down for sliding 
+        }
+
         // Draw the appropriate animation based on state and facing direction
         if (this.animations[this.state] && 
             this.animations[this.state][0] && 
@@ -315,7 +334,7 @@ class Player {
                 this.game.clockTick,
                 ctx,
                 this.x - 37,
-                this.y,
+                adjustedY,
                 0.5
             );
         }
