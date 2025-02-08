@@ -28,7 +28,7 @@ class Player {
         this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling
         this.dead = false;
         this.isGrounded = true;
-        this.fallAcc = 550;
+        this.gravity = 1750;
 
         this.velocity = {x: 0, y: 0};
 
@@ -120,16 +120,16 @@ class Player {
         // Movement constants
         const MIN_WALK = 20;
         const MAX_WALK = 500;
-        const MAX_RUN = 1000;
-        const ACC_WALK = 650;
-        const ACC_RUN = 1250;
+        const MAX_RUN = 650;
+        const ACC_WALK = 425;
+        const ACC_RUN = 825;
 
+        const DEC_SLIDE = 300;
         const DEC_REL = 600;
-        const DEC_SKID = 1800;
+        const DEC_SKID = 1200;
         
         const MAX_FALL = 2000;
-        const GRAVITY = 1500;
-        const MAX_JUMP = 850;
+        const MAX_JUMP = 650;
 
         // check for death state and restart game
         if (this.dead) {
@@ -154,13 +154,6 @@ class Player {
         // Update state based on movement and keys
         this.updateState();
 
-        // Jump input handling
-        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) {
-            this.velocity.y = -MAX_JUMP;
-            this.state = 4;
-            this.isGrounded = false;
-        }
-
         // Update BoundingBoxes
         this.updateLastBB();
         this.updateBB();
@@ -169,15 +162,29 @@ class Player {
         this.game.entities.forEach(function (entity) {
             if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
                 entity.removeFromWorld = true;
-                    that.kill();
+                that.kill();
+            }
+            if (entity.BB && entity instanceof Spike && that.BB.collide(entity.BB)) {
+                that.kill();
             }
         });
 
         // Horizontal movement
-        this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID);
+        this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID, DEC_SLIDE);
+
+        // Jump input handling
+        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) {
+            this.velocity.y = -MAX_JUMP;
+            this.state = 4;
+            this.isGrounded = false;
+        }
+
+        if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
+            this.velocity.y -= 850 * TICK; 
+        }
 
         // Apply gravity
-        this.velocity.y += GRAVITY * TICK;
+        this.velocity.y += this.gravity * TICK;
 
         // Apply max velocities
         this.applyMaxVelocities(MAX_WALK, MAX_RUN, MAX_FALL);
@@ -188,6 +195,9 @@ class Player {
     
     // Updates the player's state based on current conditions
     updateState() {
+        if (this.velocity.x < 0) this.facing = 0;
+        if (this.velocity.x > 0) this.facing = 1;
+
         if (!this.isGrounded) {
             this.state = 4; // Jumping/Falling
             return;
@@ -220,34 +230,70 @@ class Player {
     }
 
     // Updates horizontal movement based on input
-    updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID) {
-        // Handle left movement
-        if (this.game.keys['a'] && !this.game.keys['d']) {
-            this.facing = 0;
-            if (this.game.keys['shift']) {
-                this.velocity.x -= ACC_RUN * TICK;
-            } else {
-                this.velocity.x -= ACC_WALK * TICK;
+    updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID, DEC_SLIDE) {
+         // HORIZONTAL MOVEMENT/PHYSICS
+         if (this.state !== 4) { // if player is not jumping
+            // idle, walking, running, skidding ground physics
+            if (Math.abs(this.velocity.x) < MIN_WALK) {
+                this.velocity.x = 0;
+                this.state = 0;
+                if (this.game.keys['a'] && !this.game.keys['s']) {
+                    this.velocity.x -= MIN_WALK;
+                }
+                if (this.game.keys['d'] && !this.game.keys['s']) {
+                    this.velocity.x += MIN_WALK;
+                }
+            } else if (Math.abs(this.velocity.x) >= MIN_WALK) { // accelerating or decelerating
+                if (this.facing === 0) { // left
+                    if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // moving
+                        if (this.game.keys['shift']) { // if sprinting
+                            this.velocity.x -= ACC_RUN * TICK;
+                            this.state = 2;
+                        } else {
+                            this.velocity.x -= ACC_WALK * TICK;
+                            this.state = 1;
+                        }
+                    } else if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // skidding
+                        this.velocity.x += DEC_SKID * TICK;
+                        this.state = 3;
+                    } else if (this.game.keys['s']) {
+                        this.velocity.x += DEC_SLIDE * TICK;
+                    } else { // holding nothing
+                        this.velocity.x += DEC_REL * TICK;
+                        this.state = 1;
+                    }
+                }
+                if (this.facing === 1) { // right
+                    if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // moving
+                        if (this.game.keys['shift']) { // if sprinting
+                            this.velocity.x += ACC_RUN * TICK;
+                            this.state = 2;
+                        } else {
+                            this.velocity.x += ACC_WALK * TICK;
+                            this.state = 1;
+                        } 
+                    } else if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // skidding
+                        this.velocity.x -= DEC_SKID * TICK;
+                        this.state = 3
+                    }  else if (this.game.keys['s']) {
+                        this.velocity.x -= DEC_SLIDE * TICK;
+                    } else { // holding nothing
+                        this.velocity.x -= DEC_REL * TICK;
+                        this.state = 1;
+                    }
+                }
             }
-        } else if (this.game.keys['d'] && !this.game.keys['a']) { // right movement
-            this.facing = 1;
-            if (this.game.keys['shift']) {
-                this.velocity.x += ACC_RUN * TICK;
-            } else {
-                this.velocity.x += ACC_WALK * TICK;
+       } else if (this.state === 4) {
+            if (this.game.keys['a'] && !this.game.keys['d']) { 
+                if (Math.abs(this.velocity.x) > MAX_WALK) {
+                    this.velocity.x -= ACC_RUN * TICK;
+                } else this.velocity.x -= ACC_WALK * TICK;
+            } else if (this.game.keys['d'] && !this.game.keys['a']) {
+                if (Math.abs(this.velocity.x) > MAX_WALK) {
+                    this.velocity.x += ACC_RUN * TICK;
+                } else this.velocity.x += ACC_WALK * TICK;
             }
-        } else { // handle deceleration
-            if (this.velocity.x > 0) {
-                this.velocity.x = Math.max(0, this.velocity.x - DEC_REL * TICK);
-            } else if (this.velocity.x < 0) {
-                this.velocity.x = Math.min(0, this.velocity.x + DEC_REL * TICK);
-            }
-        }
-
-        // Update facing
-        if (this.velocity.x < 0) this.facing = 0;
-        if (this.velocity.x > 0) this.facing = 1;
-    
+       }
     }
 
     // Applies maximum velocity limits to both horizontal and vertical movement

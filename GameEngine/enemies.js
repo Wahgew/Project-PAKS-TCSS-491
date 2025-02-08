@@ -141,30 +141,36 @@ class Spike {
         this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
+        this.updateBB();
     }
+
+    updateBB() {
+        this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+    };
 
     update() {
         var that = this;
         if (this.moving && this.tracking) {
-            this.game.entities.forEach(function (entity) { // change this??? jank
+            this.game.entities.forEach(function (entity) { 
                 if (entity instanceof Player) {
-                    if (entity.x + (entity.width / 4) > that.x) {
+                    if (entity.x + entity.width / 2 > that.x + that.width / 2) {
                         that.velocity.x = that.speed;
                     } else {
                         that.velocity.x = -that.speed;
                     }
-                    if (entity.y + (entity.height / 4) > that.y) {
+                    if (entity.y + entity.height / 2 > that.y + that.height / 2) {
                         that.velocity.y = that.speed;
                     } else {
                         that.velocity.y = -that.speed;
                     }
                 }
             });
-        } else if (this.moving && !this.tracking) { // CHANGE THIS TO USE timer.js implementation.
+        } else if (this.moving && !this.tracking) { 
            updateMovement(this.game, this)
         }
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
+        this.updateBB();
     }
 
     draw(ctx) {
