@@ -119,7 +119,7 @@ class Player {
         
         const MAX_FALL = 2000;
         const GRAVITY = 1500;
-        const MAX_JUMP = 750;
+        const MAX_JUMP = 850;
 
         // Update state based on movement and keys
         this.updateState();
