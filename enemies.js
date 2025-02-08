@@ -72,7 +72,12 @@ class Projectile {
         // Create animator with full sprite dimensions
         this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
         this.velocity = {x: 0, y: 0};
+        this.updateBB();
     }
+
+    updateBB() {
+        this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+    };
 
     update() {
         switch (this.direction) {
@@ -87,6 +92,8 @@ class Projectile {
         }
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
+        
+        this.updateBB();
     }
 
     draw(ctx) {
@@ -169,6 +176,46 @@ class Spike {
 
         // Draw the sprite
         this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
+    }
+}
+
+class Laser { // A LOT OF JANK with this, refactor this later for sure.
+    constructor({gameEngine, x, y, speed, moving, direction, shotdirec, length}) {
+        this.game = gameEngine;
+        Object.assign(this, {x, y, speed, moving, direction, shotdirec, length});
+
+        this.height = 60;
+        this.width = this.length;
+
+        // Load spritesheet
+        this.spritesheet = ASSET_MANAGER.getAsset("./sprites/laser_test.png");
+
+        // Create animator with full sprite dimensions
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
+        this.velocity = {x: 0, y: 0};
+        this.updateBB();
+    }
+
+    updateBB(){
+        this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+    }
+
+    update() {
+        //if (this.moving) updateMovement(this.game, this);
+        this.x += this.game.clockTick * this.velocity.x; 
+        this.y += this.game.clockTick * this.velocity.y;
+        this.updateBB();
+    }
+
+    draw(ctx) {
+        if (this.game.options.debugging) {
+            // Draw debug box
+            ctx.strokeStyle = 'red';
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+
+        // Draw the sprite
+        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     }
 }
 

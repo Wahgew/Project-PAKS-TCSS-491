@@ -21,10 +21,29 @@ class GameEngine {
         this.wheel = null;
         this.keys = {};
 
+        // store player instance
+        this.Player = null;
+        this.entityCount = 0;
+
         // Options and the Details
         this.options = options || {
-            debugging: true,
+            debugging: false,
         };
+
+        // wait for DOM to load before accessing elements
+        window.addEventListener("DOMContentLoaded", () => {
+            this.debugBox = document.getElementById("debug");
+
+            if (this.debugBox) {
+                this.options.debugging = this.debugBox.checked; // Initialize debugging option
+
+                // event listener to update debugging option when checkbox is toggled
+                this.debugBox.addEventListener("change", (e) => {
+                    this.options.debugging = e.target.checked;
+                    console.log("Debug mode:", this.options.debugging);
+                });
+            }
+        });
     }
 
     init(ctx) {
@@ -124,8 +143,9 @@ class GameEngine {
 
     addEntity(entity) {
         if (this.options.debugging) {
-            console.log("Adding entity:", entity);
+            console.log("Adding entity #" + this.entityCount + ":", entity);
         }
+        this.entityCount++;
         this.entities.push(entity);
     }
 
@@ -210,18 +230,29 @@ class GameEngine {
     }
 
     update() {
+        // Store initial entity count
+        // add safety checks to handle entity removal
         let entitiesCount = this.entities.length;
 
+        // first pass: Update all valid entities
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
-            if (!entity.removeFromWorld) {
+            // add null check to prevent "Cannot read properties of undefined"
+            // handles cases where entities might have been removed
+            if (entity && !entity.removeFromWorld) {
                 entity.update();
             }
         }
 
-        // Remove dead entities
-        this.entities = this.entities.filter(entity => !entity.removeFromWorld);
+        // second pass: Remove marked entities
+        // backward iteration prevents skipping elements when removing items
+        for (var i = this.entities.length - 1; i >= 0; --i) {
+            // null check for safety
+            if (this.entities[i] && this.entities[i].removeFromWorld) {
+                this.entities.splice(i, 1);
+            }
+        }
     }
 
     loop() {
