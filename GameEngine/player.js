@@ -169,7 +169,7 @@ class Player {
         this.game.entities.forEach(function (entity) {
             if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
                 entity.removeFromWorld = true;
-                that.dead = true;
+                    that.kill();
             }
         });
 
@@ -345,6 +345,16 @@ class Player {
         // Clear any game keys that might be held
         for (let key in this.game.keys) {
             this.game.keys[key] = false;
+        }
+    }
+
+    // call this method if you want to kill the player from an entity
+    kill() {
+        if (!this.game.options.debugging) {
+            this.dead = true;
+            // add any death-related effects or sounds here
+        } else {
+            console.log("Player would have died, but debug mode is active");
         }
     }
 

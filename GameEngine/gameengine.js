@@ -27,8 +27,23 @@ class GameEngine {
 
         // Options and the Details
         this.options = options || {
-            debugging: true,
+            debugging: false,
         };
+
+        // wait for DOM to load before accessing elements
+        window.addEventListener("DOMContentLoaded", () => {
+            this.debugBox = document.getElementById("debug");
+
+            if (this.debugBox) {
+                this.options.debugging = this.debugBox.checked; // Initialize debugging option
+
+                // event listener to update debugging option when checkbox is toggled
+                this.debugBox.addEventListener("change", (e) => {
+                    this.options.debugging = e.target.checked;
+                    console.log("Debug mode:", this.options.debugging);
+                });
+            }
+        });
     }
 
     init(ctx) {
