@@ -21,6 +21,10 @@ class GameEngine {
         this.wheel = null;
         this.keys = {};
 
+        // store player instance
+        this.Player = null;
+        this.entityCount = 0;
+
         // Options and the Details
         this.options = options || {
             debugging: true,
@@ -124,9 +128,15 @@ class GameEngine {
 
     addEntity(entity) {
         if (this.options.debugging) {
-            console.log("Adding entity:", entity);
+            console.log("Adding entity #" + this.entityCount + ":", entity);
         }
+        this.entityCount++;
         this.entities.push(entity);
+    }
+
+    // clears all projectiles entities when the player dies
+    clearAllProjectiles() {
+        this.entities = this.entities.filter(entity => !(entity instanceof Projectile));
     }
 
     draw() {
@@ -210,18 +220,27 @@ class GameEngine {
     }
 
     update() {
+        // Store initial entity count
+        // add safety checks to handle entity removal
         let entitiesCount = this.entities.length;
 
+        // first pass: Update all valid entities
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
-            if (!entity.removeFromWorld) {
+            // Add null check to prevent "Cannot read properties of undefined"
+            // This handles cases where entities might have been removed
+            if (entity && !entity.removeFromWorld) {
                 entity.update();
             }
         }
 
+        // Second pass: Remove marked entities
+        // This preserves the original backward iteration for safe array splicing
+        // Backward iteration prevents skipping elements when removing items
         for (var i = this.entities.length - 1; i >= 0; --i) {
-            if (this.entities[i].removeFromWorld) {
+            // Add null check for safety while maintaining original logic
+            if (this.entities[i] && this.entities[i].removeFromWorld) {
                 this.entities.splice(i, 1);
             }
         }

@@ -5,7 +5,16 @@ class Player {
         this.height = 76;
         this.width = 20;
 
-        this.game.Player = this;
+        // initial starting pos of player
+        this.intialX = this.x;
+        this.intialY = this.y;
+
+        // First check if player instance exists first
+        if (this.game) {
+            this.game.Player = this;
+        } else {
+            console.error("Game instance not properly initialized for player");
+        }
 
         // Load spritesheets
         this.idleSpritesheet = ASSET_MANAGER.getAsset("./sprites/idle.png");
@@ -34,6 +43,7 @@ class Player {
         } else {
             console.error("Map not found");
         }
+        // this.map = null;
     }
 
     loadAnimations() {
@@ -120,6 +130,28 @@ class Player {
         const MAX_FALL = 2000;
         const GRAVITY = 1500;
         const MAX_JUMP = 850;
+
+        // check for death state and restart game
+        if (this.dead) {
+            // Clear all projectiles immediately when player dies
+            //this.game.clearAllProjectiles();
+            console.log(this.game.entities);
+            if (this.game.keys['enter']) {
+                this.restartGame();
+                console.log(this.game.entities);
+            }
+            // may want to load the death animation here then return.
+            return; // don't process other updates when dead restart the game instead
+        }
+
+        // find the map if not already found
+        // if (!this.map) {
+        //     this.map = this.game.entities.find(entity => entity instanceof testMap);
+        //     if (!this.map) {
+        //         console.error("Map not found in update");
+        //         return; // Skip update if map not found
+        //     }
+        // }
 
         // Update state based on movement and keys
         this.updateState();
@@ -302,8 +334,45 @@ class Player {
         }
     }
 
+    // resets the game
+    restartGame() {
+        // Clear all entities before loading new level
+        //this.game.clearAllProjectiles();
+        this.game.levelConfig.loadLevel(this.game.levelConfig.currentLevel);
+
+        // Reset timer if it exists
+        if (this.game.timer) {
+            this.game.timer.reset();
+        }
+
+        // Clear any game keys that might be held
+        for (let key in this.game.keys) {
+            this.game.keys[key] = false;
+        }
+    }
+
+
     // Renders the player character
     draw(ctx) {
+
+        // check if the player is dead first
+        if (this.dead) {
+            // Draw death screen
+            //this.game.timer.stop(); // future peter decide if I want to stop the time when dead
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            ctx.font = '48px monospace';
+            ctx.fillStyle = 'red';
+            ctx.textAlign = 'center';
+            ctx.fillText('YOU DIED', ctx.canvas.width / 2, ctx.canvas.height / 2);
+
+            ctx.font = '24px monospace';
+            ctx.fillStyle = 'white';
+            ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
+            return;
+        }
+
         if (!ctx) return;
 
         // Draw the appropriate animation based on state and facing direction
