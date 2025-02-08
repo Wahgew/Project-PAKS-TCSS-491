@@ -1,18 +1,10 @@
 class testMap {
-
         constructor(testSize) {
                 this.testSize = testSize;
-                this.gameEngine = gameEngine;
                 this.block = ASSET_MANAGER.getAsset("./sprites/block.png");
                 console.log("TestMap initialized with size:", testSize);
-                console.log("Block sprite loaded:", this.block);
-
-                this.spawnEntities();
         }
 
-        // 1 - wall
-        // 0 - empty space
-        // 2 - player
         map = [
                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -22,7 +14,7 @@ class testMap {
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1],
                 [1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -34,32 +26,57 @@ class testMap {
                 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ]
 
-        spawnEntities() {
-                for (let row = 0; row < this.map.length; row++) {
-                        for (let col = 0; col < this.map[row].length; col++) {
-                                const tile = this.map[row][col];
-                                const x = col * this.testSize;
-                                const y = row * this.testSize;
+        update() {
+        }
 
-                                switch(tile) {
-                                        // case 2: // Player
-                                        //         const playerHeight = 120;
-                                        //         const spawnY = y - (playerHeight - this.testSize);
-                                        //         this.gameEngine.addEntity(new Player(this.gameEngine, x, spawnY));
-                                        //         this.map[row][col] = 0; // Convert to air
-                                        //         break;
+        //checkCollisions method
+        checkCollisions(entity) {
+                if (!entity || !entity.BB) {
+                        console.error("Invalid entity passed to checkCollisions");
+                        return { collides: false };
+                }
 
-                                        case 3: // Exit Door
-                                                this.gameEngine.addEntity(new exitDoor(this.gameEngine, x, y, this.testSize));
-                                                this.map[row][col] = 0; // Convert to air
-                                                break;
+                // Get the tiles the entity could be colliding with
+                const tileStartX = Math.floor(entity.x / this.testSize);
+                const tileEndX = Math.floor((entity.x + entity.width) / this.testSize);
+                const tileStartY = Math.floor(entity.y / this.testSize);
+                const tileEndY = Math.floor((entity.y + entity.height) / this.testSize);
+
+                // Add bounds checking
+                // const maxY = this.map.length;
+                // const maxX = this.map[0].length;
+
+                if (entity.x + entity.width > this.map[0].length * this.testSize) {
+                        return {
+                                collides: true,
+                                tileX: this.map[0].length * this.testSize,
+                                tileY: entity.y
+                        };
+                }
+
+                // Regular tile collision checking
+                for (let i = tileStartY; i <= tileEndY; i++) {
+                        for (let j = tileStartX; j <= tileEndX; j++) {
+                                if (this.map[i] && this.map[i][j] === 1) {
+                                        const tileBB = new BoundingBox(
+                                            j * this.testSize,
+                                            i * this.testSize,
+                                            this.testSize,
+                                            this.testSize
+                                        );
+
+                                        if (entity.BB.collide(tileBB)) {
+                                                return {
+                                                        collides: true,
+                                                        tileX: j * this.testSize,
+                                                        tileY: i * this.testSize
+                                                };
+                                        }
                                 }
                         }
                 }
-        }
 
-        update() {
-
+                return { collides: false };
         }
 
         draw(ctx) {
@@ -68,29 +85,40 @@ class testMap {
                         return;
                 }
 
-                console.log("Drawing map");
                 this.#setCanvasSize(ctx.canvas);
                 this.#clearCanvas(ctx);
                 this.#drawMap(ctx);
         }
 
         #drawMap(ctx) {
-                if (!ctx) return;
-                console.log("Drawing map tiles");
+                if (!ctx) {
+                        console.error("No context provided to drawMap");
+                        return;
+                }
 
+                // Only draw the tiles that are visible
                 for (let i = 0; i < this.map.length; i++) {
                         for (let j = 0; j < this.map[i].length; j++) {
-                                if (this.map[i][j] === 1 && this.block) {
+                                if (this.map[i][j] === 1) {  // If it's a solid tile
+                                        const x = j * this.testSize;
+                                        const y = i * this.testSize;
+
                                         try {
                                                 ctx.drawImage(
                                                     this.block,
-                                                    j * this.testSize,
-                                                    i * this.testSize,
+                                                    x,
+                                                    y,
                                                     this.testSize,
                                                     this.testSize
                                                 );
+
+                                                // Draw collision boxes if debugging is enabled
+                                                if (this.game && this.game.options && this.game.options.debugging) {
+                                                        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+                                                        ctx.strokeRect(x, y, this.testSize, this.testSize);
+                                                }
                                         } catch (e) {
-                                                console.error("Error drawing tile at", i, j, ":", e);
+                                                console.error("Error drawing tile at", x, y, e);
                                         }
                                 }
                         }
