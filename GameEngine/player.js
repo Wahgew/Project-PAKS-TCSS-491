@@ -133,8 +133,6 @@ class Player {
 
         // check for death state and restart game
         if (this.dead) {
-            // Clear all projectiles immediately when player dies
-            //this.game.clearAllProjectiles();
             console.log(this.game.entities);
             if (this.game.keys['enter']) {
                 this.restartGame();
@@ -336,8 +334,7 @@ class Player {
 
     // resets the game
     restartGame() {
-        // Clear all entities before loading new level
-        //this.game.clearAllProjectiles();
+        // loads the new level
         this.game.levelConfig.loadLevel(this.game.levelConfig.currentLevel);
 
         // Reset timer if it exists

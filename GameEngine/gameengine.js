@@ -134,11 +134,6 @@ class GameEngine {
         this.entities.push(entity);
     }
 
-    // clears all projectiles entities when the player dies
-    clearAllProjectiles() {
-        this.entities = this.entities.filter(entity => !(entity instanceof Projectile));
-    }
-
     draw() {
         if (!this.ctx) {
             console.error("No context found in GameEngine");
@@ -228,18 +223,17 @@ class GameEngine {
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
-            // Add null check to prevent "Cannot read properties of undefined"
-            // This handles cases where entities might have been removed
+            // add null check to prevent "Cannot read properties of undefined"
+            // handles cases where entities might have been removed
             if (entity && !entity.removeFromWorld) {
                 entity.update();
             }
         }
 
-        // Second pass: Remove marked entities
-        // This preserves the original backward iteration for safe array splicing
-        // Backward iteration prevents skipping elements when removing items
+        // second pass: Remove marked entities
+        // backward iteration prevents skipping elements when removing items
         for (var i = this.entities.length - 1; i >= 0; --i) {
-            // Add null check for safety while maintaining original logic
+            // null check for safety
             if (this.entities[i] && this.entities[i].removeFromWorld) {
                 this.entities.splice(i, 1);
             }

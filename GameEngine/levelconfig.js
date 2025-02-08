@@ -1,10 +1,27 @@
+/**
+ * Handles level configurations, including loading maps, players, and hazards.
+ *
+ * @author Peter Madin
+ * @version 0.0.1
+ * @date 02/7/25
+ */
 class LevelConfig {
+    /**
+     * Creates an instance of LevelConfig.
+     * @param {object} gameEngine - The game engine instance.
+     */
     constructor(gameEngine) {
         this.game = gameEngine;
         this.currentLevel = 1; // sets the current level
         this.TILE_SIZE = 25;
     }
 
+    /**
+     * Retrieves the entity configurations for a given level.
+     *
+     * @param {number} levelNumber - The level number to load.
+     * @returns {object|null} Level configuration containing map, player, and hazards, or null if level does not exist.
+     */
     getLevelEntities(levelNumber) {
         // first create the player instance
         // Each level configuration returns an array of entities (saves initial state)
@@ -47,6 +64,12 @@ class LevelConfig {
         return levels[levelNumber] || null;
     }
 
+    /**
+     * Loads a level by creating and adding entities in the correct order: map, player, and hazards.
+     *
+     * @param {number} levelNumber - The level number to load.
+     * @returns {boolean} True if the level was loaded successfully, false otherwise.
+     */
     loadLevel(levelNumber) {
         const levelConfig = this.getLevelEntities(levelNumber);
         if (!levelConfig) return false;
