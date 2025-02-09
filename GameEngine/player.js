@@ -128,7 +128,7 @@ class Player {
 
         // Movement constants
         const MIN_WALK = 20;
-        const MAX_WALK = 500;
+        const MAX_WALK = 100;
         const MAX_RUN = 1000;
         const ACC_WALK = 650;
         const ACC_RUN = 1250;
