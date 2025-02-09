@@ -23,14 +23,14 @@ class ProjectileLauncher {
 
         this.height = 54;
         this.width = 58;
-        this.time = 0;
+        this.time = this.atkspd; // shoot projectile immediately
         this.reverse = false;
 
         // Load spritesheet
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/launcher_small.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
     }
@@ -70,7 +70,7 @@ class Projectile {
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/tempproj3.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
         this.velocity = {x: 0, y: 0};
         this.updateBB();
     }
@@ -138,7 +138,7 @@ class Spike {
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/spike_small.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
         this.updateBB();
@@ -251,7 +251,7 @@ function updateMovement(game, object) { // consider option to make reverse coord
                 }
                 object.time += game.clockTick;
                 break;
-            case 'RIGHT':
+            case 'LEFT':
                 if (object.reverse) object.velocity.x = object.speed;
                 else object.velocity.x = -object.speed;
                 if (object.time >= object.reverseTime) {
@@ -260,7 +260,7 @@ function updateMovement(game, object) { // consider option to make reverse coord
                 }
                 object.time += game.clockTick;
                 break;
-            case 'LEFT':
+            case 'RIGHT':
                 if (!object.reverse) object.velocity.x = object.speed;
                 else object.velocity.x = -object.speed;
                 if (object.time >= object.reverseTime) {
@@ -284,7 +284,7 @@ function updateMovement(game, object) { // consider option to make reverse coord
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/temptest.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
 

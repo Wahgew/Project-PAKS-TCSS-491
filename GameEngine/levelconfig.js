@@ -29,15 +29,15 @@ class LevelConfig {
         const levels = {
             1: {
                 map: () => new testMap(this.TILE_SIZE),
-                player: () => new Player(this.game, 75, 400),
+                player: () => new Player(this.game, 85, 400),
                 hazards: () => [
-                    new Spike({gameEngine: this.game, x: 100, y: 100, speed: 50, moving: true, direction: null, tracking: true, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 500, y: 125, speed: 100, moving: true, direction: "LEFT", tracking: false, reverseTime: 4}),
-                    new Spike({gameEngine: this.game, x: 350, y: 125, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 100, y: 50, speed: 25, moving: true, direction: null, tracking: true, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 500, y: 265, speed: 150, moving: true, direction: "RIGHT", tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 350, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new ProjectileLauncher({
                         gameEngine: this.game,
-                        x: 975,
-                        y: 325,
+                        x: 1075,
+                        y: 450,
                         speed: 0,
                         moving: false,
                         direction: null,
@@ -45,7 +45,12 @@ class LevelConfig {
                         atkspd: 2,
                         projspd: 100,
                         shotdirec: "LEFT"
-                    })
+                    }),
+                    new Platform({
+                        gameEngine: this.game, x: 550, y: 225, speed: 0, moving: false, direction: null, reverseTime: 0, size: "SHORT"
+                    }),
+                    new Lever({gameEngine: this.game, x: 640, y: 100, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 750, y: 450, speed: 0, moving: false, direction: null, reverseTime: 0})
                 ]
             },
 
