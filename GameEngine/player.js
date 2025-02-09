@@ -14,6 +14,12 @@ class Player {
         this.slideSpritesheet = ASSET_MANAGER.getAsset("./sprites/slide.png");
         this.walkSpritesheet = ASSET_MANAGER.getAsset("./sprites/walk.png");
 
+        //Load flip animation
+        this.RwalkSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rwalk.png");
+        this.RrunSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rrun.png");
+        this.RslideSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rslide.png");
+        this.RjumpSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rjump.png");
+
 
         this.testSprite = ASSET_MANAGER.getAsset("./sprites/temptest.png");
         this.testAnimator = new Animator(this.testSprite, 0, 0, 54, 60, 1, 1);
@@ -61,24 +67,24 @@ class Player {
             0, 5, 170, 175, 4, 0.15
         );
 
-        // Run animation
+        // Walk animation
         this.animations[1][0][1] = new Animator(
             this.walkSpritesheet,
             0, 13, 144, 190, 5, 0.1
         );
         this.animations[1][0][0] = new Animator(
-            this.walkSpritesheet,
+            this.RwalkSpritesheet,
             0, 13, 144, 190, 5, 0.1
         );
 
         // Running animation (faster)
         this.animations[2][0][1] = new Animator(
             this.runSpritesheet,
-            0, 0, 181, 175, 5, 0.08  // Faster animation for running
+            0, 0, 175, 145, 5, 0.08  // Faster animation for running
         );
         this.animations[2][0][0] = new Animator(
-            this.runSpritesheet,
-            0, 0, 181, 175, 5, 0.08
+            this.RrunSpritesheet,
+            0, 0, 175, 145, 5, 0.08
         );
 
         // Jump animation
@@ -88,7 +94,7 @@ class Player {
                 0, 0, 181, 175, 2, 0.2
             );
             this.animations[i][0][0] = new Animator(
-                this.jumpSpritesheet,
+                this.RjumpSpritesheet,
                 0, 0, 181, 175, 2, 0.2
             );
         }
@@ -99,7 +105,7 @@ class Player {
             0, 0, 200, 120, 3, 0.1
         );
         this.animations[5][0][0] = new Animator(
-            this.slideSpritesheet,
+            this.RslideSpritesheet,
             0, 0, 200, 120, 3, 0.1
         );
     }

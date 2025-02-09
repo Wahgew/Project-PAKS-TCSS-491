@@ -14,6 +14,10 @@ ASSET_MANAGER.queueDownload("./sprites/laser_test.png");
 ASSET_MANAGER.queueDownload("./sprites/slide.png");
 ASSET_MANAGER.queueDownload("./sprites/walk.png");
 
+ASSET_MANAGER.queueDownload("./sprites/Rwalk.png");
+ASSET_MANAGER.queueDownload("./sprites/Rrun.png");
+ASSET_MANAGER.queueDownload("./sprites/Rslide.png");
+ASSET_MANAGER.queueDownload("./sprites/Rjump.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");
