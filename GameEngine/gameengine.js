@@ -40,6 +40,7 @@ class GameEngine {
                 // event listener to update debugging option when checkbox is toggled
                 this.debugBox.addEventListener("change", (e) => {
                     this.options.debugging = e.target.checked;
+
                     console.log("Debug mode:", this.options.debugging);
                 });
             }
@@ -83,10 +84,10 @@ class GameEngine {
         });
 
         this.ctx.canvas.addEventListener("mousemove", e => {
-            if (this.options.debugging) {
-        //        console.log("MOUSE_MOVE", getXandY(e)); 
-            }
             this.mouse = getXandY(e);
+            if (this.options.debugging) {
+                console.log("MOUSE_MOVE", this.mouse);
+            }
         });
 
         this.ctx.canvas.addEventListener("click", e => {
@@ -136,6 +137,11 @@ class GameEngine {
                     this.levelUI.hideLevelComplete();
                 }
             }
+
+            if (event.key.toLowerCase() === 'enter') {
+                this.levelUI.hideLevelComplete();
+            }
+
         });
 
 
@@ -226,6 +232,17 @@ class GameEngine {
         }
 
         this.levelUI.draw(this.ctx);
+
+        // draws the x y pos following the cursor
+        if (this.options.debugging && this.mouse) {
+            this.ctx.font = "12px Arial";
+            this.ctx.fillStyle = "red";
+
+            let offsetX = 10; // Adjust to prevent overlap with cursor
+            let offsetY = 20;
+
+            this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
+        }
 
     }
 
