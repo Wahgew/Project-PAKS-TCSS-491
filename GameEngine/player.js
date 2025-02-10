@@ -8,6 +8,7 @@ class Player {
         // initial starting pos of player
         this.intialX = this.x;
         this.intialY = this.y;
+        this.teleportHandler = null;
 
         // First check if player instance exists first
         if (this.game) {
@@ -43,7 +44,11 @@ class Player {
         } else {
             console.error("Map not found");
         }
-        // this.map = null;
+
+        this.tpPlayerDebug();
+        if (this.game.debugBox) {
+            this.game.debugBox.addEventListener("change", () => this.tpPlayerDebug());
+        }
     }
 
     loadAnimations() {
@@ -355,6 +360,35 @@ class Player {
             // add any death-related effects or sounds here
         } else {
             console.log("Player would have died, but debug mode is active");
+        }
+    }
+
+    // debug to teleport the player entity on click based on mouse postion
+    tpPlayerDebug() {
+        // Remove existing teleport handler if it exists
+        if (this.teleportHandler) {
+            this.game.ctx.canvas.removeEventListener("click", this.teleportHandler);
+            this.teleportHandler = null;
+        }
+
+        // Only add new handler if debugging is enabled
+        if (this.game.options.debugging) {
+            this.teleportHandler = (e) => {
+                const rect = this.game.ctx.canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Teleport the player
+                this.x = mouseX - this.width / 2;
+                this.y = mouseY - this.height / 2;
+
+                // Update the bounding box after teleporting
+                this.updateBB();
+
+                console.log(`Teleported to: (${this.x}, ${this.y})`);
+            };
+
+            this.game.ctx.canvas.addEventListener("click", this.teleportHandler);
         }
     }
 

@@ -105,5 +105,11 @@ class LevelUI {
             centerX,
             centerY + lineHeight
         );
+
+        ctx.fillText(
+            'Press Enter to Continue',
+            centerX,
+                centerY + 30 + lineHeight
+        )
     }
 }
