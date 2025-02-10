@@ -30,6 +30,7 @@ class LevelConfig {
             1: {
                 map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 75, 400),
+                exitDoor: () => new exitDoor(this.game, 200, 175, 50),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 100, y: 100, speed: 50, moving: true, direction: null, tracking: true, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 500, y: 125, speed: 100, moving: true, direction: "LEFT", tracking: false, reverseTime: 4}),
@@ -55,6 +56,7 @@ class LevelConfig {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 600, 400),
+                exitDoor: () => new exitDoor(this.game, 100, 200),
                 hazards: () => []
             }
             // add more levels below
@@ -86,6 +88,10 @@ class LevelConfig {
         // create and add the player
         const player = levelConfig.player();
         this.game.addEntity(player);
+
+        // create and add the exit door
+        const exitDoor = levelConfig.exitDoor();
+        this.game.addEntity(exitDoor);
 
         // add any obstacles
         const obstacles = levelConfig.hazards();

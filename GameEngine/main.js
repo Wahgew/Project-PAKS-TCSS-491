@@ -11,6 +11,7 @@ ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
 ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
 ASSET_MANAGER.queueDownload("./sprites/tempproj3.png");
 ASSET_MANAGER.queueDownload("./sprites/laser_test.png");
+ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
 
 ASSET_MANAGER.downloadAll(() => {
 	const canvas = document.getElementById("gameWorld");

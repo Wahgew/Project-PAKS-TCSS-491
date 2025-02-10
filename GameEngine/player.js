@@ -28,6 +28,7 @@ class Player {
         this.facing = 1; // 0 = left, 1 = right
         this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling
         this.dead = false;
+        this.win = true;
         this.isGrounded = true;
         this.gravity = 1750;
 
@@ -147,6 +148,15 @@ class Player {
             return; // don't process other updates when dead restart the game instead
         }
 
+        // if (this.win) {
+        //     console.log(this.game.entities);
+        //     if (this.game.keys['enter']) {
+        //         this.restartGame();
+        //         console.log(this.game.entities);
+        //     }
+        //     return;
+        // }
+
         // find the map if not already found
         // if (!this.map) {
         //     this.map = this.game.entities.find(entity => entity instanceof testMap);
@@ -171,6 +181,10 @@ class Player {
             }
             if (entity.BB && entity instanceof Spike && that.BB.collide(entity.BB)) {
                 that.kill();
+            }
+            if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB)) {
+                that.winGame();
+                console.log("Player has collided with exit");
             }
         });
 
@@ -409,6 +423,22 @@ class Player {
         }
     }
 
+    //call this method when the play has reached the exit door
+    winGame() {
+        if (!this.game.options.debugging) {
+            this.win = true;
+            if (this.game.levelUI) {
+                this.game.levelUI.showLevelComplete();
+                // Stop the timer when winning
+                if (this.game.timer) {
+                    this.game.timer.stop();
+                }
+            }
+        } else {
+            console.log("Player win, but debug mode is active");
+        }
+    }
+
     // debug to teleport the player entity on click based on mouse postion
     tpPlayerDebug() {
         // Remove existing teleport handler if it exists
@@ -459,6 +489,7 @@ class Player {
             ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
             return;
         }
+
 
         if (!ctx) return;
 
