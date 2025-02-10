@@ -38,7 +38,7 @@ class Player {
         this.animations = [];
         this.loadAnimations();
 
-        this.map = this.game.entities.find(entity => entity instanceof testMap);
+        this.map = this.game.entities.find(entity => entity instanceof drawMap);
         if (this.map) {
             console.log("Map found, tile size:", this.map.testSize);
         } else {

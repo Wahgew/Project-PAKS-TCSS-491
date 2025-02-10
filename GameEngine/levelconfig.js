@@ -28,7 +28,7 @@ class LevelConfig {
         // This will be setup up for each map
         const levels = {
             1: {
-                map: () => new testMap(this.TILE_SIZE),
+                map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 75, 400),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 100, y: 100, speed: 50, moving: true, direction: null, tracking: true, reverseTime: 0}),
@@ -53,7 +53,7 @@ class LevelConfig {
 
             2: {
                 // replace with real second map
-                map: () => new testMap(this.TILE_SIZE),
+                map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 600, 400),
                 hazards: () => []
             }

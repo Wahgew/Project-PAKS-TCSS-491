@@ -177,7 +177,7 @@ class GameEngine {
 
         // Draw from front to back (map first, then entities)
         // Find and draw map first
-        const mapEntity = this.entities.find(entity => entity instanceof testMap);
+        const mapEntity = this.entities.find(entity => entity instanceof drawMap);
         if (mapEntity) {
             this.ctx.save();
             mapEntity.draw(this.ctx);
@@ -186,7 +186,7 @@ class GameEngine {
 
         // Then draw all other entities
         this.entities.forEach(entity => {
-            if (!(entity instanceof testMap)) {
+            if (!(entity instanceof drawMap)) {
                 if (this.options.debugging) {
                     const time = Date.now()
                     if (!this.lastDebugLogTime || time - this.lastDebugLogTime >= 3000) {
