@@ -8,6 +8,7 @@ class Player {
         // initial starting pos of player
         this.intialX = this.x;
         this.intialY = this.y;
+        this.teleportHandler = null;
 
         // First check if player instance exists first
         if (this.game) {
@@ -27,6 +28,7 @@ class Player {
         this.facing = 1; // 0 = left, 1 = right
         this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling
         this.dead = false;
+        this.win = true;
         this.isGrounded = true;
         this.gravity = 2000;
         this.levers = 0;
@@ -38,13 +40,17 @@ class Player {
         this.animations = [];
         this.loadAnimations();
 
-        this.map = this.game.entities.find(entity => entity instanceof testMap);
+        this.map = this.game.entities.find(entity => entity instanceof drawMap);
         if (this.map) {
             console.log("Map found, tile size:", this.map.testSize);
         } else {
             console.error("Map not found");
         }
-        // this.map = null;
+
+        this.tpPlayerDebug();
+        if (this.game.debugBox) {
+            this.game.debugBox.addEventListener("change", () => this.tpPlayerDebug());
+        }
     }
 
     loadAnimations() {
@@ -143,6 +149,15 @@ class Player {
             return; // don't process other updates when dead restart the game instead
         }
 
+        // if (this.win) {
+        //     console.log(this.game.entities);
+        //     if (this.game.keys['enter']) {
+        //         this.restartGame();
+        //         console.log(this.game.entities);
+        //     }
+        //     return;
+        // }
+
         // find the map if not already found
         // if (!this.map) {
         //     this.map = this.game.entities.find(entity => entity instanceof testMap);
@@ -173,6 +188,10 @@ class Player {
             } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) { // need to tie into door/exit
                 that.levers++;
                 entity.collected = true;
+            }
+            if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB)) {
+                that.winGame();
+                console.log("Player has collided with exit");
             }
         });
 
@@ -410,6 +429,51 @@ class Player {
         }
     }
 
+    //call this method when the play has reached the exit door
+    winGame() {
+        if (!this.game.options.debugging) {
+            this.win = true;
+            if (this.game.levelUI) {
+                this.game.levelUI.showLevelComplete();
+                // Stop the timer when winning
+                if (this.game.timer) {
+                    this.game.timer.stop();
+                }
+            }
+        } else {
+            console.log("Player win, but debug mode is active");
+        }
+    }
+
+    // debug to teleport the player entity on click based on mouse postion
+    tpPlayerDebug() {
+        // Remove existing teleport handler if it exists
+        if (this.teleportHandler) {
+            this.game.ctx.canvas.removeEventListener("click", this.teleportHandler);
+            this.teleportHandler = null;
+        }
+
+        // Only add new handler if debugging is enabled
+        if (this.game.options.debugging) {
+            this.teleportHandler = (e) => {
+                const rect = this.game.ctx.canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Teleport the player
+                this.x = mouseX - this.width / 2;
+                this.y = mouseY - this.height / 2;
+
+                // Update the bounding box after teleporting
+                this.updateBB();
+
+                console.log(`Teleported to: (${this.x}, ${this.y})`);
+            };
+
+            this.game.ctx.canvas.addEventListener("click", this.teleportHandler);
+        }
+    }
+
 
     // Renders the player character
     draw(ctx) {
@@ -431,6 +495,7 @@ class Player {
             ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
             return;
         }
+
 
         if (!ctx) return;
 

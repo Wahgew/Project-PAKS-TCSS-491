@@ -1,8 +1,8 @@
-class testMap {
+class drawMap {
         constructor(testSize) {
                 this.testSize = testSize;
                 this.block = ASSET_MANAGER.getAsset("./sprites/block.png");
-                console.log("TestMap initialized with size:", testSize);
+                console.log("DrawMap initialized with size:", testSize);
         }
 
         map = [
@@ -14,7 +14,7 @@ class testMap {
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -86,7 +86,7 @@ class testMap {
 
         draw(ctx) {
                 if (!ctx || !ctx.drawImage) {
-                        console.error("Invalid context passed to testMap.draw:", ctx);
+                        console.error("Invalid context passed to drawMap.draw:", ctx);
                         return;
                 }
 
@@ -149,5 +149,5 @@ class testMap {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-        module.exports = testMap;
+        module.exports = drawMap;
 }
