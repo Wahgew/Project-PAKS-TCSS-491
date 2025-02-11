@@ -28,7 +28,7 @@ class LevelConfig {
         // This will be setup up for each map
         const levels = {
             1: {
-                map: () => new testMap(this.TILE_SIZE),
+                map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 85, 400),
                 player: () => new Player(this.game, 75, 400),
                 exitDoor: () => new exitDoor(this.game, 200, 175, 50),
