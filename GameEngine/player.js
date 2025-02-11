@@ -5,7 +5,17 @@ class Player {
         this.height = 76;
         this.width = 20;
 
-        this.game.Player = this;
+        // initial starting pos of player
+        this.intialX = this.x;
+        this.intialY = this.y;
+        this.teleportHandler = null;
+
+        // First check if player instance exists first
+        if (this.game) {
+            this.game.Player = this;
+        } else {
+            console.error("Game instance not properly initialized for player");
+        }
 
         // Load spritesheets
         this.idleSpritesheet = ASSET_MANAGER.getAsset("./sprites/idle.png");
@@ -27,8 +37,10 @@ class Player {
         this.facing = 1; // 0 = left, 1 = right
         this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling
         this.dead = false;
+        this.win = true;
         this.isGrounded = true;
-        this.fallAcc = 550;
+        this.gravity = 2000;
+        this.levers = 0;
 
         this.velocity = {x: 0, y: 0};
 
@@ -37,11 +49,16 @@ class Player {
         this.animations = [];
         this.loadAnimations();
 
-        this.map = this.game.entities.find(entity => entity instanceof testMap);
+        this.map = this.game.entities.find(entity => entity instanceof drawMap);
         if (this.map) {
             console.log("Map found, tile size:", this.map.testSize);
         } else {
             console.error("Map not found");
+        }
+
+        this.tpPlayerDebug();
+        if (this.game.debugBox) {
+            this.game.debugBox.addEventListener("change", () => this.tpPlayerDebug());
         }
     }
 
@@ -128,27 +145,46 @@ class Player {
 
         // Movement constants
         const MIN_WALK = 20;
-        const MAX_WALK = 100;
-        const MAX_RUN = 1000;
-        const ACC_WALK = 650;
-        const ACC_RUN = 1250;
+        const MAX_WALK = 500;
+        const MAX_RUN = 650;
+        const ACC_WALK = 425;
+        const ACC_RUN = 825;
 
+        const DEC_SLIDE = 300;
         const DEC_REL = 600;
-        const DEC_SKID = 1800;
+        const DEC_SKID = 1200;
         
         const MAX_FALL = 2000;
-        const GRAVITY = 1500;
-        const MAX_JUMP = 750;
+        const MAX_JUMP = 650;
 
-        // Update state based on movement and keys
-        this.updateState();
-
-        // Jump input handling
-        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) {
-            this.velocity.y = -MAX_JUMP;
-            this.state = 4;
-            this.isGrounded = false;
+        // check for death state and restart game
+        if (this.dead) {
+            console.log(this.game.entities);
+            if (this.game.keys['enter']) {
+                this.restartGame();
+                console.log(this.game.entities);
+            }
+            // may want to load the death animation here then return.
+            return; // don't process other updates when dead restart the game instead
         }
+
+        // if (this.win) {
+        //     console.log(this.game.entities);
+        //     if (this.game.keys['enter']) {
+        //         this.restartGame();
+        //         console.log(this.game.entities);
+        //     }
+        //     return;
+        // }
+
+        // find the map if not already found
+        // if (!this.map) {
+        //     this.map = this.game.entities.find(entity => entity instanceof testMap);
+        //     if (!this.map) {
+        //         console.error("Map not found in update");
+        //         return; // Skip update if map not found
+        //     }
+        // }
 
         // Update BoundingBoxes
         this.updateLastBB();
@@ -158,15 +194,45 @@ class Player {
         this.game.entities.forEach(function (entity) {
             if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
                 entity.removeFromWorld = true;
-                that.dead = true;
+                that.kill();
+            } else if (entity.BB && entity instanceof Spike && that.BB.collide(entity.BB)) {
+                that.kill();
+            } else if (entity.BB && entity instanceof Platform && that.BB.collide(entity.BB) && that.velocity.y > 0 && (that.lastBB.bottom) <= entity.BB.top + 5) {
+                that.isGrounded = true;
+                if (!that.game.keys['w'] && !that.game.keys[' '] && !that.game.keys['s']) { // allow player to jump off
+                    that.velocity.y = 0;
+                    that.BB.bottom = entity.BB.top; // lock bounding box position
+                    that.y = entity.BB.top - that.BB.height;
+                }
+            } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) { // need to tie into door/exit
+                that.levers++;
+                entity.collected = true;
+            }
+            if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB)) {
+                that.winGame();
+                console.log("Player has collided with exit");
             }
         });
 
         // Horizontal movement
-        this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID);
+        this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID, DEC_SLIDE);
+
+        // Jump input handling
+        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) {
+            this.velocity.y = -MAX_JUMP;
+            this.state = 4;
+            this.isGrounded = false;
+        }
+
+        if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
+            this.velocity.y -= 850 * TICK;
+        }
+
+        // Update state based on movement and keys
+        this.updateState();
 
         // Apply gravity
-        this.velocity.y += GRAVITY * TICK;
+        this.velocity.y += this.gravity * TICK;
 
         // Apply max velocities
         this.applyMaxVelocities(MAX_WALK, MAX_RUN, MAX_FALL);
@@ -177,66 +243,100 @@ class Player {
     
     // Updates the player's state based on current conditions
     updateState() {
+        if (this.velocity.x < 0) this.facing = 0;
+        if (this.velocity.x > 0) this.facing = 1;
+
         if (!this.isGrounded) {
             this.state = 4; // Jumping/Falling
             return;
         }
-		
-		if (this.game.keys['s']) {
-			this.state = 5;
-			return;
-		}
 
-        if (Math.abs(this.velocity.x) < 20) {
-            this.state = 0; // Idle
-            return;
+		if (this.isGrounded) {
+            if (this.game.keys['s']) {
+                this.state = 5;
+                return;
+            } else if (Math.abs(this.velocity.x) < 20) { // MIN_WALK
+                this.state = 0; // Idle
+                return;
+            } else if (this.game.keys['shift'] && (this.game.keys['d'] || this.game.keys['a'])) {
+                this.state = 2;
+                return;
+            } else if (this.game.keys['d'] || this.game.keys['a']) {
+                this.state = 1;
+                return;
+            } else this.state = 0;
         }
-
-        // Running state (holding shift)
-        if (this.game.keys['shift'] && (this.game.keys['d'] || this.game.keys['a'])) {
-            this.state = 2;
-            return;
-        }
-
-        // Walking state
-        if (this.game.keys['d'] || this.game.keys['a']) {
-            this.state = 1;
-            return;
-        }
-
-        // Default to idle if no other conditions met
-        this.state = 0;
     }
 
     // Updates horizontal movement based on input
-    updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID) {
-        // Handle left movement
-        if (this.game.keys['a'] && !this.game.keys['d']) {
-            this.facing = 0;
-            if (this.game.keys['shift']) {
-                this.velocity.x -= ACC_RUN * TICK;
-            } else {
-                this.velocity.x -= ACC_WALK * TICK;
-            }
-        } else if (this.game.keys['d'] && !this.game.keys['a']) { // right movement
-            this.facing = 1;
-            if (this.game.keys['shift']) {
-                this.velocity.x += ACC_RUN * TICK;
-            } else {
-                this.velocity.x += ACC_WALK * TICK;
-            }
-        } else { // handle deceleration
-            if (this.velocity.x > 0) {
-                this.velocity.x = Math.max(0, this.velocity.x - DEC_REL * TICK);
-            } else if (this.velocity.x < 0) {
-                this.velocity.x = Math.min(0, this.velocity.x + DEC_REL * TICK);
-            }
-        }
+    updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID, DEC_SLIDE) {
+         // HORIZONTAL MOVEMENT/PHYSICS
+         if (this.state !== 4) { // if player is not jumping
+            // idle, walking, running, skidding ground physics
+            if (Math.abs(this.velocity.x) < MIN_WALK) {
+                this.velocity.x = 0;
+                this.state = 0;
+                if (this.game.keys['a'] && !this.game.keys['s']) {
+                    this.velocity.x -= MIN_WALK;
+                } else if (this.game.keys['d'] && !this.game.keys['s']) {
+                    this.velocity.x += MIN_WALK;
+                } else if (this.game.keys['s']) {
+                    this.state = 5;
+                }
 
-        // Update facing
-        if (this.velocity.x < 0) this.facing = 0;
-        if (this.velocity.x > 0) this.facing = 1;
-    
+            } else if (Math.abs(this.velocity.x) >= MIN_WALK) { // accelerating or decelerating
+                if (this.facing === 0) { // left
+                    if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // moving
+                        if (this.game.keys['shift']) { // if sprinting
+                            this.velocity.x -= ACC_RUN * TICK;
+                            this.state = 2;
+                        } else {
+                            this.velocity.x -= ACC_WALK * TICK;
+                            this.state = 1;
+                        }
+                    } else if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // skidding
+                        this.velocity.x += DEC_SKID * TICK;
+                        this.state = 3;
+                    } else if (this.game.keys['s']) {
+                        this.velocity.x += DEC_SLIDE * TICK;
+                        this.state = 5;
+                    } else { // holding nothing
+                        this.velocity.x += DEC_REL * TICK;
+                        this.state = 1;
+                    }
+                }
+                if (this.facing === 1) { // right
+                    if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // moving
+                        if (this.game.keys['shift']) { // if sprinting
+                            this.velocity.x += ACC_RUN * TICK;
+                            this.state = 2;
+                        } else {
+                            this.velocity.x += ACC_WALK * TICK;
+                            this.state = 1;
+                        }
+                    } else if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // skidding
+                        this.velocity.x -= DEC_SKID * TICK;
+                        this.state = 3;
+                    }  else if (this.game.keys['s']) {
+                        this.velocity.x -= DEC_SLIDE * TICK;
+                        this.state = 5;
+                    } else { // holding nothing
+                        this.velocity.x -= DEC_REL * TICK;
+                        this.state = 1;
+                    }
+                }
+            }
+       } else if (this.state === 4) { // mid-air
+            if (this.game.keys['a'] && !this.game.keys['d']) {
+                if (Math.abs(this.velocity.x) > MAX_WALK) {
+                    this.velocity.x -= ACC_RUN * TICK;
+                } else this.velocity.x -= ACC_WALK * TICK;
+            } else if (this.game.keys['d'] && !this.game.keys['a']) {
+                if (Math.abs(this.velocity.x) > MAX_WALK) {
+                    this.velocity.x += ACC_RUN * TICK;
+                } else this.velocity.x += ACC_WALK * TICK;
+            }
+       }
     }
 
     // Applies maximum velocity limits to both horizontal and vertical movement
@@ -321,14 +421,107 @@ class Player {
         }
     }
 
+    // resets the game
+    restartGame() {
+        // loads the new level
+        this.game.levelConfig.loadLevel(this.game.levelConfig.currentLevel);
+
+        // Reset timer if it exists
+        if (this.game.timer) {
+            this.game.timer.reset();
+        }
+
+        // Clear any game keys that might be held
+        for (let key in this.game.keys) {
+            this.game.keys[key] = false;
+        }
+        this.levers = 0; // reset levers collected;
+    }
+
+    // call this method if you want to kill the player from an entity
+    kill() {
+        if (!this.game.options.debugging) {
+            this.dead = true;
+            // add any death-related effects or sounds here
+        } else {
+            console.log("Player would have died, but debug mode is active");
+        }
+    }
+
+    //call this method when the play has reached the exit door
+    winGame() {
+        if (!this.game.options.debugging) {
+            this.win = true;
+            if (this.game.levelUI) {
+                this.game.levelUI.showLevelComplete();
+                // Stop the timer when winning
+                if (this.game.timer) {
+                    this.game.timer.stop();
+                }
+            }
+        } else {
+            console.log("Player win, but debug mode is active");
+        }
+    }
+
+    // debug to teleport the player entity on click based on mouse postion
+    tpPlayerDebug() {
+        // Remove existing teleport handler if it exists
+        if (this.teleportHandler) {
+            this.game.ctx.canvas.removeEventListener("click", this.teleportHandler);
+            this.teleportHandler = null;
+        }
+
+        // Only add new handler if debugging is enabled
+        if (this.game.options.debugging) {
+            this.teleportHandler = (e) => {
+                const rect = this.game.ctx.canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Teleport the player
+                this.x = mouseX - this.width / 2;
+                this.y = mouseY - this.height / 2;
+
+                // Update the bounding box after teleporting
+                this.updateBB();
+
+                console.log(`Teleported to: (${this.x}, ${this.y})`);
+            };
+
+            this.game.ctx.canvas.addEventListener("click", this.teleportHandler);
+        }
+    }
+
+
     // Renders the player character
     draw(ctx) {
+
+        // check if the player is dead first
+        if (this.dead) {
+            // Draw death screen
+            //this.game.timer.stop(); // future peter decide if I want to stop the time when dead
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            ctx.font = '48px monospace';
+            ctx.fillStyle = 'red';
+            ctx.textAlign = 'center';
+            ctx.fillText('YOU DIED', ctx.canvas.width / 2, ctx.canvas.height / 2);
+
+            ctx.font = '24px monospace';
+            ctx.fillStyle = 'white';
+            ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
+            return;
+        }
+
+
         if (!ctx) return;
 
-        // Adjust vertical position when sliding 
+        // Adjust vertical position when sliding
         let adjustedY = this.y;
         if (this.state === 5) {
-            adjustedY = this.y + this.height/4; // Move down for sliding 
+            adjustedY = this.y + this.height/4; // Move down for sliding
         }
 
         // Draw the appropriate animation based on state and facing direction

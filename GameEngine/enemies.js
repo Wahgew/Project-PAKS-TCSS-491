@@ -23,14 +23,14 @@ class ProjectileLauncher {
 
         this.height = 54;
         this.width = 58;
-        this.time = 0;
+        this.time = this.atkspd; // shoot projectile immediately
         this.reverse = false;
 
         // Load spritesheet
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/launcher_small.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
     }
@@ -70,7 +70,7 @@ class Projectile {
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/tempproj3.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
         this.velocity = {x: 0, y: 0};
         this.updateBB();
     }
@@ -138,33 +138,39 @@ class Spike {
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/spike_small.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
+        this.updateBB();
     }
+
+    updateBB() {
+        this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+    };
 
     update() {
         var that = this;
         if (this.moving && this.tracking) {
-            this.game.entities.forEach(function (entity) { // change this??? jank
+            this.game.entities.forEach(function (entity) { 
                 if (entity instanceof Player) {
-                    if (entity.x + (entity.width / 4) > that.x) {
+                    if (entity.x + entity.width / 2 > that.x + that.width / 2) {
                         that.velocity.x = that.speed;
                     } else {
                         that.velocity.x = -that.speed;
                     }
-                    if (entity.y + (entity.height / 4) > that.y) {
+                    if (entity.y + entity.height / 2 > that.y + that.height / 2) {
                         that.velocity.y = that.speed;
                     } else {
                         that.velocity.y = -that.speed;
                     }
                 }
             });
-        } else if (this.moving && !this.tracking) { // CHANGE THIS TO USE timer.js implementation.
+        } else if (this.moving && !this.tracking) { 
            updateMovement(this.game, this)
         }
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
+        this.updateBB();
     }
 
     draw(ctx) {
@@ -245,7 +251,7 @@ function updateMovement(game, object) { // consider option to make reverse coord
                 }
                 object.time += game.clockTick;
                 break;
-            case 'RIGHT':
+            case 'LEFT':
                 if (object.reverse) object.velocity.x = object.speed;
                 else object.velocity.x = -object.speed;
                 if (object.time >= object.reverseTime) {
@@ -254,7 +260,7 @@ function updateMovement(game, object) { // consider option to make reverse coord
                 }
                 object.time += game.clockTick;
                 break;
-            case 'LEFT':
+            case 'RIGHT':
                 if (!object.reverse) object.velocity.x = object.speed;
                 else object.velocity.x = -object.speed;
                 if (object.time >= object.reverseTime) {
@@ -278,7 +284,7 @@ function updateMovement(game, object) { // consider option to make reverse coord
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/temptest.png");
 
         // Create animator with full sprite dimensions
-        this.animator = new Animator(this.spritesheet, 0, 0, this.height, this.width, 1, 0.1);
+        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
 

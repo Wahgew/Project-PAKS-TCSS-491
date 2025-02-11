@@ -21,10 +21,30 @@ class GameEngine {
         this.wheel = null;
         this.keys = {};
 
+        // store player instance
+        this.Player = null;
+        this.entityCount = 0;
+
         // Options and the Details
         this.options = options || {
-            debugging: true,
+            debugging: false,
         };
+
+        // wait for DOM to load before accessing elements
+        window.addEventListener("DOMContentLoaded", () => {
+            this.debugBox = document.getElementById("debug");
+
+            if (this.debugBox) {
+                this.options.debugging = this.debugBox.checked; // Initialize debugging option
+
+                // event listener to update debugging option when checkbox is toggled
+                this.debugBox.addEventListener("change", (e) => {
+                    this.options.debugging = e.target.checked;
+
+                    console.log("Debug mode:", this.options.debugging);
+                });
+            }
+        });
     }
 
     init(ctx) {
@@ -64,10 +84,10 @@ class GameEngine {
         });
 
         this.ctx.canvas.addEventListener("mousemove", e => {
-            if (this.options.debugging) {
-        //        console.log("MOUSE_MOVE", getXandY(e)); 
-            }
             this.mouse = getXandY(e);
+            if (this.options.debugging) {
+                console.log("MOUSE_MOVE", this.mouse);
+            }
         });
 
         this.ctx.canvas.addEventListener("click", e => {
@@ -117,6 +137,11 @@ class GameEngine {
                     this.levelUI.hideLevelComplete();
                 }
             }
+
+            if (event.key.toLowerCase() === 'enter') {
+                this.levelUI.hideLevelComplete();
+            }
+
         });
 
 
@@ -124,8 +149,9 @@ class GameEngine {
 
     addEntity(entity) {
         if (this.options.debugging) {
-            console.log("Adding entity:", entity);
+            console.log("Adding entity #" + this.entityCount + ":", entity);
         }
+        this.entityCount++;
         this.entities.push(entity);
     }
 
@@ -151,7 +177,7 @@ class GameEngine {
 
         // Draw from front to back (map first, then entities)
         // Find and draw map first
-        const mapEntity = this.entities.find(entity => entity instanceof testMap);
+        const mapEntity = this.entities.find(entity => entity instanceof drawMap);
         if (mapEntity) {
             this.ctx.save();
             mapEntity.draw(this.ctx);
@@ -160,7 +186,7 @@ class GameEngine {
 
         // Then draw all other entities
         this.entities.forEach(entity => {
-            if (!(entity instanceof testMap)) {
+            if (!(entity instanceof drawMap)) {
                 if (this.options.debugging) {
                     const time = Date.now()
                     if (!this.lastDebugLogTime || time - this.lastDebugLogTime >= 3000) {
@@ -207,21 +233,40 @@ class GameEngine {
 
         this.levelUI.draw(this.ctx);
 
+        // draws the x y pos following the cursor
+        if (this.options.debugging && this.mouse) {
+            this.ctx.font = "12px Arial";
+            this.ctx.fillStyle = "red";
+
+            let offsetX = 10; // Adjust to prevent overlap with cursor
+            let offsetY = 20;
+
+            this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
+        }
+
     }
 
     update() {
+        // Store initial entity count
+        // add safety checks to handle entity removal
         let entitiesCount = this.entities.length;
 
+        // first pass: Update all valid entities
         for (let i = 0; i < entitiesCount; i++) {
             let entity = this.entities[i];
 
-            if (!entity.removeFromWorld) {
+            // add null check to prevent "Cannot read properties of undefined"
+            // handles cases where entities might have been removed
+            if (entity && !entity.removeFromWorld) {
                 entity.update();
             }
         }
 
+        // second pass: Remove marked entities
+        // backward iteration prevents skipping elements when removing items
         for (var i = this.entities.length - 1; i >= 0; --i) {
-            if (this.entities[i].removeFromWorld) {
+            // null check for safety
+            if (this.entities[i] && this.entities[i].removeFromWorld) {
                 this.entities.splice(i, 1);
             }
         }
