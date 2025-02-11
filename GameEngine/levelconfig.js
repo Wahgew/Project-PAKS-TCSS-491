@@ -30,8 +30,7 @@ class LevelConfig {
             1: {
                 map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 85, 400),
-                player: () => new Player(this.game, 75, 400),
-                exitDoor: () => new exitDoor(this.game, 200, 175, 50),
+                exitDoor: () => new exitDoor(this.game, 1075, 175, 50),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 100, y: 50, speed: 25, moving: true, direction: null, tracking: true, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 500, y: 265, speed: 150, moving: true, direction: "RIGHT", tracking: false, reverseTime: 3}),
