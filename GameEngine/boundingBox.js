@@ -25,4 +25,4 @@ class BoundingBox {
 
         return {x: ox, y: oy};
     };
-};
+}
