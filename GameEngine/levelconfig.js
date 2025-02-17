@@ -50,8 +50,9 @@ class LevelConfig {
                     new Platform({
                         gameEngine: this.game, x: 550, y: 225, speed: 0, moving: false, direction: null, reverseTime: 0, size: "SHORT"
                     }),
-                    new Lever({gameEngine: this.game, x: 640, y: 100, speed: 0, moving: false, direction: null, reverseTime: 0}),
-                    new Lever({gameEngine: this.game, x: 750, y: 450, speed: 0, moving: false, direction: null, reverseTime: 0})
+                    new Lever({gameEngine: this.game, x: 640, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 750, y: 450, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Laser({gameEngine: this.game, x: 280, y: 55, speed: 100, moving: true, direction: 'RIGHT', reverseTime: 2, shotdirec: 'RIGHT', length: 500})
                 ]
             },
 

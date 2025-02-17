@@ -132,7 +132,7 @@ class Player {
             this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
         }
         else { // player is crouching
-            this.BB = new BoundingBox(this.x, this.y + this.height / 2, this.width, this.height / 2);
+            this.BB = new BoundingBox(this.x, this.y + this.height / 1.5, this.width * 3, this.height / 3);
         }
     };
 
@@ -149,7 +149,7 @@ class Player {
         const MAX_RUN = 650;
         const ACC_WALK = 300;
         const ACC_RUN = 450;
-        const ACC_AIR = 500;
+        const ACC_AIR = 525;
 
         const DEC_SLIDE = 300;
         const DEC_REL = 600;
@@ -196,7 +196,7 @@ class Player {
             if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
                 entity.removeFromWorld = true;
                 that.kill();
-            } else if (entity.BB && entity instanceof Spike && that.BB.collide(entity.BB)) {
+            } else if (entity.BB && (entity instanceof Spike || entity instanceof Laser) && that.BB.collide(entity.BB)) {
                 that.kill();
             } else if (entity.BB && entity instanceof Platform && that.BB.collide(entity.BB) && that.velocity.y > 0 && (that.lastBB.bottom) <= entity.BB.top + 5) {
                 that.isGrounded = true;
@@ -208,8 +208,7 @@ class Player {
             } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) { // need to tie into door/exit
                 that.levers++;
                 entity.collected = true;
-            }
-            if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB) && entity.levers <= that.levers) {
+            } else if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB) && entity.levers <= that.levers) {
                 that.winGame();
                 console.log("Player has collided with exit");
             }
@@ -565,7 +564,7 @@ class Player {
         if (this.game.options.debugging) {
             if (this.state === 5) {
                 ctx.strokeStyle = 'red';
-                ctx.strokeRect(this.x, this.y + this.height / 2, this.width, this.height / 2);
+                ctx.strokeRect(this.x, this.y + this.height / 1.5, this.width * 3, this.height / 3);
             } else {
                 ctx.strokeStyle = 'red';
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
