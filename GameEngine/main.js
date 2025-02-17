@@ -30,33 +30,10 @@ ASSET_MANAGER.downloadAll(() => {
 	ctx.imageSmoothingEnabled = false; // uncomment this if we're using pixel art
 	
 	gameEngine.init(ctx);
-
-	// Create map with tile size (adjust size as needed)
-	// const TILE_SIZE = 25;
-	// const map = new testMap(TILE_SIZE);
-	// gameEngine.addEntity(map);
-
-	// Player position calculations
-	//const playerWidth = 109;  // Player sprite width
-	//const playerHeight = 120; // Player sprite height
-
-	// Position player in tile [16][2] - adjusting calculation to properly align with tiles
-	//const playerX = 2 * TILE_SIZE; // Align with left edge of tile
-	//const playerY = 16 * TILE_SIZE - playerHeight + TILE_SIZE; // Align with bottom of tile, adding TILE_SIZE to offset
-
-	//console.log(`Spawning player at tile [16][2] (${playerX}, ${playerY})`);
-	//gameEngine.addEntity(new Player(gameEngine, playerX, playerY));
-	
-	// const player = new Player(gameEngine, 75, 400);
-	// gameEngine.addEntity(player);
-	// gameEngine.addEntity(new Spike({gameEngine, x: 100, y: 100, speed: 50, moving: true, direction: null, tracking: true, reverseTime: 0}));
-	// gameEngine.addEntity(new Spike({gameEngine, x: 500, y: 125, speed: 100, moving: true, direction: "LEFT", tracking: false, reverseTime: 4}));
-	// gameEngine.addEntity(new Spike({gameEngine, x: 350, y: 125, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}));
-	// gameEngine.addEntity(new ProjectileLauncher({gameEngine, x: 975, y: 325, speed: 0, moving: false, direction: null,
-	// 													reverseTime: 0, atkspd: 2, projspd: 100, shotdirec: "LEFT"}));
-	// gameEngine.addEntity(new Laser({gameEngine, x: 25, y: 50, speed: 20, moving: true, direction: "DOWN", shotdirec: "RIGHT", length: 975})); sorta works but looks jank.
-
 	gameEngine.levelConfig = new LevelConfig(gameEngine);
-	gameEngine.levelConfig.loadLevel(2);
+	gameEngine.levelConfig.loadLevel(0);
 	gameEngine.start();
+	gameEngine.levelTimesManager.debugPrintAllTimes();
+	// gameEngine.levelTimesManager.resetBestTime(0, 3000)
+	// gameEngine.levelTimesManager.debugPrintAllTimes();
 });

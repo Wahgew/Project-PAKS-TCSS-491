@@ -12,7 +12,7 @@ class LevelConfig {
      */
     constructor(gameEngine) {
         this.game = gameEngine;
-        this.currentLevel = 1; // sets the current level
+        this.currentLevel = 0; // sets the current level
         this.TILE_SIZE = 25;
     }
 
@@ -27,7 +27,7 @@ class LevelConfig {
         // Each level configuration returns an array of entities (saves initial state)
         // This will be setup up for each map
         const levels = {
-            1: {
+            0: {
                 map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 85, 400),
                 exitDoor: () => new exitDoor(this.game, 1075, 175, 50),
@@ -56,6 +56,14 @@ class LevelConfig {
             },
 
             // add second map example
+
+            1: {
+                // replace with real second map
+                map: () => new drawMap(this.TILE_SIZE),
+                player: () => new Player(this.game, 600, 400),
+                exitDoor: () => new exitDoor(this.game, 100, 200),
+                hazards: () => []
+            },
 
             2: {
                 // replace with real second map

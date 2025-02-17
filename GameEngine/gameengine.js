@@ -52,6 +52,7 @@ class GameEngine {
         this.startInput();
         this.timer = new Timer();
         this.levelUI = new LevelUI(this);
+        this.levelTimesManager = new LevelTimesManager();
     }
 
     start() {
@@ -113,6 +114,12 @@ class GameEngine {
             this.rightclick = getXandY(e);
         });
 
+        document.getElementById('resetTimes').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all level times?')) {
+                gameEngine.levelTimesManager.resetAllTimes();
+            }
+        });
+
         // test timer reset and stop
         // test level completion display
         window.addEventListener("keydown", event => {
@@ -122,7 +129,7 @@ class GameEngine {
             if (event.key.toLowerCase() === 'l') {
                 console.log("Stopping timer...");
                 if (this.timer) {
-                    this.timer.stop();
+                    //this.timer.stop();
 
                     // re-draw timer display
                     this.levelUI.showLevelComplete();

@@ -7,7 +7,8 @@ class LevelUI {
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
         this.isDisplayingComplete = false;
-        this.bestTime = Infinity;
+        this.showBestTimeMsg = false;
+        this.newBestTimeMsg = '';
     }
 
     /**
@@ -15,20 +16,40 @@ class LevelUI {
      */
     showLevelComplete() {
         this.isDisplayingComplete = true;
-        // Only update best time if we have a valid timer
-        if (this.gameEngine && this.gameEngine.timer) {
+
+        if (this.gameEngine && this.gameEngine.timer && this.gameEngine.levelTimesManager) {
             const currentTime = this.gameEngine.timer.getDisplayTime();
-            if (currentTime < this.bestTime) {
-                this.bestTime = currentTime;
+            const currentLevel = this.gameEngine.levelConfig.currentLevel;
+
+            console.log("Current level:", currentLevel);
+            console.log("Current time:", currentTime);
+
+            // Try to update best time
+            const isNewBest = this.gameEngine.levelTimesManager.updateBestTime(currentLevel, currentTime);
+
+            if (isNewBest) {
+                console.log("New best time achieved!");
+                this.showNewBestTime(this.gameEngine.levelTimesManager.formatTime(currentTime));
             }
         }
     }
 
     /**
-     * Hides the level complete screen.
+     * Displays a "New Best Time!" message.
+     * @param {string} formattedTime The formatted best time to display.
+     */
+    showNewBestTime(formattedTime) {
+        this.newBestTimeMsg = `New Best Time! ${formattedTime}`;
+        this.showBestTimeMsg = true;
+        console.log("Showing new best time:", this.newBestTimeMsg);
+    }
+
+    /**
+     * Hides the level complete screen and best time.
      */
     hideLevelComplete() {
         this.isDisplayingComplete = false;
+        this.showBestTimeMsg = false; // Hide the new best time message
     }
 
     /**
@@ -55,6 +76,21 @@ class LevelUI {
     }
 
     /**
+     * Gets the best time for the current level.
+     * @returns {string} The formatted best time or "--:--:--" if no best time exists.
+     */
+    getBestTime() {
+        if (this.gameEngine && this.gameEngine.levelTimesManager && this.gameEngine.levelConfig) {
+            const bestTime = this.gameEngine.levelTimesManager.getBestTime(this.gameEngine.levelConfig.currentLevel);
+            if (bestTime === 9000000000) {
+                return '--:--:--';
+            }
+            return this.formatTime(bestTime);
+        }
+        return '--:--:--';
+    }
+
+    /**
      * Draws the level complete screen onto the provided canvas context.
      * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
      */
@@ -70,7 +106,6 @@ class LevelUI {
         const centerY = ctx.canvas.height / 2;
 
         // Calculate text dimensions and padding
-        const padding = 20;
         const lineHeight = 40;
 
         // Create semi-transparent background
@@ -94,12 +129,12 @@ class LevelUI {
         // Best Time
         ctx.font = '20px monospace';
         ctx.fillText(
-            `Best Time: ${this.bestTime === Infinity ? '--:--:--' : this.formatTime(this.bestTime)}`,
+            `Best Time: ${this.getBestTime()}`,
             centerX,
             centerY + 10
         );
 
-        // Current Time - now using getCurrentTime() which has null checks
+        // Current Time
         ctx.fillText(
             `Current Time: ${this.getCurrentTime()}`,
             centerX,
@@ -109,7 +144,14 @@ class LevelUI {
         ctx.fillText(
             'Press Enter to Continue',
             centerX,
-                centerY + 30 + lineHeight
-        )
+            centerY + 30 + lineHeight
+        );
+
+        // Draw new best time message if applicable
+        if (this.showBestTimeMsg) {
+            ctx.fillStyle = "green";
+            ctx.font = "30px Arial";
+            ctx.fillText(this.newBestTimeMsg, centerX, centerY - boxHeight/2 - 20);
+        }
     }
 }

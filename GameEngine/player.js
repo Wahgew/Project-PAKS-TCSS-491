@@ -210,7 +210,7 @@ class Player {
             }
             if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB)) {
                 that.winGame();
-                console.log("Player has collided with exit");
+                //console.log("Player has collided with exit");
             }
         });
 
@@ -450,13 +450,30 @@ class Player {
 
     //call this method when the play has reached the exit door
     winGame() {
+        console.log("winGame called");
         if (!this.game.options.debugging) {
             this.win = true;
             if (this.game.levelUI) {
+                console.log("Showing level complete");
                 this.game.levelUI.showLevelComplete();
-                // Stop the timer when winning
+
+                // Stop the timer
                 if (this.game.timer) {
+                    console.log("Timer exists, about to call stop");
+                    console.log("Timer isRunning before stop:", this.game.timer.isRunning);
                     this.game.timer.stop();
+                    const currentTime = this.game.timer.getDisplayTime();
+                    const currentLevel = this.game.levelConfig.currentLevel;
+
+                    // Check if it's a new best time
+                    const isNewBest = this.game.levelTimesManager.updateBestTime(currentLevel, currentTime);
+
+                    // You can use this to show a "New Best Time!" message
+                    if (isNewBest) {
+                        this.game.levelUI.showNewBestTime(
+                            this.game.levelTimesManager.formatTime(currentTime)
+                        );
+                    }
                 }
             }
         } else {
