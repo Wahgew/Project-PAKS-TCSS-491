@@ -12,7 +12,7 @@ class LevelConfig {
      */
     constructor(gameEngine) {
         this.game = gameEngine;
-        this.currentLevel = 1; // sets the current level
+        this.currentLevel = 0; // sets the current level
         this.TILE_SIZE = 25;
     }
 
@@ -27,17 +27,18 @@ class LevelConfig {
         // Each level configuration returns an array of entities (saves initial state)
         // This will be setup up for each map
         const levels = {
-            1: {
-                map: () => new testMap(this.TILE_SIZE),
-                player: () => new Player(this.game, 75, 400),
+            0: {
+                map: () => new drawMap(this.TILE_SIZE),
+                player: () => new Player(this.game, 85, 400),
+                exitDoor: () => new exitDoor(this.game, 1075, 175, 50),
                 hazards: () => [
-                    new Spike({gameEngine: this.game, x: 100, y: 100, speed: 50, moving: true, direction: null, tracking: true, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 500, y: 125, speed: 100, moving: true, direction: "LEFT", tracking: false, reverseTime: 4}),
-                    new Spike({gameEngine: this.game, x: 350, y: 125, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 100, y: 50, speed: 25, moving: true, direction: null, tracking: true, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 500, y: 265, speed: 150, moving: true, direction: "RIGHT", tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 350, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new ProjectileLauncher({
                         gameEngine: this.game,
-                        x: 975,
-                        y: 325,
+                        x: 1075,
+                        y: 450,
                         speed: 0,
                         moving: false,
                         direction: null,
@@ -45,16 +46,30 @@ class LevelConfig {
                         atkspd: 2,
                         projspd: 100,
                         shotdirec: "LEFT"
-                    })
+                    }),
+                    new Platform({
+                        gameEngine: this.game, x: 550, y: 225, speed: 0, moving: false, direction: null, reverseTime: 0, size: "SHORT"
+                    }),
+                    new Lever({gameEngine: this.game, x: 640, y: 100, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 750, y: 450, speed: 0, moving: false, direction: null, reverseTime: 0})
                 ]
             },
 
             // add second map example
 
+            1: {
+                // replace with real second map
+                map: () => new drawMap(this.TILE_SIZE),
+                player: () => new Player(this.game, 600, 400),
+                exitDoor: () => new exitDoor(this.game, 100, 200),
+                hazards: () => []
+            },
+
             2: {
                 // replace with real second map
-                map: () => new testMap(this.TILE_SIZE),
+                map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 600, 400),
+                exitDoor: () => new exitDoor(this.game, 100, 200),
                 hazards: () => []
             }
             // add more levels below
@@ -81,11 +96,18 @@ class LevelConfig {
 
         // first create and add the map
         const map = levelConfig.map();
+        console.log("Map instance created");
+        map.loadMap(levelNumber);
+        console.log("Map after loadMap:", map.map);
         this.game.addEntity(map);
 
         // create and add the player
         const player = levelConfig.player();
         this.game.addEntity(player);
+
+        // create and add the exit door
+        const exitDoor = levelConfig.exitDoor();
+        this.game.addEntity(exitDoor);
 
         // add any obstacles
         const obstacles = levelConfig.hazards();

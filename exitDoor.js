@@ -12,6 +12,12 @@ class exitDoor {
         // Door state
         this.isOpen = false;
         this.active = true; // If the door can be interacted with
+
+        this.updateBB();
+    }
+
+    updateBB() {
+        this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
     }
 
     update() {
@@ -25,8 +31,9 @@ class exitDoor {
         if (this.checkPlayerCollision(player)) {
             // Handle door interaction (e.g., level completion, transition, etc.)
             console.log("Player reached the door!");
-            // You can add level completion logic here
+            player.winGame();  // Call winGame on the player instance
         }
+        this.updateBB();
     }
 
     checkPlayerCollision(player) {
