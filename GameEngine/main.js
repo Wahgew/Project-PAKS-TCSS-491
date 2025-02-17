@@ -57,6 +57,6 @@ ASSET_MANAGER.downloadAll(() => {
 	// gameEngine.addEntity(new Laser({gameEngine, x: 25, y: 50, speed: 20, moving: true, direction: "DOWN", shotdirec: "RIGHT", length: 975})); sorta works but looks jank.
 
 	gameEngine.levelConfig = new LevelConfig(gameEngine);
-	gameEngine.levelConfig.loadLevel(1);
+	gameEngine.levelConfig.loadLevel(2);
 	gameEngine.start();
 });

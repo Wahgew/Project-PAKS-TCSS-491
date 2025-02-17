@@ -88,6 +88,9 @@ class LevelConfig {
 
         // first create and add the map
         const map = levelConfig.map();
+        console.log("Map instance created");
+        map.loadMap(levelNumber);
+        console.log("Map after loadMap:", map.map);
         this.game.addEntity(map);
 
         // create and add the player
