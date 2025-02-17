@@ -12,7 +12,7 @@ class LevelConfig {
      */
     constructor(gameEngine) {
         this.game = gameEngine;
-        this.currentLevel = 0; // sets the current level
+        this.currentLevel = 1; // sets the current level
         this.TILE_SIZE = 25;
     }
 
@@ -29,7 +29,6 @@ class LevelConfig {
         const levels = {
             0: {
                 map: () => new drawMap(this.TILE_SIZE),
-                player: () => new Player(this.game, 85, 400),
                 exitDoor: () => new exitDoor(this.game, 1075, 175, 50),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 100, y: 50, speed: 25, moving: true, direction: null, tracking: true, reverseTime: 0}),
@@ -52,7 +51,8 @@ class LevelConfig {
                     }),
                     new Lever({gameEngine: this.game, x: 640, y: 100, speed: 0, moving: false, direction: null, reverseTime: 0}),
                     new Lever({gameEngine: this.game, x: 750, y: 450, speed: 0, moving: false, direction: null, reverseTime: 0})
-                ]
+                ],
+                player: () => new Player(this.game, 85, 400)
             },
 
             // add second map example
@@ -60,17 +60,23 @@ class LevelConfig {
             1: {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE),
-                player: () => new Player(this.game, 600, 400),
-                exitDoor: () => new exitDoor(this.game, 100, 200),
-                hazards: () => []
+                exitDoor: () => new exitDoor(this.game, 30, 95, 80),
+                hazards: () => [
+                    new Spike({gameEngine: this.game, x: 180, y: 260, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 510, y: 360, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 810, y: 460, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1120, y: 560, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1520, y: 760, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                ],
+                player: () => new Player(this.game, 50, 850),
             },
 
             2: {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE),
-                player: () => new Player(this.game, 600, 400),
                 exitDoor: () => new exitDoor(this.game, 100, 200),
-                hazards: () => []
+                hazards: () => [],
+                player: () => new Player(this.game, 50, 850)
             }
             // add more levels below
         };
@@ -101,10 +107,6 @@ class LevelConfig {
         console.log("Map after loadMap:", map.map);
         this.game.addEntity(map);
 
-        // create and add the player
-        const player = levelConfig.player();
-        this.game.addEntity(player);
-
         // create and add the exit door
         const exitDoor = levelConfig.exitDoor();
         this.game.addEntity(exitDoor);
@@ -114,6 +116,11 @@ class LevelConfig {
         obstacles.forEach(obstacle => {
             this.game.addEntity(obstacle);
         });
+
+        // create and add the player
+        // player is created last so they are on top off all other sprites
+        const player = levelConfig.player();
+        this.game.addEntity(player);
 
         // Reset timer
         if (this.game.timer) {

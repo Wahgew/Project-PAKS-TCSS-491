@@ -31,7 +31,7 @@ ASSET_MANAGER.downloadAll(() => {
 	
 	gameEngine.init(ctx);
 	gameEngine.levelConfig = new LevelConfig(gameEngine);
-	gameEngine.levelConfig.loadLevel(0);
+	gameEngine.levelConfig.loadLevel(1);
 	gameEngine.start();
 	gameEngine.levelTimesManager.debugPrintAllTimes();
 	// gameEngine.levelTimesManager.resetBestTime(0, 3000)

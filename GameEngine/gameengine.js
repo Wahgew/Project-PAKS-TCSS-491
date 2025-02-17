@@ -125,25 +125,25 @@ class GameEngine {
         window.addEventListener("keydown", event => {
             this.keys[event.key.toLowerCase()] = true;
 
-            // Test level completion with 'L' key
-            if (event.key.toLowerCase() === 'l') {
-                console.log("Stopping timer...");
-                if (this.timer) {
-                    //this.timer.stop();
-
-                    // re-draw timer display
-                    this.levelUI.showLevelComplete();
-                    this.draw();
-                }
-            }
-            // Test level reset with 'R' key
-            if (event.key.toLowerCase() === 'r') {
-                console.log("Resetting timer...");
-                if (this.timer) {
-                    this.timer.reset();
-                    this.levelUI.hideLevelComplete();
-                }
-            }
+            // // Test level completion with 'L' key
+            // if (event.key.toLowerCase() === 'l') {
+            //     console.log("Stopping timer...");
+            //     if (this.timer) {
+            //         //this.timer.stop();
+            //
+            //         // re-draw timer display
+            //         this.levelUI.showLevelComplete();
+            //         this.draw();
+            //     }
+            // }
+            // // Test level reset with 'R' key
+            // if (event.key.toLowerCase() === 'r') {
+            //     console.log("Resetting timer...");
+            //     if (this.timer) {
+            //         this.timer.reset();
+            //         this.levelUI.hideLevelComplete();
+            //     }
+            // }
 
             if (event.key.toLowerCase() === 'enter') {
                 this.levelUI.hideLevelComplete();
