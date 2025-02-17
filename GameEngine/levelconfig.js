@@ -101,10 +101,6 @@ class LevelConfig {
         console.log("Map after loadMap:", map.map);
         this.game.addEntity(map);
 
-        // create and add the player
-        const player = levelConfig.player();
-        this.game.addEntity(player);
-
         // create and add the exit door
         const exitDoor = levelConfig.exitDoor();
         this.game.addEntity(exitDoor);
@@ -114,6 +110,11 @@ class LevelConfig {
         obstacles.forEach(obstacle => {
             this.game.addEntity(obstacle);
         });
+
+        // create and add the player
+        // player is created last so they are at the front of sprites
+        const player = levelConfig.player();
+        this.game.addEntity(player);
 
         // Reset timer
         if (this.game.timer) {
