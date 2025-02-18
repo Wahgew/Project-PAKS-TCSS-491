@@ -75,8 +75,11 @@ class LevelConfig {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 600, 400),
-                exitDoor: () => new exitDoor(this.game, 100, 200),
-                hazards: () => []
+                exitDoor: () => new exitDoor(this.game, 1324, 350, 50),
+                hazards: () => [
+                    new Spike({gameEngine: this.game, x: 420, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 735, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                ]
             }
             // add more levels below
         };
@@ -131,7 +134,9 @@ class LevelConfig {
     }
 
     loadNextLevel() {
-        this.loadLevel(++this.currentLevel);
-        this.game.timer.reset();
+        if (this.currentLevel !== 10) {
+            this.loadLevel(++this.currentLevel);
+            this.game.timer.reset();
+        }
     }
 }
