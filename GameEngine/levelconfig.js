@@ -129,4 +129,8 @@ class LevelConfig {
 
         return true;
     }
+
+    loadNextLevel() {
+        this.loadLevel(this.currentLevel++);
+    }
 }

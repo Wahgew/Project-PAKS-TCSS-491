@@ -5,6 +5,11 @@ class GameEngine {
         // What you will use to draw
         this.ctx = null;
 
+        // Options and the Details
+        this.options = options || {
+            debugging: false,
+        };
+
         // timer initialization
         this.timer = null;
         this.running = false;
@@ -24,35 +29,41 @@ class GameEngine {
         // store player instance
         this.Player = null;
         this.entityCount = 0;
-
-        // Options and the Details
-        this.options = options || {
-            debugging: false,
-        };
-
-        // wait for DOM to load before accessing elements
-        window.addEventListener("DOMContentLoaded", () => {
-            this.debugBox = document.getElementById("debug");
-
-            if (this.debugBox) {
-                this.options.debugging = this.debugBox.checked; // Initialize debugging option
-
-                // event listener to update debugging option when checkbox is toggled
-                this.debugBox.addEventListener("change", (e) => {
-                    this.options.debugging = e.target.checked;
-
-                    console.log("Debug mode:", this.options.debugging);
-                });
-            }
-        });
     }
 
     init(ctx) {
         this.ctx = ctx;
         this.startInput();
+        this.initDebugMode();
         this.timer = new Timer();
         this.levelUI = new LevelUI(this);
         this.levelTimesManager = new LevelTimesManager();
+    }
+
+    initDebugMode() {
+        // Get debug checkbox
+        this.debugBox = document.getElementById("debug");
+
+        if (this.debugBox) {
+            // Set initial state
+            this.options.debugging = this.debugBox.checked;
+
+            // Add event listener
+            this.debugBox.addEventListener("change", (e) => {
+                this.options.debugging = e.target.checked;
+                console.log("Debug mode:", this.options.debugging);
+            });
+
+            // Initialize reset times button
+            const resetButton = document.getElementById('resetTimes');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset all level times?')) {
+                        this.levelTimesManager.resetAllTimes();
+                    }
+                });
+            }
+        }
     }
 
     start() {
@@ -114,12 +125,6 @@ class GameEngine {
             this.rightclick = getXandY(e);
         });
 
-        document.getElementById('resetTimes').addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset all level times?')) {
-                gameEngine.levelTimesManager.resetAllTimes();
-            }
-        });
-
         // test timer reset and stop
         // test level completion display
         window.addEventListener("keydown", event => {
@@ -147,6 +152,7 @@ class GameEngine {
 
             if (event.key.toLowerCase() === 'enter') {
                 this.levelUI.hideLevelComplete();
+                this.levelConfig.loadNextLevel();
             }
 
         });
