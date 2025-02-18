@@ -74,7 +74,7 @@ class LevelConfig {
             2: {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE),
-                player: () => new Player(this.game, 600, 400),
+                player: () => new Player(this.game, 25, 700),
                 exitDoor: () => new exitDoor(this.game, 1324, 350, 50),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 420, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
