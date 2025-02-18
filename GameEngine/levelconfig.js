@@ -131,6 +131,7 @@ class LevelConfig {
     }
 
     loadNextLevel() {
-        this.loadLevel(this.currentLevel++);
+        this.loadLevel(++this.currentLevel);
+        this.game.timer.reset();
     }
 }

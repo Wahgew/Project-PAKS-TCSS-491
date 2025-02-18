@@ -130,34 +130,22 @@ class GameEngine {
         window.addEventListener("keydown", event => {
             this.keys[event.key.toLowerCase()] = true;
 
-            // // Test level completion with 'L' key
-            // if (event.key.toLowerCase() === 'l') {
-            //     console.log("Stopping timer...");
-            //     if (this.timer) {
-            //         //this.timer.stop();
-            //
-            //         // re-draw timer display
-            //         this.levelUI.showLevelComplete();
-            //         this.draw();
-            //     }
-            // }
-            // // Test level reset with 'R' key
-            // if (event.key.toLowerCase() === 'r') {
-            //     console.log("Resetting timer...");
-            //     if (this.timer) {
-            //         this.timer.reset();
-            //         this.levelUI.hideLevelComplete();
-            //     }
-            // }
-
             if (event.key.toLowerCase() === 'enter') {
-                this.levelUI.hideLevelComplete();
-                this.levelConfig.loadNextLevel();
+                // Handle level complete screen
+                console.log("before if " + this.levelUI.isDisplayingComplete)
+                if (this.levelUI.isDisplayingComplete && !this.Player.dead) {
+                    console.log("in if" + this.levelUI.isDisplayingComplete)
+
+                    this.levelUI.hideLevelComplete();
+                    this.levelConfig.loadNextLevel();
+                }
+                // Handle death screen (death screen state)
+                else if (this.Player && this.Player.dead) {  // track player death state
+                    this.levelUI.hideLevelComplete();
+                    this.levelConfig.loadLevel(this.levelConfig.currentLevel); // Reload current level
+                }
             }
-
         });
-
-
     }
 
     addEntity(entity) {
