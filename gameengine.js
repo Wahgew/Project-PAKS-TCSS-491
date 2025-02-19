@@ -5,6 +5,11 @@ class GameEngine {
         // What you will use to draw
         this.ctx = null;
 
+        // Options and the Details
+        this.options = options || {
+            debugging: false,
+        };
+
         // timer initialization
         this.timer = null;
         this.running = false;
@@ -24,35 +29,41 @@ class GameEngine {
         // store player instance
         this.Player = null;
         this.entityCount = 0;
-
-        // Options and the Details
-        this.options = options || {
-            debugging: false,
-        };
-
-        // wait for DOM to load before accessing elements
-        window.addEventListener("DOMContentLoaded", () => {
-            this.debugBox = document.getElementById("debug");
-
-            if (this.debugBox) {
-                this.options.debugging = this.debugBox.checked; // Initialize debugging option
-
-                // event listener to update debugging option when checkbox is toggled
-                this.debugBox.addEventListener("change", (e) => {
-                    this.options.debugging = e.target.checked;
-
-                    console.log("Debug mode:", this.options.debugging);
-                });
-            }
-        });
     }
 
     init(ctx) {
         this.ctx = ctx;
         this.startInput();
+        this.initDebugMode();
         this.timer = new Timer();
         this.levelUI = new LevelUI(this);
         this.levelTimesManager = new LevelTimesManager();
+    }
+
+    initDebugMode() {
+        // Get debug checkbox
+        this.debugBox = document.getElementById("debug");
+
+        if (this.debugBox) {
+            // Set initial state
+            this.options.debugging = this.debugBox.checked;
+
+            // Add event listener
+            this.debugBox.addEventListener("change", (e) => {
+                this.options.debugging = e.target.checked;
+                console.log("Debug mode:", this.options.debugging);
+            });
+
+            // Initialize reset times button
+            const resetButton = document.getElementById('resetTimes');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset all level times?')) {
+                        this.levelTimesManager.resetAllTimes();
+                    }
+                });
+            }
+        }
     }
 
     start() {
@@ -114,44 +125,27 @@ class GameEngine {
             this.rightclick = getXandY(e);
         });
 
-        document.getElementById('resetTimes').addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset all level times?')) {
-                gameEngine.levelTimesManager.resetAllTimes();
-            }
-        });
-
         // test timer reset and stop
         // test level completion display
         window.addEventListener("keydown", event => {
             this.keys[event.key.toLowerCase()] = true;
 
-            // Test level completion with 'L' key
-            if (event.key.toLowerCase() === 'l') {
-                console.log("Stopping timer...");
-                if (this.timer) {
-                    //this.timer.stop();
-
-                    // re-draw timer display
-                    this.levelUI.showLevelComplete();
-                    this.draw();
-                }
-            }
-            // Test level reset with 'R' key
-            if (event.key.toLowerCase() === 'r') {
-                console.log("Resetting timer...");
-                if (this.timer) {
-                    this.timer.reset();
-                    this.levelUI.hideLevelComplete();
-                }
-            }
-
             if (event.key.toLowerCase() === 'enter') {
-                this.levelUI.hideLevelComplete();
+                // Handle level complete screen
+                console.log("before if " + this.levelUI.isDisplayingComplete)
+                if (this.levelUI.isDisplayingComplete && !this.Player.dead) {
+                    console.log("in if" + this.levelUI.isDisplayingComplete)
+
+                    this.levelUI.hideLevelComplete();
+                    this.levelConfig.loadNextLevel();
+                }
+                // Handle death screen (death screen state)
+                else if (this.Player && this.Player.dead) {  // track player death state
+                    this.levelUI.hideLevelComplete();
+                    this.levelConfig.loadLevel(this.levelConfig.currentLevel); // Reload current level
+                }
             }
-
         });
-
-
     }
 
     addEntity(entity) {
