@@ -30,7 +30,7 @@ class LevelConfig {
             0: {
                 map: () => new drawMap(this.TILE_SIZE),
                 player: () => new Player(this.game, 85, 400),
-                exitDoor: () => new exitDoor(this.game, 1075, 175, 50),
+                exitDoor: () => new exitDoor(this.game, 1075, 175, 50, 2),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 100, y: 50, speed: 25, moving: true, direction: null, tracking: true, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 500, y: 265, speed: 150, moving: true, direction: "RIGHT", tracking: false, reverseTime: 3}),
@@ -50,8 +50,9 @@ class LevelConfig {
                     new Platform({
                         gameEngine: this.game, x: 550, y: 225, speed: 0, moving: false, direction: null, reverseTime: 0, size: "SHORT"
                     }),
-                    new Lever({gameEngine: this.game, x: 640, y: 100, speed: 0, moving: false, direction: null, reverseTime: 0}),
-                    new Lever({gameEngine: this.game, x: 750, y: 450, speed: 0, moving: false, direction: null, reverseTime: 0})
+                    new Lever({gameEngine: this.game, x: 640, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 750, y: 450, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Laser({gameEngine: this.game, x: 280, y: 55, speed: 100, moving: true, direction: 'RIGHT', reverseTime: 2, shotdirec: 'RIGHT', length: 500})
                 ]
             },
 

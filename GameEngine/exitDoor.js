@@ -1,6 +1,6 @@
 class exitDoor {
-    constructor(game, x, y, size) {
-        Object.assign(this, { game, x, y, size });
+    constructor(game, x, y, size, levers = 0) { // 0 levers required by default
+        Object.assign(this, { game, x, y, size, levers});
 
         // Door dimensions (same as tile size)
         this.width = size;
@@ -22,25 +22,7 @@ class exitDoor {
 
     update() {
         if (!this.active) return;
-
-        // Get player reference (if needed)
-        const player = this.game.entities.find(entity => entity instanceof Player);
-        if (!player) return;
-
-        // Check for collision/interaction with player
-        if (this.checkPlayerCollision(player)) {
-            // Handle door interaction (e.g., level completion, transition, etc.)
-            console.log("Player reached the door!");
-            player.winGame();  // Call winGame on the player instance
-        }
         this.updateBB();
-    }
-
-    checkPlayerCollision(player) {
-        return (player.x < this.x + this.width &&
-            player.x + player.width > this.x &&
-            player.y < this.y + this.height &&
-            player.y + player.height > this.y);
     }
 
     draw(ctx) {

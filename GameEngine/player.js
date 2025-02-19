@@ -35,7 +35,7 @@ class Player {
         this.testAnimator = new Animator(this.testSprite, 0, 0, 54, 60, 1, 1);
 
         this.facing = 1; // 0 = left, 1 = right
-        this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling
+        this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling, 5 = crouching/sliding, 6 = wall sliding
         this.dead = false;
         this.win = true;
         this.isGrounded = true;
@@ -132,7 +132,7 @@ class Player {
             this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
         }
         else { // player is crouching
-            this.BB = new BoundingBox(this.x, this.y + this.height / 2, this.width, this.height / 2);
+            this.BB = new BoundingBox(this.x, this.y + this.height / 1.5, this.width * 3, this.height / 3);
         }
     };
 
@@ -145,17 +145,18 @@ class Player {
 
         // Movement constants
         const MIN_WALK = 20;
-        const MAX_WALK = 500;
+        const MAX_WALK = 400;
         const MAX_RUN = 650;
-        const ACC_WALK = 425;
-        const ACC_RUN = 825;
+        const ACC_WALK = 300;
+        const ACC_RUN = 450;
+        const ACC_AIR = 525;
 
         const DEC_SLIDE = 300;
         const DEC_REL = 600;
         const DEC_SKID = 1200;
         
         const MAX_FALL = 2000;
-        const MAX_JUMP = 650;
+        const MAX_JUMP = 850;
 
         // check for death state and restart game
         if (this.dead) {
@@ -195,7 +196,7 @@ class Player {
             if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
                 entity.removeFromWorld = true;
                 that.kill();
-            } else if (entity.BB && entity instanceof Spike && that.BB.collide(entity.BB)) {
+            } else if (entity.BB && (entity instanceof Spike || entity instanceof Laser) && that.BB.collide(entity.BB)) {
                 that.kill();
             } else if (entity.BB && entity instanceof Platform && that.BB.collide(entity.BB) && that.velocity.y > 0 && (that.lastBB.bottom) <= entity.BB.top + 5) {
                 that.isGrounded = true;
@@ -207,26 +208,29 @@ class Player {
             } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) { // need to tie into door/exit
                 that.levers++;
                 entity.collected = true;
-            }
-            if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB)) {
+            } else if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB) && entity.levers <= that.levers) {
                 that.winGame();
                 //console.log("Player has collided with exit");
             }
         });
 
         // Horizontal movement
-        this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID, DEC_SLIDE);
+        this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, ACC_AIR, DEC_REL, DEC_SKID, DEC_SLIDE);
 
         // Jump input handling
         if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) {
             this.velocity.y = -MAX_JUMP;
             this.state = 4;
             this.isGrounded = false;
+            this.jumpRelease = false;
         }
-
-        if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
-            this.velocity.y -= 850 * TICK;
+        if (this.velocity.y < 0 && this.jumpRelease == false && (!this.game.keys[' '] && !this.game.keys['w'])) {
+            this.velocity.y = this.velocity.y / 2; // velocity cut, reduce upward movement when w is released.
+            this.jumpRelease = true;
         }
+        // if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
+        //     this.velocity.y -= 850 * TICK;
+        // }
 
         // Update state based on movement and keys
         this.updateState();
@@ -269,7 +273,7 @@ class Player {
     }
 
     // Updates horizontal movement based on input
-    updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, DEC_REL, DEC_SKID, DEC_SLIDE) {
+    updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, ACC_AIR, DEC_REL, DEC_SKID, DEC_SLIDE) {
          // HORIZONTAL MOVEMENT/PHYSICS
          if (this.state !== 4) { // if player is not jumping
             // idle, walking, running, skidding ground physics
@@ -328,13 +332,9 @@ class Player {
             }
        } else if (this.state === 4) { // mid-air
             if (this.game.keys['a'] && !this.game.keys['d']) {
-                if (Math.abs(this.velocity.x) > MAX_WALK) {
-                    this.velocity.x -= ACC_RUN * TICK;
-                } else this.velocity.x -= ACC_WALK * TICK;
+                this.velocity.x -= ACC_AIR * TICK;
             } else if (this.game.keys['d'] && !this.game.keys['a']) {
-                if (Math.abs(this.velocity.x) > MAX_WALK) {
-                    this.velocity.x += ACC_RUN * TICK;
-                } else this.velocity.x += ACC_WALK * TICK;
+                this.velocity.x += ACC_AIR * TICK;
             }
        }
     }
@@ -376,6 +376,8 @@ class Player {
 
     // Handles horizontal collision detection and response : boundingbox for horizontal movement
     handleHorizontalCollision(horizontalBB, nextX) {
+        const MAX_WALLSLIDE = 175;
+        const MAX_JUMP = 850;
         const collision = this.map.checkCollisions({
             BB: horizontalBB,
             x: nextX,
@@ -385,12 +387,32 @@ class Player {
         });
 
         if (collision.collides) {
-            if (this.velocity.x > 0) {
-                this.x = collision.tileX - this.width;
-            } else if (this.velocity.x < 0) {
-                this.x = collision.tileX + this.map.testSize;
+            var jump = false;
+            if ((!this.isGrounded && this.velocity.x != 0)) { // WALL SLIDE CHECK
+                this.state = 6;
+                if (this.velocity.y > MAX_WALLSLIDE) {
+                    this.velocity.y = MAX_WALLSLIDE;
+                }
+                if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding left
+                    this.velocity.y = -MAX_JUMP;
+                    this.velocity.x = 200;
+                    this.state = 4;
+                    jump = true;
+                }
+                if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding right
+                    this.velocity.y = -MAX_JUMP;
+                    this.velocity.x = -200;
+                    this.state = 4;
+                    jump = true;
+                }
             }
-            this.velocity.x = 0;
+            if (this.velocity.x > 0 && !jump) {
+                this.x = collision.tileX - this.width;
+            } else if (this.velocity.x < 0 && !jump) {
+                this.x = collision.tileX + this.map.testSize;
+            } if (!jump) {
+                this.velocity.x = 0;
+            }
         } else {
             this.x = nextX;
         }
@@ -559,7 +581,7 @@ class Player {
         if (this.game.options.debugging) {
             if (this.state === 5) {
                 ctx.strokeStyle = 'red';
-                ctx.strokeRect(this.x, this.y + this.height / 2, this.width, this.height / 2);
+                ctx.strokeRect(this.x, this.y + this.height / 1.5, this.width * 3, this.height / 3);
             } else {
                 ctx.strokeStyle = 'red';
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
