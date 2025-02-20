@@ -83,12 +83,16 @@ class Projectile {
         switch (this.direction) {
             case 'UP':
                 this.velocity.y = -this.speed;
+				break;
             case 'DOWN':
                 this.velocity.y = this.speed;
+				break;
             case 'RIGHT':
                 this.velocity.x = this.speed;
+				break;
             case 'LEFT':
                 this.velocity.x = -this.speed;
+				break;
         }
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
