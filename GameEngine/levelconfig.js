@@ -28,7 +28,7 @@ class LevelConfig {
         // This will be setup up for each map
         const levels = {
             0: {
-                map: () => new drawMap(this.TILE_SIZE),
+                map: () => new drawMap(this.TILE_SIZE, this.game),
                 player: () => new Player(this.game, 85, 400),
                 exitDoor: () => new exitDoor(this.game, 1075, 175, 50, 2),
                 hazards: () => [
@@ -60,7 +60,7 @@ class LevelConfig {
 
             1: {
                 // replace with real second map
-                map: () => new drawMap(this.TILE_SIZE),
+                map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 600, 400),
                 exitDoor: () => new exitDoor(this.game, 30, 95, 80),
                 hazards: () =>
@@ -74,7 +74,7 @@ class LevelConfig {
 
             2: {
                 // replace with real second map
-                map: () => new drawMap(this.TILE_SIZE),
+                map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 25, 700),
                 exitDoor: () => new exitDoor(this.game, 1324, 350, 50),
                 hazards: () => [
