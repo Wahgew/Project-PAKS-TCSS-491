@@ -40,7 +40,11 @@ function startGame() {
         // gameEngine.levelTimesManager.debugPrintAllTimes();
     });
 }
+function showLevels() {
+    const levelsScreen = new LevelsScreen();
+    levelsScreen.show();
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    new WelcomeScreen(startGame);
+    new WelcomeScreen(startGame, showLevels);
 });
