@@ -7,8 +7,13 @@ class LevelUI {
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
         this.isDisplayingComplete = false;
+<<<<<<< Updated upstream
         this.showBestTimeMsg = false;
         this.newBestTimeMsg = '';
+=======
+        this.bestTime = Infinity;
+        this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
+>>>>>>> Stashed changes
     }
 
     /**
@@ -96,6 +101,8 @@ class LevelUI {
      */
     draw(ctx) {
         if (!this.isDisplayingComplete) return;
+
+
 
         // Setup text properties
         ctx.font = '30px monospace';
