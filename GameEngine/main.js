@@ -30,7 +30,6 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
     ASSET_MANAGER.queueDownload("./sprites/elevator_right.png");
     ASSET_MANAGER.queueDownload("./sprites/elevator_left.png");
-    console.log("all downloaded")
 
     ASSET_MANAGER.downloadAll(() => {
         const canvas = document.getElementById("gameWorld");

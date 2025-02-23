@@ -105,6 +105,7 @@ class LevelUI {
         // this.elevatorL.drawFrame(this.game.clockTick, ctx, this.elevatorLX, this.y, 1, 90);
         // this.elevatorR.drawFrame(this.game.clockTick, ctx, this.elevatorRX, this.y, 1, 90);
 
+
         // Setup text properties
         ctx.font = '30px monospace';
         ctx.textAlign = 'center';
