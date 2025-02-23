@@ -19,6 +19,7 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/slide.png");
     ASSET_MANAGER.queueDownload("./sprites/walk.png");
 
+<<<<<<< Updated upstream
     ASSET_MANAGER.queueDownload("./sprites/Rwalk.png");
     ASSET_MANAGER.queueDownload("./sprites/Rrun.png");
     ASSET_MANAGER.queueDownload("./sprites/Rslide.png");
@@ -30,6 +31,22 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
     ASSET_MANAGER.queueDownload("./sprites/elevator_right.png");
     ASSET_MANAGER.queueDownload("./sprites/elevator_left.png");
+=======
+ASSET_MANAGER.queueDownload("./sprites/block.png");
+ASSET_MANAGER.queueDownload("./sprites/block2.png");
+ASSET_MANAGER.queueDownload("./sprites/block3.png");
+ASSET_MANAGER.queueDownload("./sprites/block4.png");
+ASSET_MANAGER.queueDownload("./sprites/idle.png");
+ASSET_MANAGER.queueDownload("./sprites/run.png");
+ASSET_MANAGER.queueDownload("./sprites/jump.png");
+ASSET_MANAGER.queueDownload("./sprites/temptest.png");
+ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
+ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
+ASSET_MANAGER.queueDownload("./sprites/tempproj3.png");
+ASSET_MANAGER.queueDownload("./sprites/laser_test.png");
+ASSET_MANAGER.queueDownload("./sprites/slide.png");
+ASSET_MANAGER.queueDownload("./sprites/walk.png");
+>>>>>>> Stashed changes
 
     ASSET_MANAGER.downloadAll(() => {
         const canvas = document.getElementById("gameWorld");

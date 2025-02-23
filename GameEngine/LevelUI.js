@@ -10,10 +10,14 @@ class LevelUI {
         this.showBestTimeMsg = false;
         this.newBestTimeMsg = '';
         this.bestTime = Infinity;
+<<<<<<< Updated upstream
         // this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png");
         // this.elevatorR = ASSET_MANAGER.getAsset("./sprites/elevator_right.png");
         this.elevatorLX = -960;
         this.elevatorRX = 1920;
+=======
+        this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
+>>>>>>> Stashed changes
     }
 
     /**
@@ -102,8 +106,11 @@ class LevelUI {
     draw(ctx) {
         if (!this.isDisplayingComplete) return;
 
+<<<<<<< Updated upstream
         // this.elevatorL.drawFrame(this.game.clockTick, ctx, this.elevatorLX, this.y, 1, 90);
         // this.elevatorR.drawFrame(this.game.clockTick, ctx, this.elevatorRX, this.y, 1, 90);
+=======
+>>>>>>> Stashed changes
 
 
         // Setup text properties
