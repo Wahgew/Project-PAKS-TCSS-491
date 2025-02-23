@@ -7,13 +7,13 @@ class LevelUI {
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
         this.isDisplayingComplete = false;
-<<<<<<< Updated upstream
         this.showBestTimeMsg = false;
         this.newBestTimeMsg = '';
-=======
         this.bestTime = Infinity;
-        this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
->>>>>>> Stashed changes
+        // this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png");
+        // this.elevatorR = ASSET_MANAGER.getAsset("./sprites/elevator_right.png");
+        this.elevatorLX = -960;
+        this.elevatorRX = 1920;
     }
 
     /**
@@ -102,7 +102,8 @@ class LevelUI {
     draw(ctx) {
         if (!this.isDisplayingComplete) return;
 
-
+        // this.elevatorL.drawFrame(this.game.clockTick, ctx, this.elevatorLX, this.y, 1, 90);
+        // this.elevatorR.drawFrame(this.game.clockTick, ctx, this.elevatorRX, this.y, 1, 90);
 
         // Setup text properties
         ctx.font = '30px monospace';

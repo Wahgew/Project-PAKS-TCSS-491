@@ -1,13 +1,8 @@
 class drawMap {
         constructor(testSize, gameEngine) {
                 this.testSize = testSize;
-<<<<<<< Updated upstream
-                this.game = gameEngine;
-                this.block = ASSET_MANAGER.getAsset("./sprites/block.png");
-=======
                 this.blocks = [ASSET_MANAGER.getAsset("./sprites/block.png"), ASSET_MANAGER.getAsset("./sprites/block2.png"), 
                         ASSET_MANAGER.getAsset("./sprites/block3.png"), ASSET_MANAGER.getAsset("./sprites/block4.png")];
->>>>>>> Stashed changes
                 console.log("DrawMap initialized with size:", testSize);
                 this.colors = ["pink",
                         "peachpuff",
