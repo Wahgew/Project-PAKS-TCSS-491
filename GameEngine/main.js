@@ -22,8 +22,8 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/Rjump.png");
     ASSET_MANAGER.queueDownload("./sprites/plat_wide.png");
     ASSET_MANAGER.queueDownload("./sprites/plat_short.png");
-    ASSET_MANAGER.queueDownload("./sprites/lever_uncollected.png");
-    ASSET_MANAGER.queueDownload("./sprites/lever_collected.png");
+    ASSET_MANAGER.queueDownload("./sprites/leverOn.png");
+    ASSET_MANAGER.queueDownload("./sprites/leverOff.png");
     ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
 
     ASSET_MANAGER.downloadAll(() => {
