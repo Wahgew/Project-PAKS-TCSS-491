@@ -31,12 +31,6 @@ class WelcomeScreen {
         this.welcomeContainer.style.textAlign = "center";
         this.welcomeContainer.style.zIndex = "2";
 
-        // Create title
-        const title = document.createElement("h1");
-        title.style.color = "black";
-        title.style.fontSize = "48px";
-        title.style.marginBottom = "40px";
-        title.style.textShadow = "2px 2px 4px rgba(0,0,0,0.5)";
 
         // Create button container
         const buttonContainer = document.createElement("div");
@@ -81,7 +75,6 @@ class WelcomeScreen {
             buttonContainer.appendChild(buttonImg);
         });
 
-        this.welcomeContainer.appendChild(title);
         this.welcomeContainer.appendChild(buttonContainer);
         document.body.appendChild(this.welcomeContainer);
     }
