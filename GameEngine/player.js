@@ -2,7 +2,7 @@ class Player {
     constructor(game, x, y) {
         Object.assign(this, {game, x, y});
 
-        this.height = 76;
+        this.height = 74;
         this.width = 20;
 
         // initial starting pos of player
