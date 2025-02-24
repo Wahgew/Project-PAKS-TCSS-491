@@ -69,8 +69,6 @@ class LevelConfig {
                     new Spike({gameEngine: this.game, x: 810, y: 460, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 1120, y: 560, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 1520, y: 760, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}), new Lever({gameEngine: this.game, x: 640, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}), new Lever({gameEngine: this.game, x: 640, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
-                    new Lever({gameEngine: this.game, x: 640, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
-
                     ]
             },
 
@@ -82,7 +80,6 @@ class LevelConfig {
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 420, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 735, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Lever({gameEngine: this.game, x: 640, y: 470, speed: 0, moving: false, direction: null, reverseTime: 0})
                 ]
             }
             // add more levels below
