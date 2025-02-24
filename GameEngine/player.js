@@ -37,6 +37,7 @@ class Player {
         this.facing = 1; // 0 = left, 1 = right
         this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling, 5 = crouching/sliding, 6 = wall sliding
         this.dead = false;
+        this.deathAnimation = null;
         this.win = true;
         this.isGrounded = true;
         this.gravity = 2000;
@@ -445,6 +446,7 @@ class Player {
 
     // resets the game
     restartGame() {
+        this.deathAnimation = null;
         // loads the new level
         this.game.levelConfig.loadLevel(this.game.levelConfig.currentLevel);
 
@@ -464,20 +466,24 @@ class Player {
     kill() {
         if (!this.game.options.debugging) {
             this.dead = true;
-            // add any death-related effects or sounds here
+            // Create death animation at player's center position
+            this.deathAnimation = new DeathAnimation(
+                this.x + this.width / 2,
+                this.y + this.height / 2
+            );
         } else {
             console.log("Player would have died, but debug mode is active");
         }
     }
 
     //call this method when the play has reached the exit door
-    winGame() {
+    async winGame() {
         console.log("winGame called");
         if (!this.game.options.debugging) {
             this.win = true;
             if (this.game.levelUI) {
                 console.log("Showing level complete");
-                this.game.levelUI.showLevelComplete();
+                await this.game.levelUI.showLevelComplete();
 
                 // Stop the timer
                 if (this.game.timer) {
@@ -538,19 +544,27 @@ class Player {
 
         // check if the player is dead first
         if (this.dead) {
-            // Draw death screen
-            //this.game.timer.stop(); // future peter decide if I want to stop the time when dead
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            // Draw death animation if it exists
+            if (this.deathAnimation) {
+                this.deathAnimation.update(this.game.clockTick);
+                this.deathAnimation.draw(ctx);
 
-            ctx.font = '48px monospace';
-            ctx.fillStyle = 'red';
-            ctx.textAlign = 'center';
-            ctx.fillText('YOU DIED', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                // Once animation is finished, show death screen
+                if (this.deathAnimation.finished) {
+                    // Draw death screen
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-            ctx.font = '24px monospace';
-            ctx.fillStyle = 'white';
-            ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
+                    ctx.font = '48px monospace';
+                    ctx.fillStyle = 'red';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('YOU DIED', ctx.canvas.width / 2, ctx.canvas.height / 2);
+
+                    ctx.font = '24px monospace';
+                    ctx.fillStyle = 'white';
+                    ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
+                }
+            }
             return;
         }
 
