@@ -31,13 +31,16 @@ class GameEngine {
         this.entityCount = 0;
     }
 
-    init(ctx) {
+    // use async to wait for the DB to initialize
+    async init(ctx) {
         this.ctx = ctx;
         this.startInput();
         this.initDebugMode();
         this.timer = new Timer();
         this.levelUI = new LevelUI(this);
         this.levelTimesManager = new LevelTimesManager();
+        // Wait for the database to be ready
+        await this.levelTimesManager.dbReady;
     }
 
     initDebugMode() {

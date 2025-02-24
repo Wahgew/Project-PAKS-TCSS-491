@@ -26,16 +26,16 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/lever_collected.png");
     ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
 
-    ASSET_MANAGER.downloadAll(() => {
+    ASSET_MANAGER.downloadAll(async () => {
         const canvas = document.getElementById("gameWorld");
         const ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = false; // uncomment this if we're using pixel art
 
-        gameEngine.init(ctx);
+        await gameEngine.init(ctx);
         gameEngine.levelConfig = new LevelConfig(gameEngine);
         gameEngine.levelConfig.loadLevel(1);
         gameEngine.start();
-        gameEngine.levelTimesManager.debugPrintAllTimes();
+        await gameEngine.levelTimesManager.debugPrintAllTimes();
         // gameEngine.levelTimesManager.resetBestTime(0, 3000)
         // gameEngine.levelTimesManager.debugPrintAllTimes();
     });
