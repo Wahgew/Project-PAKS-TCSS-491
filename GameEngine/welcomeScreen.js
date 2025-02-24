@@ -43,7 +43,7 @@ class WelcomeScreen {
         // Define buttons
         const buttons = [
             { src: "./sprites/start.png", callback: this.startCallback, width: "150px" },
-            { src: "./sprites/aboutme.png", callback: this.aboutCallback, width: "120px" },
+            { src: "./sprites/aboutus.png", callback: this.aboutCallback, width: "120px" },
             { src: "./sprites/levels.png", callback: this.levelsCallback, width: "150px" }
         ];
 
