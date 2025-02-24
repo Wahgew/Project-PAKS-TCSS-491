@@ -48,10 +48,69 @@ class GameEngine {
             // Set initial state
             this.options.debugging = this.debugBox.checked;
 
-            // Add event listener
+            // Create debug menu
+            const debugMenu = document.createElement("div");
+            debugMenu.id = "debugMenu";
+
+            // Position menu next to debug checkbox
+            const checkboxRect = this.debugBox.getBoundingClientRect();
+            debugMenu.style.position = "fixed";
+            debugMenu.style.left = (checkboxRect.right + 10) + "px"; // 10px gap after checkbox
+            debugMenu.style.top = checkboxRect.top + "px";
+
+            // Rest of the styling
+            debugMenu.style.backgroundColor = "white";
+            debugMenu.style.padding = "10px";
+            debugMenu.style.border = "1px solid #ccc";
+            debugMenu.style.borderRadius = "4px";
+            debugMenu.style.display = this.options.debugging ? "block" : "none";
+            debugMenu.style.zIndex = "1000";
+
+            // Create level selector
+            const levelSelect = document.createElement("select");
+            levelSelect.style.padding = "5px";
+            levelSelect.style.marginLeft = "10px";
+
+            // Add level options
+            const levels = [
+                { value: 0, label: "Level 0 (Test)" },
+                { value: 1, label: "Level 1" },
+                { value: 2, label: "Level 2" }
+            ];
+
+            levels.forEach(level => {
+                const option = document.createElement("option");
+                option.value = level.value;
+                option.text = level.label;
+                levelSelect.appendChild(option);
+            });
+
+            // Add label
+            const label = document.createElement("label");
+            label.textContent = "Level: ";
+            label.style.marginRight = "5px";
+
+            // Add elements to debug menu
+            debugMenu.appendChild(label);
+            debugMenu.appendChild(levelSelect);
+
+            // Add to document
+            document.body.appendChild(debugMenu);
+
+            // Add event listeners
             this.debugBox.addEventListener("change", (e) => {
                 this.options.debugging = e.target.checked;
+                debugMenu.style.display = e.target.checked ? "block" : "none";
                 console.log("Debug mode:", this.options.debugging);
+            });
+
+            levelSelect.addEventListener("change", (e) => {
+                const level = parseInt(e.target.value);
+                console.log("Loading level:", level);
+                if (this.levelConfig) {
+                    this.levelConfig.loadLevel(level);
+                    this.levelConfig.currentLevel = level;
+                }
             });
 
             // Initialize reset times button
@@ -63,6 +122,10 @@ class GameEngine {
                     }
                 });
             }
+
+            // Set initial value and display state
+            levelSelect.value = this.levelConfig ? this.levelConfig.currentLevel : 1;
+            debugMenu.style.display = this.options.debugging ? "block" : "none";
         }
     }
 
@@ -278,5 +341,6 @@ class GameEngine {
         this.update();
         this.draw();
     }
+
 }
 // KV Le was here :)
