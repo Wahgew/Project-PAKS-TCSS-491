@@ -143,7 +143,8 @@ class WelcomeScreen {
         title.textContent = "About Me";
         title.style.margin = "0";
         title.style.fontSize = "32px";
-        title.style.fontFamily = "Arial, sans-serif";
+        title.style.fontFamily = "Molot, sans-serif";
+        title.style.fontWeight = "normal";
         header.appendChild(title);
 
         // Add close button.
@@ -198,6 +199,6 @@ class WelcomeScreen {
         document.body.appendChild(overlay);
 
         // Apply a blur effect to the welcome screen.
-        this.welcomeContainer.style.filter = "blur(3px)";
+        this.welcomeContainer.style.filter = "blur(5px)";
     }
 }
