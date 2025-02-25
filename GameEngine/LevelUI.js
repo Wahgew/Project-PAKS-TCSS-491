@@ -19,6 +19,13 @@ class LevelUI {
     }
 
     async showLevelComplete() {
+        this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
+    }
+
+    /**
+     * Displays the level complete screen and updates the best time if applicable.
+     */
+    async showLevelComplete() {
         this.isDisplayingComplete = true;
 
         if (this.gameEngine && this.gameEngine.timer && this.gameEngine.levelTimesManager) {
@@ -75,12 +82,9 @@ class LevelUI {
     draw(ctx) {
         if (!this.isDisplayingComplete) return;
 
-<<<<<<< Updated upstream
         // this.elevatorL.drawFrame(this.game.clockTick, ctx, this.elevatorLX, this.y, 1, 90);
         // this.elevatorR.drawFrame(this.game.clockTick, ctx, this.elevatorRX, this.y, 1, 90);
-=======
 
->>>>>>> Stashed changes
 
         // Setup text properties
         ctx.font = '30px monospace';
