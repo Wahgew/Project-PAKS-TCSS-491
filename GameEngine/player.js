@@ -129,7 +129,7 @@ class Player {
     }
 
     updateBB() {
-        if (this.state != 5) { // player not crouching/sliding
+        if (this.state !== 5) { // player not crouching/sliding
             this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
         }
         else { // player is crouching
@@ -225,7 +225,7 @@ class Player {
             this.isGrounded = false;
             this.jumpRelease = false;
         }
-        if (this.velocity.y < 0 && this.jumpRelease == false && (!this.game.keys[' '] && !this.game.keys['w'])) {
+        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'])) {
             this.velocity.y = this.velocity.y / 2; // velocity cut, reduce upward movement when w is released.
             this.jumpRelease = true;
         }
@@ -389,7 +389,7 @@ class Player {
 
         if (collision.collides) {
             var jump = false;
-            if ((!this.isGrounded && this.velocity.x != 0)) { // WALL SLIDE CHECK
+            if ((!this.isGrounded && this.velocity.x !== 0)) { // WALL SLIDE CHECK
                 this.state = 6;
                 if (this.velocity.y > MAX_WALLSLIDE) {
                     this.velocity.y = MAX_WALLSLIDE;
