@@ -4,17 +4,31 @@ class LevelUI {
         this.isDisplayingComplete = false;
         this.showBestTimeMsg = false;
         this.newBestTimeMsg = '';
-        this.cachedBestTime = '--:--:--';  // Add cache for best time
-        this.updateBestTimeCache();  // Initialize the cache
+        this.cachedBestTime = '--:--:--';  // Default value
     }
 
     // New method to update the best time cache
     async updateBestTimeCache() {
-        this.cachedBestTime = await this.getBestTime();
+        try {
+            // Make sure the levelTimesManager is available and DB is ready
+            if (this.gameEngine && this.gameEngine.levelTimesManager) {
+                // Wait for DB to be ready
+                await this.gameEngine.levelTimesManager.dbReady;
+
+                // Now get and cache the best time
+                this.cachedBestTime = await this.getBestTime();
+                console.log("Updated best time cache:", this.cachedBestTime);
+            }
+        } catch (error) {
+            console.error("Error updating best time cache:", error);
+        }
     }
 
     async showLevelComplete() {
         this.isDisplayingComplete = true;
+
+        // Update the best time cache before comparing times
+        await this.updateBestTimeCache();
 
         if (this.gameEngine && this.gameEngine.timer && this.gameEngine.levelTimesManager) {
             const currentTime = this.gameEngine.timer.getDisplayTime();
@@ -22,6 +36,7 @@ class LevelUI {
 
             console.log("Current level:", currentLevel);
             console.log("Current time:", currentTime);
+            console.log("Cached best time before check:", this.cachedBestTime);
 
             // Try to update best time
             const isNewBest = await this.gameEngine.levelTimesManager.updateBestTime(currentLevel, currentTime);
@@ -29,7 +44,8 @@ class LevelUI {
             if (isNewBest) {
                 console.log("New best time achieved!");
                 this.showNewBestTime(this.gameEngine.levelTimesManager.formatTime(currentTime));
-                await this.updateBestTimeCache();  // Update cache when we set a new best time
+                // Update cache after we set a new best time
+                await this.updateBestTimeCache();
             }
         }
     }
@@ -61,14 +77,23 @@ class LevelUI {
 
     async getBestTime() {
         if (this.gameEngine && this.gameEngine.levelTimesManager && this.gameEngine.levelConfig) {
+            // Make sure DB is ready
+            await this.gameEngine.levelTimesManager.dbReady;
+
             const bestTime = await this.gameEngine.levelTimesManager.getBestTime(this.gameEngine.levelConfig.currentLevel);
             return bestTime === 9000000000 ? '--:--:--' : this.formatTime(bestTime);
         }
         return '--:--:--';
     }
 
-    draw(ctx) {
+    async draw(ctx) {
         if (!this.isDisplayingComplete) return;
+
+        // If we're displaying level complete but don't have cached best time yet,
+        // make sure we update it
+        if (this.cachedBestTime === '--:--:--') {
+            await this.updateBestTimeCache();
+        }
 
         // Setup text properties
         ctx.font = '30px monospace';
