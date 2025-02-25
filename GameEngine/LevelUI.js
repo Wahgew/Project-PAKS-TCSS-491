@@ -5,6 +5,7 @@ class LevelUI {
         this.showBestTimeMsg = false;
         this.newBestTimeMsg = '';
         this.bestTime = Infinity;
+        this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
         this.elevatorLX = -960;
         this.elevatorRX = 1920;
         this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
