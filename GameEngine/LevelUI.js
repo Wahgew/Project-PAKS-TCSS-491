@@ -6,6 +6,7 @@ class LevelUI {
         this.newBestTimeMsg = '';
         this.bestTime = Infinity;
         this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
+        this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
         this.elevatorLX = -960;
         this.elevatorRX = 1920;
         this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
@@ -85,6 +86,8 @@ class LevelUI {
 
         // this.elevatorL.drawFrame(this.game.clockTick, ctx, this.elevatorLX, this.y, 1, 90);
         // this.elevatorR.drawFrame(this.game.clockTick, ctx, this.elevatorRX, this.y, 1, 90);
+
+
 
 
         // Setup text properties
