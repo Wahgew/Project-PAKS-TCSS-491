@@ -1,9 +1,4 @@
 class LevelUI {
-
-    /**
-     * Constructs a LevelUI instance.
-     * @param {object} gameEngine The game engine instance used for timing and game logic.
-     */
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
         this.isDisplayingComplete = false;
@@ -20,12 +15,16 @@ class LevelUI {
 =======
         this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
 >>>>>>> Stashed changes
+        this.cachedBestTime = '--:--:--';  // Add cache for best time
+        this.updateBestTimeCache();  // Initialize the cache
     }
 
-    /**
-     * Displays the level complete screen and updates the best time if applicable.
-     */
-    showLevelComplete() {
+    // New method to update the best time cache
+    async updateBestTimeCache() {
+        this.cachedBestTime = await this.getBestTime();
+    }
+
+    async showLevelComplete() {
         this.isDisplayingComplete = true;
 
         if (this.gameEngine && this.gameEngine.timer && this.gameEngine.levelTimesManager) {
@@ -36,38 +35,27 @@ class LevelUI {
             console.log("Current time:", currentTime);
 
             // Try to update best time
-            const isNewBest = this.gameEngine.levelTimesManager.updateBestTime(currentLevel, currentTime);
+            const isNewBest = await this.gameEngine.levelTimesManager.updateBestTime(currentLevel, currentTime);
 
             if (isNewBest) {
                 console.log("New best time achieved!");
                 this.showNewBestTime(this.gameEngine.levelTimesManager.formatTime(currentTime));
+                await this.updateBestTimeCache();  // Update cache when we set a new best time
             }
         }
     }
 
-    /**
-     * Displays a "New Best Time!" message.
-     * @param {string} formattedTime The formatted best time to display.
-     */
     showNewBestTime(formattedTime) {
         this.newBestTimeMsg = `New Best Time! ${formattedTime}`;
         this.showBestTimeMsg = true;
         console.log("Showing new best time:", this.newBestTimeMsg);
     }
 
-    /**
-     * Hides the level complete screen and best time.
-     */
     hideLevelComplete() {
         this.isDisplayingComplete = false;
-        this.showBestTimeMsg = false; // Hide the new best time message
+        this.showBestTimeMsg = false;
     }
 
-    /**
-     * Formats a given time into a string with minutes, seconds, and milliseconds.
-     * @param {number} time The time to format, in seconds.
-     * @returns {string} The formatted time as "MM:SS:MS".
-     */
     formatTime(time) {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
@@ -75,10 +63,6 @@ class LevelUI {
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`;
     }
 
-    /**
-     * Retrieves the current time from the game engine timer, formatted as a string.
-     * @returns {string} The formatted current time or "--:--:--" if unavailable.
-     */
     getCurrentTime() {
         if (this.gameEngine && this.gameEngine.timer) {
             return this.formatTime(this.gameEngine.timer.getDisplayTime());
@@ -86,25 +70,14 @@ class LevelUI {
         return '--:--:--';
     }
 
-    /**
-     * Gets the best time for the current level.
-     * @returns {string} The formatted best time or "--:--:--" if no best time exists.
-     */
-    getBestTime() {
+    async getBestTime() {
         if (this.gameEngine && this.gameEngine.levelTimesManager && this.gameEngine.levelConfig) {
-            const bestTime = this.gameEngine.levelTimesManager.getBestTime(this.gameEngine.levelConfig.currentLevel);
-            if (bestTime === 9000000000) {
-                return '--:--:--';
-            }
-            return this.formatTime(bestTime);
+            const bestTime = await this.gameEngine.levelTimesManager.getBestTime(this.gameEngine.levelConfig.currentLevel);
+            return bestTime === 9000000000 ? '--:--:--' : this.formatTime(bestTime);
         }
         return '--:--:--';
     }
 
-    /**
-     * Draws the level complete screen onto the provided canvas context.
-     * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
-     */
     draw(ctx) {
         if (!this.isDisplayingComplete) return;
 
@@ -144,10 +117,10 @@ class LevelUI {
         ctx.font = 'bold 30px monospace';
         ctx.fillText('LEVEL COMPLETE!', centerX, centerY - lineHeight);
 
-        // Best Time
+        // Best Time - use cached value
         ctx.font = '20px monospace';
         ctx.fillText(
-            `Best Time: ${this.getBestTime()}`,
+            `Best Time: ${this.cachedBestTime}`,
             centerX,
             centerY + 10
         );
