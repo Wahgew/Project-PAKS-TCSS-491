@@ -5,6 +5,9 @@ function startGame() {
     ASSET_MANAGER = new AssetManager(); // Declared globally, accessible everywhere if I set it to const the map not gonna load when pressing start
 
     ASSET_MANAGER.queueDownload("./sprites/block.png");
+    ASSET_MANAGER.queueDownload("./sprites/block2.png");
+    ASSET_MANAGER.queueDownload("./sprites/block3.png");
+    ASSET_MANAGER.queueDownload("./sprites/block4.png");
     ASSET_MANAGER.queueDownload("./sprites/idle.png");
     ASSET_MANAGER.queueDownload("./sprites/run.png");
     ASSET_MANAGER.queueDownload("./sprites/jump.png");
