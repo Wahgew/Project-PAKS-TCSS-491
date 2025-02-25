@@ -23,7 +23,7 @@ class DeathParticle {
         }
 
         // Random slight variation to the angle for more chaotic effect
-        this.angle += (Math.random() - 0.5) * 0.5;
+        this.angle += (Math.random() - 0.5) * 2.0;
     }
 
     update(deltaTime) {
@@ -82,13 +82,14 @@ class DeathParticle {
     drawBodyPart(ctx) {
         // Simple stick figure parts
         ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = 'black'
+        ctx.lineWidth = 3;
 
         switch (this.partType) {
             case 0: // Head
                 ctx.beginPath();
-                ctx.arc(0, 0, 20, 0, Math.PI * 2); // Head size: 8 pixel radius
-                ctx.stroke();
+                ctx.arc(0, 0, 10, 0, Math.PI * 2); // Head size: 8 pixel radius
+                ctx.fill();
                 break;
             case 1: // Torso
                 ctx.beginPath();
