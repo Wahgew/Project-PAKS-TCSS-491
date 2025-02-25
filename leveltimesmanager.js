@@ -1,84 +1,163 @@
 class LevelTimesManager {
     constructor() {
-        this.bestTimes = this.loadBestTimes();
+        this.dbName = 'LevelTimesDB';
+        this.storeName = 'levelTimes';
+        this.db = null;
+        this.DEFAULT_TIME = 9000000000;
+        this.NUMBER_OF_LEVELS = 10;
+        this.dbReady = this.initializeDB();
     }
 
-    // Load best times from localStorage
-    loadBestTimes() {
-        const savedTimes = localStorage.getItem('levelBestTimes');
-        if (!savedTimes) {
-            // Initialize with default times if nothing is saved
-            const defaultTimes = {};
-            // You can add as many levels as you want
-            for (let i = 0; i < 10; i++) {  // Initialize first 10 levels
-                defaultTimes[i] = 9000000000;
-            }
-            localStorage.setItem('levelBestTimes', JSON.stringify(defaultTimes));
-            return defaultTimes;
+    // Initialize the IndexedDB database
+    async initializeDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, 1);
+
+            request.onerror = (event) => {
+                console.error('Database error:', event.target.error);
+                reject(event.target.error);
+            };
+
+            request.onsuccess = (event) => {
+                this.db = event.target.result;
+                console.log('Database opened successfully');
+                resolve();
+            };
+
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    const store = db.createObjectStore(this.storeName, { keyPath: 'levelNumber' });
+
+                    // Initialize default times for all levels
+                    for (let i = 0; i < this.NUMBER_OF_LEVELS; i++) {
+                        store.put({ levelNumber: i, time: this.DEFAULT_TIME });
+                    }
+                    console.log('Object store created and initialized with default times');
+                }
+            };
+        });
+    }
+
+    // Ensure database is ready before any operation
+    async ensureDBReady() {
+        if (!this.db) {
+            await this.dbReady;
         }
-
-        // Parse the saved times and ensure all values are numbers
-        const times = JSON.parse(savedTimes);
-        Object.keys(times).forEach(key => {
-            times[key] = Number(times[key]);
-        });
-        return times;
-    }
-
-    // Save best times to localStorage
-    saveBestTimes() {
-        // Ensure all values are numbers before saving
-        Object.keys(this.bestTimes).forEach(key => {
-            this.bestTimes[key] = Number(this.bestTimes[key]);
-        });
-        localStorage.setItem('levelBestTimes', JSON.stringify(this.bestTimes));
     }
 
     // Get best time for a specific level
-    getBestTime(levelNumber) {
-        // Convert to number and provide default if not found
-        return Number(this.bestTimes[levelNumber]) || 9000000000;
+    async getBestTime(levelNumber) {
+        await this.ensureDBReady();
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.get(levelNumber);
+
+            request.onsuccess = () => {
+                const result = request.result;
+                resolve(result ? result.time : this.DEFAULT_TIME);
+            };
+
+            request.onerror = (event) => {
+                console.error('Error getting time:', event.target.error);
+                reject(event.target.error);
+            };
+        });
     }
 
-    updateBestTime(levelNumber, currentTime) {
-        // Ensure we're working with numbers
+    // Update best time for a level
+    async updateBestTime(levelNumber, currentTime) {
+        await this.ensureDBReady();
+
+        const bestTime = await this.getBestTime(levelNumber);
         currentTime = Number(currentTime);
-        const bestTime = this.getBestTime(levelNumber);
 
         console.log(`Checking level ${levelNumber} - Current: ${currentTime}, Best: ${bestTime}`);
 
         if (currentTime < bestTime) {
-            this.bestTimes[levelNumber] = currentTime;
-            this.saveBestTimes();
-            console.log(`New best time for level ${levelNumber}: ${this.formatTime(currentTime)}`);
-            return true;
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                const request = store.put({ levelNumber, time: currentTime });
+
+                request.onsuccess = () => {
+                    console.log(`New best time for level ${levelNumber}: ${this.formatTime(currentTime)}`);
+                    resolve(true);
+                };
+
+                request.onerror = (event) => {
+                    console.error('Error updating time:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
         }
         return false;
     }
 
-    // Resets best time for selected map, call manually in main
-    resetBestTime (levelNumber, newBestTime){
-        this.bestTimes[levelNumber] = newBestTime;
-    }
+    // Reset best time for a specific level
+    async resetBestTime(levelNumber) {
+        await this.ensureDBReady();
 
-    /**
-     * Resets all level times to the default value
-     */
-    resetAllTimes() {
-        // Reset all existing levels to default time
-        Object.keys(this.bestTimes).forEach(level => {
-            this.bestTimes[level] = 9000000000;
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.put({ levelNumber, time: this.DEFAULT_TIME });
+
+            request.onsuccess = () => {
+                resolve();
+            };
+
+            request.onerror = (event) => {
+                console.error('Error resetting time:', event.target.error);
+                reject(event.target.error);
+            };
         });
-
-        // Save the reset times
-        this.saveBestTimes();
-        console.log('All level times have been reset to default');
-
-        // Optional: Debug print to confirm reset
-        this.debugPrintAllTimes();
     }
 
-    // Format time for display (converts seconds to MM:SS.ms format)
+    // Reset all times to default
+    async resetAllTimes() {
+        await this.ensureDBReady();
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+
+            // Clear existing data
+            const clearRequest = store.clear();
+
+            clearRequest.onsuccess = () => {
+                // Add default times for all levels
+                let completed = 0;
+
+                for (let i = 0; i < this.NUMBER_OF_LEVELS; i++) {
+                    const request = store.put({ levelNumber: i, time: this.DEFAULT_TIME });
+
+                    request.onsuccess = () => {
+                        completed++;
+                        if (completed === this.NUMBER_OF_LEVELS) {
+                            console.log('All level times have been reset to default');
+                            this.debugPrintAllTimes();
+                            resolve();
+                        }
+                    };
+
+                    request.onerror = (event) => {
+                        console.error('Error resetting times:', event.target.error);
+                        reject(event.target.error);
+                    };
+                }
+            };
+
+            clearRequest.onerror = (event) => {
+                console.error('Error clearing times:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    // Format time (kept the same as original)
     formatTime(timeInSeconds) {
         const minutes = Math.floor(timeInSeconds / 60);
         const seconds = Math.floor(timeInSeconds % 60);
@@ -87,11 +166,27 @@ class LevelTimesManager {
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
     }
 
-    // Add method to help with debugging
-    debugPrintAllTimes() {
-        console.log("All stored best times:");
-        Object.keys(this.bestTimes).forEach(level => {
-            console.log(`Level ${level}: ${this.formatTime(this.bestTimes[level])}`);
+    // Debug print all times
+    async debugPrintAllTimes() {
+        await this.ensureDBReady();
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                console.log("All stored best times:");
+                request.result.forEach(entry => {
+                    console.log(`Level ${entry.levelNumber}: ${this.formatTime(entry.time)}`);
+                });
+                resolve();
+            };
+
+            request.onerror = (event) => {
+                console.error('Error getting all times:', event.target.error);
+                reject(event.target.error);
+            };
         });
     }
 }

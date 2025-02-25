@@ -1,6 +1,7 @@
 class drawMap {
-        constructor(testSize) {
+        constructor(testSize, gameEngine) {
                 this.testSize = testSize;
+                this.game = gameEngine;
                 this.block = ASSET_MANAGER.getAsset("./sprites/block.png");
                 console.log("DrawMap initialized with size:", testSize);
         }
@@ -208,7 +209,7 @@ class drawMap {
                                                 );
 
                                                 // Draw collision boxes if debugging is enabled
-                                                if (this.game && this.game.options && this.game.options.debugging) {
+                                                if (this.game.options.debugging) {
                                                         ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
                                                         ctx.strokeRect(x, y, this.testSize, this.testSize);
                                                 }

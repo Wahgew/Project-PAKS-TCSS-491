@@ -5,17 +5,34 @@
     <title>Project P.A.K.S</title>
     <style>
         #gameWorld {
-            border: 1px solid black;
-            background: white;
+            background: transparent; /* or whatever background you prefer */
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 1;
         }
+        #debugMenu select {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        #debugMenu select:hover {
+            border-color: #999;
+        }
+
+        #debugMenu select:focus {
+            outline: none;
+            border-color: #666;
+            box-shadow: 0 0 3px rgba(0,0,0,0.2);
+        }
     </style>
     <script type="text/javascript" src="./assetmanager.js"></script>
     <script type="text/javascript" src="./timer.js"></script>
+    <script type="text/javascript" src="./deathAnimate.js"></script>
     <script type="text/javascript" src="./exitDoor.js"></script>
     <script type="text/javascript" src="./leveltimesmanager.js"></script>
     <script type="text/javascript" src="./gameengine.js"></script>
@@ -28,9 +45,15 @@
     <script type="text/javascript" src="./lever.js"></script>
     <script type="text/javascript" src="./drawMap.js"></script>
     <script type="text/javascript" src="./enemies.js"></script>
+    <script type="text/javascript" src="./deathParticle.js"></script>
     <script type="text/javascript" src="./player.js"></script>
     <script type="text/javascript" src="./welcomeScreen.js"></script>
+    <script type="text/javascript" src="./LevelsScreen.js"></script>Dd
     <script type="text/javascript" src="./main.js"></script>
+    <script>
+        console.log(window.screen.availWidth);
+        console.log(window.screen.availHeight);
+    </script>
 </head>
 <body style="background: #333;">
 <canvas id="gameWorld" width="1024" height="768" tabindex="0" autofocus></canvas>
