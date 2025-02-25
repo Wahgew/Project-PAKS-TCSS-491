@@ -5,16 +5,10 @@ class LevelUI {
         this.showBestTimeMsg = false;
         this.newBestTimeMsg = '';
         this.bestTime = Infinity;
-<<<<<<< Updated upstream
-        // this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png");
-        // this.elevatorR = ASSET_MANAGER.getAsset("./sprites/elevator_right.png");
         this.elevatorLX = -960;
         this.elevatorRX = 1920;
         this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
         this.elevatorR = ASSET_MANAGER.getAsset("./sprites/elevator_right.png")
-=======
-        this.elevatorL = ASSET_MANAGER.getAsset("./sprites/elevator_left.png")
->>>>>>> Stashed changes
         this.cachedBestTime = '--:--:--';  // Add cache for best time
         this.updateBestTimeCache();  // Initialize the cache
     }
