@@ -42,13 +42,19 @@ class LevelTimesManager {
     // Ensure database is ready before any operation
     async ensureDBReady() {
         if (!this.db) {
+            console.log("Database not ready, waiting...");
             await this.dbReady;
+            console.log("Database now ready");
         }
     }
+
 
     // Get best time for a specific level
     async getBestTime(levelNumber) {
         await this.ensureDBReady();
+
+        // Convert to number to ensure proper comparison
+        levelNumber = Number(levelNumber);
 
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([this.storeName], 'readonly');
@@ -57,7 +63,9 @@ class LevelTimesManager {
 
             request.onsuccess = () => {
                 const result = request.result;
-                resolve(result ? result.time : this.DEFAULT_TIME);
+                const bestTime = result ? result.time : this.DEFAULT_TIME;
+                console.log(`Retrieved best time for level ${levelNumber}: ${bestTime}`);
+                resolve(bestTime);
             };
 
             request.onerror = (event) => {
@@ -71,8 +79,11 @@ class LevelTimesManager {
     async updateBestTime(levelNumber, currentTime) {
         await this.ensureDBReady();
 
-        const bestTime = await this.getBestTime(levelNumber);
+        // Convert params to numbers to ensure proper comparison
+        levelNumber = Number(levelNumber);
         currentTime = Number(currentTime);
+
+        const bestTime = await this.getBestTime(levelNumber);
 
         console.log(`Checking level ${levelNumber} - Current: ${currentTime}, Best: ${bestTime}`);
 
@@ -93,6 +104,7 @@ class LevelTimesManager {
                 };
             });
         }
+        console.log("Not a new best time");
         return false;
     }
 
@@ -100,12 +112,16 @@ class LevelTimesManager {
     async resetBestTime(levelNumber) {
         await this.ensureDBReady();
 
+        // Convert to number to ensure proper operation
+        levelNumber = Number(levelNumber);
+
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([this.storeName], 'readwrite');
             const store = transaction.objectStore(this.storeName);
             const request = store.put({ levelNumber, time: this.DEFAULT_TIME });
 
             request.onsuccess = () => {
+                console.log(`Reset time for level ${levelNumber}`);
                 resolve();
             };
 

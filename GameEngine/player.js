@@ -483,26 +483,19 @@ class Player {
             this.win = true;
             if (this.game.levelUI) {
                 console.log("Showing level complete");
-                await this.game.levelUI.showLevelComplete();
 
-                // Stop the timer
+                // Stop the timer first
                 if (this.game.timer) {
                     console.log("Timer exists, about to call stop");
                     console.log("Timer isRunning before stop:", this.game.timer.isRunning);
                     this.game.timer.stop();
-                    const currentTime = this.game.timer.getDisplayTime();
-                    const currentLevel = this.game.levelConfig.currentLevel;
-
-                    // Check if it's a new best time
-                    const isNewBest = this.game.levelTimesManager.updateBestTime(currentLevel, currentTime);
-
-                    // You can use this to show a "New Best Time!" message
-                    if (isNewBest) {
-                        this.game.levelUI.showNewBestTime(
-                            this.game.levelTimesManager.formatTime(currentTime)
-                        );
-                    }
                 }
+
+                // Make sure best time cache is updated before showing the complete screen
+                await this.game.levelUI.updateBestTimeCache();
+
+                // Now show the level complete screen
+                await this.game.levelUI.showLevelComplete();
             }
         } else {
             console.log("Player win, but debug mode is active");
