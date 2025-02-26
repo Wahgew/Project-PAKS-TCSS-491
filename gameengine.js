@@ -37,10 +37,19 @@ class GameEngine {
         this.startInput();
         this.initDebugMode();
         this.timer = new Timer();
-        this.levelUI = new LevelUI(this);
+
+        // Initialize levelTimesManager first
         this.levelTimesManager = new LevelTimesManager();
+
         // Wait for the database to be ready
         await this.levelTimesManager.dbReady;
+        console.log("Database is ready");
+
+        // Now initialize LevelUI after DB is ready
+        this.levelUI = new LevelUI(this);
+
+        // Update the best time cache once everything is initialized
+        await this.levelUI.updateBestTimeCache();
     }
 
     initDebugMode() {
@@ -305,8 +314,8 @@ class GameEngine {
             this.ctx.font = "12px Arial";
             this.ctx.fillStyle = "red";
 
-            let offsetX = 10; // Adjust to prevent overlap with cursor
-            let offsetY = 20;
+            let offsetX = 35; // Adjust to prevent overlap with cursor
+            let offsetY = 10;
 
             this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
         }
@@ -344,6 +353,5 @@ class GameEngine {
         this.update();
         this.draw();
     }
-
 }
 // KV Le was here :)

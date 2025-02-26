@@ -4,6 +4,17 @@ class drawMap {
                 this.game = gameEngine;
                 this.block = ASSET_MANAGER.getAsset("./sprites/block.png");
                 console.log("DrawMap initialized with size:", testSize);
+                this.blocks = [ASSET_MANAGER.getAsset("./sprites/block.png"), ASSET_MANAGER.getAsset("./sprites/block2.png"), 
+                        ASSET_MANAGER.getAsset("./sprites/block3.png"), ASSET_MANAGER.getAsset("./sprites/block4.png")];
+                this.colors = ["pink",
+                        "peachpuff",
+                        "lightgoldenrodyellow",
+                        "palegreen",
+                        "paleturquoise",
+                        "lightsteelblue",
+                        "thistle", "lightsalmon"]
+                this.random = Math.floor(Math.random() * 8)
+                this.random2 = Math.floor(Math.random() * 3)
         }
 
         // 0 map used for test purpose ONLY won't be used in really game just keep it for now DON'T COMMENT IT OUT - peter
@@ -90,8 +101,8 @@ class drawMap {
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
                 [1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -201,7 +212,7 @@ class drawMap {
 
                                         try {
                                                 ctx.drawImage(
-                                                    this.block,
+                                                    this.blocks[this.random2],
                                                     x,
                                                     y,
                                                     this.testSize,
@@ -223,9 +234,8 @@ class drawMap {
 
         #clearCanvas(ctx) {
                 if (!ctx) return;
-
                 try {
-                        ctx.fillStyle = "white";
+                        ctx.fillStyle = this.colors[this.random] 
                         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 } catch (e) {
                         console.error("Error in clearCanvas:", e);

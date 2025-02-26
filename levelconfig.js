@@ -30,7 +30,7 @@ class LevelConfig {
             0: {
                 map: () => new drawMap(this.TILE_SIZE, this.game),
                 player: () => new Player(this.game, 85, 400),
-                exitDoor: () => new exitDoor(this.game, 1075, 175, 50, 2),
+                exitDoor: () => new exitDoor(this.game, 1075, 175, 2),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 100, y: 50, speed: 25, moving: true, direction: null, tracking: true, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 500, y: 265, speed: 150, moving: true, direction: "RIGHT", tracking: false, reverseTime: 3}),
@@ -61,14 +61,21 @@ class LevelConfig {
             1: {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
-                player: () => new Player(this.game, 600, 400),
-                exitDoor: () => new exitDoor(this.game, 30, 95, 80),
+                player: () => new Player(this.game, 1000, 830),
+                exitDoor: () => new exitDoor(this.game, 30, 95),
                 hazards: () =>
                     [new Spike({gameEngine: this.game, x: 180, y: 260, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 220, y: 260, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 510, y: 360, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 550, y: 360, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 810, y: 460, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 850, y: 460, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 1120, y: 560, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1160, y: 560, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 1520, y: 760, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1520, y: 720, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1775, y: 575, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1775, y: 615, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     ]
             },
 
@@ -76,10 +83,12 @@ class LevelConfig {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 25, 700),
-                exitDoor: () => new exitDoor(this.game, 1324, 350, 50),
+                exitDoor: () => new exitDoor(this.game, 1305, 320),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 420, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 440, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 735, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 755, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                 ]
             }
             // add more levels below

@@ -164,8 +164,8 @@ class Spike {
         this.game = gameEngine;
         Object.assign(this, {x, y, speed, moving, direction, tracking, reverseTime});
 
-        this.height = 60;
-        this.width = 60;
+        this.height = 40;
+        this.width = 40;
         this.time = 0;
         this.reverse = false;
 
