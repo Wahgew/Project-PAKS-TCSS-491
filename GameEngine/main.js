@@ -4,25 +4,27 @@ function startGame() {
     const gameEngine = new GameEngine();
     ASSET_MANAGER = new AssetManager(); // Declared globally, accessible everywhere if I set it to const the map not gonna load when pressing start
 
+    // block
     ASSET_MANAGER.queueDownload("./sprites/block.png");
     ASSET_MANAGER.queueDownload("./sprites/block2.png");
     ASSET_MANAGER.queueDownload("./sprites/block3.png");
     ASSET_MANAGER.queueDownload("./sprites/block4.png");
+    // player assets
     ASSET_MANAGER.queueDownload("./sprites/idle.png");
+    ASSET_MANAGER.queueDownload("./sprites/walk.png");
     ASSET_MANAGER.queueDownload("./sprites/run.png");
     ASSET_MANAGER.queueDownload("./sprites/jump.png");
-    ASSET_MANAGER.queueDownload("./sprites/temptest.png");
+    ASSET_MANAGER.queueDownload("./sprites/skid.png");
+    ASSET_MANAGER.queueDownload("./sprites/slide.png");
+    ASSET_MANAGER.queueDownload("./sprites/wall-slide.png");
+    ASSET_MANAGER.queueDownload("./sprites/crouch.png");
+    ASSET_MANAGER.queueDownload("./sprites/fall.png");
+
+    // hazard assets
     ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
     ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
-    ASSET_MANAGER.queueDownload("./sprites/tempproj3.png");
     ASSET_MANAGER.queueDownload("./sprites/laser_test.png");
-    ASSET_MANAGER.queueDownload("./sprites/slide.png");
-    ASSET_MANAGER.queueDownload("./sprites/walk.png");
-
-    ASSET_MANAGER.queueDownload("./sprites/Rwalk.png");
-    ASSET_MANAGER.queueDownload("./sprites/Rrun.png");
-    ASSET_MANAGER.queueDownload("./sprites/Rslide.png");
-    ASSET_MANAGER.queueDownload("./sprites/Rjump.png");
+    // level assets
     ASSET_MANAGER.queueDownload("./sprites/plat_wide.png");
     ASSET_MANAGER.queueDownload("./sprites/plat_short.png");
     ASSET_MANAGER.queueDownload("./sprites/leverOn.png");
