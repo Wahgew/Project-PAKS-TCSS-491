@@ -88,16 +88,6 @@
             gap: 5px;
             margin-top: 10px;
         }
-        .frame-button {
-            padding: 5px 10px;
-            background-color: #ddd;
-            border: 1px solid #999;
-            cursor: pointer;
-        }
-        .frame-button.active {
-            background-color: #4CAF50;
-            color: white;
-        }
         #gridToggle {
             margin-right: 10px;
         }
@@ -325,16 +315,15 @@
         }
         
         function updateCodeOutput() {
-            const code = `this.animations[this.STATES.${currentSprite.toUpperCase()}] = new Animator(
-    this.sprites.${currentSprite}, 
-    ${settings.xStart}, 
-    ${settings.yStart}, 
-    ${settings.width}, 
-    ${settings.height}, 
-    ${settings.frameCount}, 
+            codeOutput.textContent = `this.animations[this.STATES.${currentSprite.toUpperCase()}] = new Animator(
+    this.sprites.${currentSprite},
+    ${settings.xStart},
+    ${settings.yStart},
+    ${settings.width},
+    ${settings.height},
+    ${settings.frameCount},
     ${settings.frameDuration}
 );`;
-            codeOutput.textContent = code;
         }
         
         function animate(timestamp) {
