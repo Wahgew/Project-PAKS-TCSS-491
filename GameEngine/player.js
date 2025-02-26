@@ -206,11 +206,14 @@ class Player {
                     that.BB.bottom = entity.BB.top; // lock bounding box position
                     that.y = entity.BB.top - that.BB.height;
                 }
-            } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) { // need to tie into door/exit
+            } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) { 
                 that.levers++;
                 entity.collected = true;
-            } else if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB) && entity.levers <= that.levers) {
-                that.winGame();
+            } else if (entity.BB && entity instanceof exitDoor) {
+                entity.collectedLevers = that.levers; 
+                if (that.BB.collide(entity.BB) && entity.levers <= that.levers) {
+                    that.winGame();
+                }
                 //console.log("Player has collided with exit");
             }
         });

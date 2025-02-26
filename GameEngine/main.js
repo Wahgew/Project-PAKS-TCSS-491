@@ -27,7 +27,8 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/plat_short.png");
     ASSET_MANAGER.queueDownload("./sprites/leverOn.png");
     ASSET_MANAGER.queueDownload("./sprites/leverOff.png");
-    ASSET_MANAGER.queueDownload("./sprites/exitDoor.png");
+    ASSET_MANAGER.queueDownload("./sprites/exit_door_locked.png");
+    ASSET_MANAGER.queueDownload("./sprites/exit_door_unlocked.png");
 
     ASSET_MANAGER.downloadAll(async () => {
         const canvas = document.getElementById("gameWorld");
