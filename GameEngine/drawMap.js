@@ -9,11 +9,13 @@ class drawMap {
                 this.colors = ["pink",
                         "peachpuff",
                         "lightgoldenrodyellow",
-                        "palegreen",
+                        "lavender",
                         "paleturquoise",
                         "lightsteelblue",
-                        "thistle", "lightsalmon"]
-                this.random = Math.floor(Math.random() * 8)
+                        "thistle",
+                        "lightsalmon",
+                        "lavenderblush"]
+                this.random = Math.floor(Math.random() * 9)
                 this.random2 = Math.floor(Math.random() * 3)
         }
 

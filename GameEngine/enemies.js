@@ -93,7 +93,7 @@ class Projectile {
         this.updateBB();
     }
 
-    updateBB() {
+    updateBB() { // collision w/ map, use same stuff as player map collision, need second case for bigblock
         this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
     };
 
@@ -114,7 +114,9 @@ class Projectile {
         }
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
-        
+        this.game.entities.forEach(function (entity) {
+            ;
+        });
         this.updateBB();
     }
 

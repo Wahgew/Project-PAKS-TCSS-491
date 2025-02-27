@@ -8,6 +8,7 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/block2.png");
     ASSET_MANAGER.queueDownload("./sprites/block3.png");
     ASSET_MANAGER.queueDownload("./sprites/block4.png");
+    ASSET_MANAGER.queueDownload("./sprites/bigblock.png");
     ASSET_MANAGER.queueDownload("./sprites/idle.png");
     ASSET_MANAGER.queueDownload("./sprites/run.png");
     ASSET_MANAGER.queueDownload("./sprites/jump.png");

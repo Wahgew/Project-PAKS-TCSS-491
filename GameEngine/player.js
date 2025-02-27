@@ -215,6 +215,8 @@ class Player {
                     that.winGame();
                 }
                 //console.log("Player has collided with exit");
+            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) { // might need to call this 
+                this.handleWallSlide(true, null, entity.x, entity.y, entity.width); //  in a different place, in handle collisions?
             }
         });
 
@@ -380,8 +382,6 @@ class Player {
 
     // Handles horizontal collision detection and response : boundingbox for horizontal movement
     handleHorizontalCollision(horizontalBB, nextX) {
-        const MAX_WALLSLIDE = 175;
-        const MAX_JUMP = 850;
         const collision = this.map.checkCollisions({
             BB: horizontalBB,
             x: nextX,
@@ -391,34 +391,48 @@ class Player {
         });
 
         if (collision.collides) {
-            var jump = false;
-            if ((!this.isGrounded && this.velocity.x != 0)) { // WALL SLIDE CHECK
-                this.state = 6;
-                if (this.velocity.y > MAX_WALLSLIDE) {
-                    this.velocity.y = MAX_WALLSLIDE;
-                }
-                if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding left
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = 200;
-                    this.state = 4;
-                    jump = true;
-                }
-                if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding right
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = -200;
-                    this.state = 4;
-                    jump = true;
-                }
-            }
-            if (this.velocity.x > 0 && !jump) {
-                this.x = collision.tileX - this.width;
-            } else if (this.velocity.x < 0 && !jump) {
-                this.x = collision.tileX + this.map.testSize;
-            } if (!jump) {
-                this.velocity.x = 0;
-            }
+            this.handleWallSlide(false, collision);
         } else {
             this.x = nextX;
+        }
+    }
+    handleWallSlide(bigBlock, collision = null , x = 0, y = 0, width = 0) {
+        const MAX_WALLSLIDE = 175;
+        const MAX_JUMP = 850;
+        var jump = false;
+        if ((!this.isGrounded && this.velocity.x != 0)) { // WALL SLIDE CHECK
+            this.state = 6;
+            if (this.velocity.y > MAX_WALLSLIDE) {
+                this.velocity.y = MAX_WALLSLIDE;
+            }
+            if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding left
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = 200;
+                this.state = 4;
+                jump = true;
+            }
+            if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding right
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = -200;
+                this.state = 4;
+                jump = true;
+            }
+        }
+        if (!bigBlock) { // check if collision is tile or bigblock based.
+            if (this.velocity.x > 0 && !jump) { 
+                this.x = collision.tileX - this.width;
+            } else if (this.velocity.x < 0 && !jump) {
+                this.x = collision.tileX + this.map.testSize; // how does this work???
+            } 
+        } else {
+            if (this.velocity.x > 0 && !jump) { // right
+                this.x = x - this.width;
+            } else if (this.velocity.x < 0 && !jump) { // left
+                this.x = x + this.width + width;
+            } 
+        }
+        if (!jump) {
+            this.velocity.x = 0;
         }
     }
 
