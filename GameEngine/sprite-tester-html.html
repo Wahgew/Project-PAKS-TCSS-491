@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Position Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .preview-container {
+            margin: 20px 0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+        .playback-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .code-output {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        .frame-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        #gridToggle {
+            margin-right: 10px;
+        }
+        .checkbox-control {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .checkbox-control input {
+            width: auto;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sprite Position Tester</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="spriteSelect">Sprite:</label>
+                <select id="spriteSelect">
+                    <option value="idle">Idle</option>
+                    <option value="walk">Walk</option>
+                    <option value="run">Run</option>
+                    <option value="jump">Jump</option>
+                    <option value="slide">Slide</option>
+                    <option value="fall">fall</option>
+                    <option value="wall_slide">wall-slide</option>
+                    <option value="crouch">crouch</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="frameCount">Frame Count:</label>
+                <input type="number" id="frameCount" value="4" min="1" max="10">
+            </div>
+            
+            <div class="control-group">
+                <label for="xStart">X Start:</label>
+                <input type="number" id="xStart" value="0">
+            </div>
+            
+            <div class="control-group">
+                <label for="yStart">Y Start:</label>
+                <input type="number" id="yStart" value="0">
+            </div>
+            
+            <div class="control-group">
+                <label for="width">Width:</label>
+                <input type="number" id="width" value="170">
+            </div>
+            
+            <div class="control-group">
+                <label for="height">Height:</label>
+                <input type="number" id="height" value="175">
+            </div>
+            
+            <div class="control-group">
+                <label for="frameDuration">Frame Duration (sec):</label>
+                <input type="number" id="frameDuration" value="0.15" step="0.01">
+            </div>
+            
+            <div class="control-group">
+                <label for="scale">Scale:</label>
+                <input type="number" id="scale" value="0.5" step="0.1">
+            </div>
+        </div>
+        
+        <div class="checkbox-control">
+            <input type="checkbox" id="gridToggle" checked>
+            <label for="gridToggle">Show Grid</label>
+            
+            <input type="checkbox" id="flipToggle">
+            <label for="flipToggle">Flip Horizontally</label>
+            
+            <input type="checkbox" id="boundingBoxToggle" checked>
+            <label for="boundingBoxToggle">Show Bounding Box</label>
+        </div>
+        
+        <div class="preview-container">
+            <canvas id="previewCanvas" width="400" height="300"></canvas>
+            
+            <div class="playback-controls">
+                <button id="playPauseBtn">Pause</button>
+                <div id="frameButtons" class="frame-buttons">
+                    <!-- Frame buttons will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+        
+        <h3>Generated Code:</h3>
+        <div class="code-output" id="codeOutput"></div>
+    </div>
+
+    <script>
+        // Sprite base paths - update with your actual paths
+        const spritePaths = {
+            idle: './sprites/idle.png',
+            walk: './sprites/walk.png',
+            run: './sprites/run.png',
+            jump: './sprites/jump.png',
+            slide: './sprites/slide.png',
+            fall: './sprites/fall.png',
+            wall_slide: './sprites/wall-slide.png',
+            crouch: './sprites/crouch.png',
+        };
+        
+        // DOM elements
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const spriteSelect = document.getElementById('spriteSelect');
+        const xStartInput = document.getElementById('xStart');
+        const yStartInput = document.getElementById('yStart');
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+        const frameCountInput = document.getElementById('frameCount');
+        const frameDurationInput = document.getElementById('frameDuration');
+        const scaleInput = document.getElementById('scale');
+        const flipToggle = document.getElementById('flipToggle');
+        const gridToggle = document.getElementById('gridToggle');
+        const boundingBoxToggle = document.getElementById('boundingBoxToggle');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const frameButtons = document.getElementById('frameButtons');
+        const codeOutput = document.getElementById('codeOutput');
+        
+        // Animation state
+        let currentSprite = 'idle';
+        let currentSpriteImg = new Image();
+        let currentFrame = 0;
+        let isPlaying = true;
+        let lastTimestamp = 0;
+        let elapsedTime = 0;
+        let animationId = null;
+        
+        // Settings
+        const settings = {
+            xStart: 0,
+            yStart: 0,
+            width: 170,
+            height: 175,
+            frameCount: 4,
+            frameDuration: 0.15,
+            scale: 0.5,
+            flipped: false,
+            showGrid: true,
+            showBoundingBox: true
+        };
+        
+        // Load initial sprite
+        loadSprite(currentSprite);
+        
+        // Create frame buttons
+        updateFrameButtons();
+        
+        // Start animation loop
+        requestAnimationFrame(animate);
+        
+        // Generate initial code
+        updateCodeOutput();
+        
+        // Event listeners
+        spriteSelect.addEventListener('change', () => {
+            currentSprite = spriteSelect.value;
+            loadSprite(currentSprite);
+            updateCodeOutput();
+        });
+        
+        [xStartInput, yStartInput, widthInput, heightInput, frameCountInput, frameDurationInput, scaleInput].forEach(input => {
+            input.addEventListener('change', () => {
+                settings[input.id] = parseFloat(input.value);
+                if (input.id === 'frameCount') {
+                    updateFrameButtons();
+                    if (currentFrame >= settings.frameCount) {
+                        currentFrame = 0;
+                    }
+                }
+                updateCodeOutput();
+            });
+        });
+        
+        flipToggle.addEventListener('change', () => {
+            settings.flipped = flipToggle.checked;
+            updateCodeOutput();
+        });
+        
+        gridToggle.addEventListener('change', () => {
+            settings.showGrid = gridToggle.checked;
+        });
+        
+        boundingBoxToggle.addEventListener('change', () => {
+            settings.showBoundingBox = boundingBoxToggle.checked;
+        });
+        
+        playPauseBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            playPauseBtn.textContent = isPlaying ? 'Pause' : 'Play';
+        });
+        
+        // Functions
+        function loadSprite(spriteName) {
+            currentSpriteImg = new Image();
+            currentSpriteImg.src = spritePaths[spriteName];
+            // For local testing, you can use placeholder images
+            currentSpriteImg.onerror = () => {
+                console.log(`Failed to load sprite: ${spritePaths[spriteName]}`);
+                currentSpriteImg.src = '/api/placeholder/400/320';
+            };
+        }
+        
+        function updateFrameButtons() {
+            frameButtons.innerHTML = '';
+            for (let i = 0; i < settings.frameCount; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'frame-button' + (i === currentFrame ? ' active' : '');
+                btn.addEventListener('click', () => {
+                    currentFrame = i;
+                    isPlaying = false;
+                    playPauseBtn.textContent = 'Play';
+                    updateFrameButtons();
+                });
+                frameButtons.appendChild(btn);
+            }
+        }
+        
+        function updateCodeOutput() {
+            codeOutput.textContent = `this.animations[this.STATES.${currentSprite.toUpperCase()}] = new Animator(
+    this.sprites.${currentSprite},
+    ${settings.xStart},
+    ${settings.yStart},
+    ${settings.width},
+    ${settings.height},
+    ${settings.frameCount},
+    ${settings.frameDuration}
+);`;
+        }
+        
+        function animate(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const deltaTime = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+            
+            if (isPlaying) {
+                elapsedTime += deltaTime;
+                if (elapsedTime >= settings.frameDuration) {
+                    currentFrame = (currentFrame + 1) % settings.frameCount;
+                    elapsedTime = 0;
+                    updateFrameButtons();
+                }
+            }
+            
+            renderFrame();
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function renderFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid if enabled
+            if (settings.showGrid) {
+                ctx.strokeStyle = '#ccc';
+                ctx.lineWidth = 0.5;
+                
+                for (let x = 0; x < canvas.width; x += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+                
+                for (let y = 0; y < canvas.height; y += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw center point
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 10, centerY);
+            ctx.lineTo(centerX + 10, centerY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 10);
+            ctx.lineTo(centerX, centerY + 10);
+            ctx.stroke();
+            
+            // Draw sprite
+            if (currentSpriteImg.complete) {
+                ctx.save();
+                
+                if (settings.flipped) {
+                    ctx.translate(centerX, 0);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(
+                        currentSpriteImg,
+                        settings.xStart + currentFrame * settings.width,
+                        settings.yStart,
+                        settings.width,
+                        settings.height,
+                        -settings.width * settings.scale / 2,
+                        centerY - settings.height * settings.scale / 2,
+                        settings.width * settings.scale,
+                        settings.height * settings.scale
+                    );
+                } else {
+                    ctx.drawImage(
+                        currentSpriteImg,
+                        settings.xStart + currentFrame * settings.width,
+                        settings.yStart,
+                        settings.width,
+                        settings.height,
+                        centerX - settings.width * settings.scale / 2,
+                        centerY - settings.height * settings.scale / 2,
+                        settings.width * settings.scale,
+                        settings.height * settings.scale
+                    );
+                }
+                
+                ctx.restore();
+            }
+            
+            // Draw bounding box if enabled
+            if (settings.showBoundingBox) {
+                ctx.strokeStyle = 'blue';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(
+                    centerX - 10,
+                    centerY - 37,
+                    20,
+                    74
+                );
+            }
+        }
+    </script>
+</body>
+</html>

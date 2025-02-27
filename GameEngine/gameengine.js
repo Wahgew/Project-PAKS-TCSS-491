@@ -5,6 +5,11 @@ class GameEngine {
         // What you will use to draw
         this.ctx = null;
 
+        // Options and the Details
+        this.options = options || {
+            debugging: false,
+        };
+
         // timer initialization
         this.timer = null;
         this.running = false;
@@ -24,34 +29,116 @@ class GameEngine {
         // store player instance
         this.Player = null;
         this.entityCount = 0;
-
-        // Options and the Details
-        this.options = options || {
-            debugging: false,
-        };
-
-        // wait for DOM to load before accessing elements
-        window.addEventListener("DOMContentLoaded", () => {
-            this.debugBox = document.getElementById("debug");
-
-            if (this.debugBox) {
-                this.options.debugging = this.debugBox.checked; // Initialize debugging option
-
-                // event listener to update debugging option when checkbox is toggled
-                this.debugBox.addEventListener("change", (e) => {
-                    this.options.debugging = e.target.checked;
-
-                    console.log("Debug mode:", this.options.debugging);
-                });
-            }
-        });
     }
 
-    init(ctx) {
+    // use async to wait for the DB to initialize
+    async init(ctx) {
         this.ctx = ctx;
         this.startInput();
+        this.initDebugMode();
         this.timer = new Timer();
+
+        // Initialize levelTimesManager first
+        this.levelTimesManager = new LevelTimesManager();
+
+        // Wait for the database to be ready
+        await this.levelTimesManager.dbReady;
+        console.log("Database is ready");
+
+        // Now initialize LevelUI after DB is ready
         this.levelUI = new LevelUI(this);
+
+        // Update the best time cache once everything is initialized
+        await this.levelUI.updateBestTimeCache();
+    }
+
+    initDebugMode() {
+        // Get debug checkbox
+        this.debugBox = document.getElementById("debug");
+
+        if (this.debugBox) {
+            // Set initial state
+            this.options.debugging = this.debugBox.checked;
+
+            // Create debug menu
+            const debugMenu = document.createElement("div");
+            debugMenu.id = "debugMenu";
+
+            // Position menu next to debug checkbox
+            const checkboxRect = this.debugBox.getBoundingClientRect();
+            debugMenu.style.position = "fixed";
+            debugMenu.style.left = (checkboxRect.right + 10) + "px"; // 10px gap after checkbox
+            debugMenu.style.top = checkboxRect.top + "px";
+
+            // Rest of the styling
+            debugMenu.style.backgroundColor = "white";
+            debugMenu.style.padding = "10px";
+            debugMenu.style.border = "1px solid #ccc";
+            debugMenu.style.borderRadius = "4px";
+            debugMenu.style.display = this.options.debugging ? "block" : "none";
+            debugMenu.style.zIndex = "1000";
+
+            // Create level selector
+            const levelSelect = document.createElement("select");
+            levelSelect.style.padding = "5px";
+            levelSelect.style.marginLeft = "10px";
+
+            // Add level options
+            const levels = [
+                { value: 0, label: "Level 0 (Test)" },
+                { value: 1, label: "Level 1" },
+                { value: 2, label: "Level 2" }
+            ];
+
+            levels.forEach(level => {
+                const option = document.createElement("option");
+                option.value = level.value;
+                option.text = level.label;
+                levelSelect.appendChild(option);
+            });
+
+            // Add label
+            const label = document.createElement("label");
+            label.textContent = "Level: ";
+            label.style.marginRight = "5px";
+
+            // Add elements to debug menu
+            debugMenu.appendChild(label);
+            debugMenu.appendChild(levelSelect);
+
+            // Add to document
+            document.body.appendChild(debugMenu);
+
+            // Add event listeners
+            this.debugBox.addEventListener("change", (e) => {
+                this.options.debugging = e.target.checked;
+                debugMenu.style.display = e.target.checked ? "block" : "none";
+                console.log("Debug mode:", this.options.debugging);
+            });
+
+            levelSelect.addEventListener("change", (e) => {
+                const level = parseInt(e.target.value);
+                console.log("Loading level:", level);
+                if (this.levelConfig) {
+                    this.levelConfig.loadLevel(level);
+                    this.levelConfig.currentLevel = level;
+                }
+            });
+
+            // Initialize reset times button
+            const resetButton = document.getElementById('resetTimes');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset all level times?')) {
+                        this.levelTimesManager.resetAllTimes();
+                    }
+                });
+            }
+
+            // Set initial value and display state
+            levelSelect.value = this.levelConfig ? this.levelConfig.currentLevel : 1;
+            debugMenu.style.display = this.options.debugging ? "block" : "none";
+        }
     }
 
     start() {
@@ -118,33 +205,22 @@ class GameEngine {
         window.addEventListener("keydown", event => {
             this.keys[event.key.toLowerCase()] = true;
 
-            // Test level completion with 'L' key
-            if (event.key.toLowerCase() === 'l') {
-                console.log("Stopping timer...");
-                if (this.timer) {
-                    this.timer.stop();
-
-                    // re-draw timer display
-                    this.levelUI.showLevelComplete();
-                    this.draw();
-                }
-            }
-            // Test level reset with 'R' key
-            if (event.key.toLowerCase() === 'r') {
-                console.log("Resetting timer...");
-                if (this.timer) {
-                    this.timer.reset();
-                    this.levelUI.hideLevelComplete();
-                }
-            }
-
             if (event.key.toLowerCase() === 'enter') {
-                this.levelUI.hideLevelComplete();
+                // Handle level complete screen
+                console.log("before if " + this.levelUI.isDisplayingComplete)
+                if (this.levelUI.isDisplayingComplete && !this.Player.dead) {
+                    console.log("in if" + this.levelUI.isDisplayingComplete)
+
+                    this.levelUI.hideLevelComplete();
+                    this.levelConfig.loadNextLevel();
+                }
+                // Handle death screen (death screen state)
+                else if (this.Player && this.Player.dead) {  // track player death state
+                    this.levelUI.hideLevelComplete();
+                    this.levelConfig.loadLevel(this.levelConfig.currentLevel); // Reload current level
+                }
             }
-
         });
-
-
     }
 
     addEntity(entity) {
@@ -238,8 +314,8 @@ class GameEngine {
             this.ctx.font = "12px Arial";
             this.ctx.fillStyle = "red";
 
-            let offsetX = 10; // Adjust to prevent overlap with cursor
-            let offsetY = 20;
+            let offsetX = 35; // Adjust to prevent overlap with cursor
+            let offsetY = 10;
 
             this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
         }

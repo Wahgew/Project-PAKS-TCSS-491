@@ -5,7 +5,7 @@ class Animator {
         this.totalTime = frameCount * frameDuration;
     }
 
-    drawFrame(tick, ctx, x, y, scale = 1) {
+    drawFrame(tick, ctx, x, y, scale = 1, rotate = null) {
         if (!ctx || !this.spritesheet || !this.spritesheet.complete) {
             return;
         }
@@ -14,20 +14,41 @@ class Animator {
         if (this.elapsedTime > this.totalTime) this.elapsedTime -= this.totalTime;
         const frame = this.currentFrame();
 
-        try {
+        if (rotate != null) {
+            var degrees = (rotate * Math.PI) / 180;
+            ctx.save();
+            ctx.translate(x + this.width / 2, y + this.height / 2);
+            ctx.rotate(degrees);
+
             ctx.drawImage(
                 this.spritesheet,
                 this.xStart + this.width * frame, 
                 this.yStart,
                 this.width, 
                 this.height,
-                x, 
-                y,
-                this.width * scale,      // Use width * scale
-                this.height * scale      // Use height * scale
+                - this.width / 2, 
+                - this.height / 2,
+                this.width,      
+                this.height       
             );
-        } catch (e) {
-            console.error("Draw error:", e);
+    
+            ctx.restore();
+        } else {
+            try {
+                ctx.drawImage(
+                    this.spritesheet,
+                    this.xStart + this.width * frame, 
+                    this.yStart,
+                    this.width, 
+                    this.height,
+                    x, 
+                    y,
+                    this.width * scale,      // Use width * scale
+                    this.height * scale      // Use height * scale
+                );
+            } catch (e) {
+                console.error("Draw error:", e);
+            }
         }
     }
 

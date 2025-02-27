@@ -54,13 +54,31 @@ class ProjectileLauncher {
         }
 
         // Draw the sprite
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
+        switch (this.shotdirec) {
+            case 'UP':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 90);
+                break;
+            case 'DOWN':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 270);
+                break;
+            case 'RIGHT':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 180);
+                break;
+            case 'LEFT':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+                break;
+        }
     }
 }
 
 class Projectile {
     constructor(game, x, y, speed, direction) {
         Object.assign(this, {game, x, y, speed, direction});
+        // switch(direction) { // this is because the sprite is slightly misaligned temp.
+        //     case 'UP':
+        //         this.y += 9;
+        //     break;
+        // }
         this.y += 9; // this is hardcoded right now, needs to adjust for direction, use switch case prolly.
 
         this.height = 45;
@@ -83,16 +101,16 @@ class Projectile {
         switch (this.direction) {
             case 'UP':
                 this.velocity.y = -this.speed;
-				break;
+                break;
             case 'DOWN':
                 this.velocity.y = this.speed;
-				break;
+                break;
             case 'RIGHT':
                 this.velocity.x = this.speed;
-				break;
+                break;
             case 'LEFT':
                 this.velocity.x = -this.speed;
-				break;
+                break;
         }
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
@@ -108,7 +126,20 @@ class Projectile {
         }
 
         // Draw the sprite
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
+        switch (this.direction) {
+            case 'UP':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 90);
+                break;
+            case 'DOWN':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 270);
+                break;
+            case 'RIGHT':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 180);
+                break;
+            case 'LEFT':
+                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+                break;
+        }
     }
 }
 
@@ -133,8 +164,8 @@ class Spike {
         this.game = gameEngine;
         Object.assign(this, {x, y, speed, moving, direction, tracking, reverseTime});
 
-        this.height = 60;
-        this.width = 60;
+        this.height = 40;
+        this.width = 40;
         this.time = 0;
         this.reverse = false;
 
@@ -189,13 +220,15 @@ class Spike {
     }
 }
 
-class Laser { // A LOT OF JANK with this, refactor this later for sure.
-    constructor({gameEngine, x, y, speed, moving, direction, shotdirec, length}) {
+class Laser { 
+    constructor({gameEngine, x, y, speed, moving, direction, reverseTime, shotdirec, length}) {
         this.game = gameEngine;
-        Object.assign(this, {x, y, speed, moving, direction, shotdirec, length});
+        Object.assign(this, {x, y, speed, moving, direction, reverseTime, shotdirec, length});
 
-        this.height = 60;
+        this.height = 15; // hard coded in height, change if lineWidth changes.
         this.width = this.length;
+        this.reverse = false;
+        this.time = 0;
 
         // Load spritesheet
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/laser_test.png");
@@ -207,11 +240,11 @@ class Laser { // A LOT OF JANK with this, refactor this later for sure.
     }
 
     updateBB(){
-        this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+        this.BB = new BoundingBox(this.x, this.y - this.height / 2, this.width, this.height); 
     }
 
     update() {
-        //if (this.moving) updateMovement(this.game, this);
+        if (this.moving) updateMovement(this.game, this);
         this.x += this.game.clockTick * this.velocity.x; 
         this.y += this.game.clockTick * this.velocity.y;
         this.updateBB();
@@ -221,11 +254,29 @@ class Laser { // A LOT OF JANK with this, refactor this later for sure.
         if (this.game.options.debugging) {
             // Draw debug box
             ctx.strokeStyle = 'red';
-            ctx.strokeRect(this.x, this.y, this.width, this.height);
+            ctx.strokeRect(this.x, this.y - this.height / 2, this.width, this.height);
         }
-
-        // Draw the sprite
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+        ctx.save();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 15;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        switch (this.shotdirec) {
+            case 'UP':
+                ctx.lineTo(this.x, this.y - this.length);
+                break;
+            case 'DOWN':
+                ctx.lineTo(this.x, this.y + this.length);
+                break;
+            case 'LEFT':
+                ctx.lineTo(this.x - this.length, this.y);
+                break;
+            case 'RIGHT':
+                ctx.lineTo(this.x + this.length, this.y);
+                break;
+        }
+        ctx.stroke();
+        ctx.restore();
     }
 }
 
@@ -235,7 +286,7 @@ class Laser { // A LOT OF JANK with this, refactor this later for sure.
  * @param {enemies} object 
  */
 function updateMovement(game, object) { // consider option to make reverse coord based, so spikes can move in same location but staggered start.
-    if (object.moving && !object.tracking) { // make option for based on distance from starting, i.e. move until x is like -50 from start coord.
+    if ((object.moving && !object.tracking)) { // make option for based on distance from starting, i.e. move until x is like -50 from start coord.
         switch (object.direction) {
             case 'UP':
                 if (!object.reverse) object.velocity.y = object.speed;
