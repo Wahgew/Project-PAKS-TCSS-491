@@ -17,7 +17,20 @@ class Audiomanager {
             './sounds/love-on-hold-monument.mp3',
             './sounds/swingin.mp3',
             './sounds/the-executive-lounge.mp3',
-            './sounds/the-funny-bunch.mp3'
+            './sounds/the-funny-bunch.mp3',
+            './sounds/chill-strings.mp3',
+            './sounds/elevator-cafe.mp3',
+            './sounds/elevator-french.mp3',
+            './sounds/friday-keys.mp3',
+            './sounds/george-street.mp3',
+            './sounds/golden-coast.mp3',
+            './sounds/lobby-time.mp3',
+            './sounds/smooth-jazz.mp3',
+            './sounds/sorriso-elevator.mp3',
+            './sounds/sway-sunrise.mp3',
+            './sounds/theelevatorbossanova.mp3',
+            './sounds/waiting-music.mp3',
+            './sounds/yesterday-jazz.mp3',
         ];
 
         this.currentGameMusic = new Audio();
