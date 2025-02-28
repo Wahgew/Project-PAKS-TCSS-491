@@ -276,30 +276,62 @@ class GameEngine {
             }
         });
 
-        // draw timer
+        // draw timer with elevator theme
         if (this.timer) {
             const displayTime = this.timer.getDisplayTime();
             const minutes = Math.floor(displayTime / 60);
             const seconds = Math.floor(displayTime % 60);
             const milliseconds = Math.floor((displayTime % 1) * 100);
 
-
             const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`;
 
-            // text style
-            this.ctx.font = '20px monospace';
+            // Draw elevator-style digital display for timer
+            const displayWidth = 200;
+            const displayHeight = 50;
+            const padding = 10;
 
-            // Create background for better readability
-            const padding = 5;
-            const textMetrics = this.ctx.measureText(formattedTime);
-            const textHeight = 24;
+            // Position in top center
+            const displayX = (this.ctx.canvas.width / 2) - (displayWidth / 2);
+            const displayY = 20;
 
-            this.ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
-            this.ctx.fillRect(0, 0, textMetrics.width + padding * 2, textHeight + padding * 2);
 
-            // Draw text
-            this.ctx.fillStyle = 'black';
-            this.ctx.fillText(formattedTime, 5, 25);
+            // Draw panel background
+            this.ctx.fillStyle = '#333';
+            this.ctx.fillRect(displayX, displayY, displayWidth, displayHeight);
+            this.ctx.strokeStyle = '#555';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(displayX, displayY, displayWidth, displayHeight);
+
+            // Draw inner display
+            this.ctx.fillStyle = '#000';
+            this.ctx.fillRect(
+                displayX + padding,
+                displayY + padding,
+                displayWidth - padding * 2,
+                displayHeight - padding * 2
+            );
+
+            // Add text "FLOOR TIME"
+            this.ctx.font = '12px monospace';
+            this.ctx.fillStyle = '#ffcc00';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText('FLOOR TIME', displayX + padding + 5, displayY + padding + 15);
+
+            // Draw time
+            this.ctx.font = 'bold 18px monospace';
+            this.ctx.fillStyle = '#33ff33'; // Digital green color
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(
+                formattedTime,
+                displayX + displayWidth - padding - 5,
+                displayY + displayHeight - padding - 5
+            );
+
+            // Add small decorative LEDs
+            this.ctx.fillStyle = '#3f3'; // Green LED
+            this.ctx.beginPath();
+            this.ctx.arc(displayX + displayWidth - 15, displayY + 10, 3, 0, Math.PI * 2);
+            this.ctx.fill();
 
             // Only start the timer if it's not explicitly stopped
             if (this.timer.isRunning) {

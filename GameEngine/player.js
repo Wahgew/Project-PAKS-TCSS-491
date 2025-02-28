@@ -510,6 +510,21 @@ class Player {
     kill() {
         if (!this.game.options.debugging) {
             this.dead = true;
+
+            // Play death sound if audio manager exists
+            if (window.AUDIO_MANAGER) {
+                // Create a temporary audio element for the death sound
+                const deathSound = new Audio('./sounds/death_sound.mp3');
+
+                // Set volume based on current audio manager settings
+                deathSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+
+                // Play the sound
+                deathSound.play().catch(error => {
+                    console.error("Error playing death sound:", error);
+                });
+            }
+
             // Create death animation at player's center position
             this.deathAnimation = new DeathAnimation(
                 this.x + this.width / 2,
@@ -525,6 +540,22 @@ class Player {
         console.log("winGame called");
         if (!this.game.options.debugging) {
             this.win = true;
+
+            // Play level complete sound if audio manager exists
+            if (window.AUDIO_MANAGER) {
+                // Create a temporary audio element for the win sound
+                const winSound = new Audio('./sounds/insert-win-sound-here.mp3');
+
+                // Set volume based on current audio manager settings
+                winSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+
+                // Play the sound
+                winSound.play().catch(error => {
+                    console.error("Error playing level complete sound:", error);
+                });
+            }
+
+            // show level win UI
             if (this.game.levelUI) {
                 console.log("Showing level complete");
 
@@ -585,20 +616,73 @@ class Player {
                 this.deathAnimation.update(this.game.clockTick);
                 this.deathAnimation.draw(ctx);
 
-                // Once animation is finished, show death screen
+                // Check if animation is finished to show death screen
                 if (this.deathAnimation.finished) {
-                    // Draw death screen
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    // Draw elevator-themed death screen
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
                     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                    ctx.font = '48px monospace';
-                    ctx.fillStyle = 'red';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('YOU DIED', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    const centerX = ctx.canvas.width / 2;
+                    const centerY = ctx.canvas.height / 2;
 
-                    ctx.font = '24px monospace';
-                    ctx.fillStyle = 'white';
-                    ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
+                    // Draw red emergency panel
+                    const panelWidth = 400;
+                    const panelHeight = 300;
+                    const panelX = centerX - panelWidth/2;
+                    const panelY = centerY - panelHeight/2;
+
+                    // Red emergency panel background
+                    ctx.fillStyle = '#d00';
+                    ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+
+                    // Panel border
+                    ctx.strokeStyle = '#800';
+                    ctx.lineWidth = 5;
+                    ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
+
+                    // Warning stripes at top
+                    const stripeHeight = 30;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(panelX, panelY, panelWidth, stripeHeight);
+
+                    // Warning text
+                    ctx.font = 'bold 18px monospace';
+                    ctx.fillStyle = '#fff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('EMERGENCY STOP', centerX, panelY + 20);
+
+                    // Error display
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(panelX + 50, panelY + 60, panelWidth - 100, 60);
+
+                    ctx.font = 'bold 36px monospace';
+                    ctx.fillStyle = '#f00';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('ELEVATOR FAULT', centerX, panelY + 100);
+
+                    // Instructions
+                    ctx.font = '20px monospace';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText('Press ENTER to restart floor', centerX, panelY + 150);
+
+                    // Warning icon
+                    ctx.fillStyle = '#ff0';
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, panelY + 190);
+                    ctx.lineTo(centerX - 25, panelY + 230);
+                    ctx.lineTo(centerX + 25, panelY + 230);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 24px Arial';
+                    ctx.fillText('!', centerX, panelY + 220);
+
+                    // Flashing emergency light effect
+                    if (Math.floor(Date.now() / 300) % 2 === 0) {
+                        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    }
                 }
             }
             return;

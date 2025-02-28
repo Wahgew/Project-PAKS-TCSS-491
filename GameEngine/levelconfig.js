@@ -112,7 +112,6 @@ class LevelConfig {
         this.game.entities = [];
         this.game.Player = null;
 
-
         // first create and add the map
         const map = levelConfig.map();
         console.log("Map instance created");
@@ -140,6 +139,9 @@ class LevelConfig {
             this.game.timer.reset();
         }
 
+        // Add "elevator ding" sound effect when level loads
+        // this.playElevatorDing();
+
         return true;
     }
 
@@ -147,6 +149,31 @@ class LevelConfig {
         if (this.currentLevel !== 10) {
             this.loadLevel(++this.currentLevel);
             this.game.timer.reset();
+
+            // Play a random game track for the new level
+            if (window.AUDIO_MANAGER) {
+                window.AUDIO_MANAGER.playGameMusic();
+            }
         }
+    }
+
+    /**
+     * Plays an elevator "ding" sound effect when changing levels
+     */
+    playElevatorDing() {
+        // Create a temporary audio element for the ding sound
+        const dingSound = new Audio('./sounds/sample-adinghere.mp3');
+
+        // Set volume based on current audio manager settings
+        if (window.AUDIO_MANAGER) {
+            dingSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+        } else {
+            dingSound.volume = 0.5;
+        }
+
+        // Play the sound
+        dingSound.play().catch(error => {
+            console.error("Error playing elevator ding:", error);
+        });
     }
 }

@@ -40,6 +40,13 @@ function startGame() {
         await gameEngine.init(ctx);
         gameEngine.levelConfig = new LevelConfig(gameEngine);
         gameEngine.levelConfig.loadLevel(1);
+
+        // Switch from menu music to game music
+        if (window.AUDIO_MANAGER) {
+            window.AUDIO_MANAGER.stopMenuMusic();
+            window.AUDIO_MANAGER.playGameMusic();
+        }
+
         gameEngine.start();
         await gameEngine.levelTimesManager.debugPrintAllTimes();
         // gameEngine.levelTimesManager.resetBestTime(0, 3000)
@@ -52,5 +59,81 @@ function showLevels() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Initialize audio settings when the DOM is loaded
+    if (window.AUDIO_MANAGER) {
+        window.AUDIO_MANAGER.loadVolumeSettings();
+        window.AUDIO_MANAGER.playMenuMusic();
+    }
+
+    // Create welcome screen with start game and show levels callbacks
     new WelcomeScreen(startGame, showLevels);
+
+    function createVolumeToggleButton() {
+        console.log("Creating volume toggle button");
+
+        const volumeToggleBtn = document.createElement('button');
+        volumeToggleBtn.innerHTML = '🎵';
+        volumeToggleBtn.style.position = 'fixed';
+        volumeToggleBtn.style.top = '20px';
+        volumeToggleBtn.style.right = '20px';
+        volumeToggleBtn.style.backgroundColor = '#333';
+        volumeToggleBtn.style.color = '#ffcc00';
+        volumeToggleBtn.style.border = '2px solid #555';
+        volumeToggleBtn.style.borderRadius = '5px';
+        volumeToggleBtn.style.padding = '5px 10px';
+        volumeToggleBtn.style.cursor = 'pointer';
+        volumeToggleBtn.style.zIndex = '1000';
+        volumeToggleBtn.style.fontSize = '16px';
+        volumeToggleBtn.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+
+        // Add a class name to help with styling and debugging
+        volumeToggleBtn.className = 'volume-toggle-button';
+
+        // Add a hover effect
+        volumeToggleBtn.onmouseover = function() {
+            this.style.backgroundColor = '#444';
+            this.style.boxShadow = '0 0 15px rgba(255, 204, 0, 0.3)';
+        };
+
+        volumeToggleBtn.onmouseout = function() {
+            this.style.backgroundColor = '#333';
+            this.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        };
+
+        // Add onclick handler with explicit debug
+        volumeToggleBtn.onclick = function() {
+            console.log("Volume button clicked");
+            if (window.VOLUME_CONTROL) {
+                console.log("VOLUME_CONTROL exists, calling toggle()");
+                window.VOLUME_CONTROL.toggle();
+            } else {
+                console.error("VOLUME_CONTROL is undefined");
+                // Fallback: create volume control if it doesn't exist
+                window.VOLUME_CONTROL = new VolumeControl();
+                setTimeout(() => {
+                    if (window.VOLUME_CONTROL) {
+                        window.VOLUME_CONTROL.show();
+                    }
+                }, 100);
+            }
+        };
+
+        document.body.appendChild(volumeToggleBtn);
+        console.log("Volume toggle button added to document body");
+        return volumeToggleBtn;
+    }
+
+    createVolumeToggleButton();
+
+    // Add keyboard shortcut for volume panel (M key)
+    // Add keyboard shortcut for volume panel (M key)
+    document.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'm') {
+            console.log("M key pressed");
+            if (window.VOLUME_CONTROL) {
+                console.log("Toggling volume control via keyboard");
+                window.VOLUME_CONTROL.toggle();
+            }
+        }
+    });
 });

@@ -95,61 +95,108 @@ class LevelUI {
             await this.updateBestTimeCache();
         }
 
-        // Setup text properties
-        ctx.font = '30px monospace';
-        ctx.textAlign = 'center';
-
         // Get canvas center
         const centerX = ctx.canvas.width / 2;
         const centerY = ctx.canvas.height / 2;
 
-        // Calculate text dimensions and padding
-        const lineHeight = 40;
+        // Calculate dimensions for our elevator announcement display
+        const boxWidth = 500;
+        const boxHeight = 300;
+        const boxX = centerX - boxWidth/2;
+        const boxY = centerY - boxHeight/2;
 
-        // Create semi-transparent background
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        const boxWidth = 400;
-        const boxHeight = 200;
-        ctx.fillRect(
-            centerX - boxWidth/2,
-            centerY - boxHeight/2,
-            boxWidth,
-            boxHeight
-        );
+        // Draw semi-transparent overlay for background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-        // Draw text
-        ctx.fillStyle = '#FFFFFF';
+        // Draw elevator arrival screen
+        ctx.fillStyle = '#333'; // Dark gray for panel
+        ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
-        // Level Complete text
-        ctx.font = 'bold 30px monospace';
-        ctx.fillText('LEVEL COMPLETE!', centerX, centerY - lineHeight);
+        // Draw border
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
 
-        // Best Time - use cached value
-        ctx.font = '20px monospace';
-        ctx.fillText(
-            `Best Time: ${this.cachedBestTime}`,
-            centerX,
-            centerY + 10
-        );
+        // Add elevator door lines
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, boxY);
+        ctx.lineTo(centerX, boxY + boxHeight);
+        ctx.stroke();
 
-        // Current Time
-        ctx.fillText(
-            `Current Time: ${this.getCurrentTime()}`,
-            centerX,
-            centerY + lineHeight
-        );
+        // Draw indicator light (green for arrived)
+        const lightSize = 20;
+        ctx.fillStyle = '#3f3'; // Green light
+        ctx.beginPath();
+        ctx.arc(boxX + 30, boxY + 30, lightSize, 0, Math.PI * 2);
+        ctx.fill();
+        // Add glow effect
+        ctx.shadowColor = '#3f3';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(boxX + 30, boxY + 30, lightSize - 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
 
-        ctx.fillText(
-            'Press Enter to Continue',
-            centerX,
-            centerY + 30 + lineHeight
-        );
+        // Add floor display
+        ctx.fillStyle = '#000';
+        ctx.fillRect(boxX + boxWidth - 100, boxY + 20, 70, 40);
+
+        // Add "ARRIVED" text
+        ctx.font = 'bold 40px monospace';
+        ctx.fillStyle = '#ffcc00';
+        ctx.textAlign = 'center';
+        ctx.fillText('FLOOR COMPLETE', centerX, boxY + 80);
+
+        // Add "Next floor" text
+        ctx.font = '24px monospace';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('Press ENTER to continue', centerX, boxY + boxHeight - 40);
+
+        // Display times in digital display style
+        const displayWidth = 300;
+        const displayHeight = 40;
+        const displayX = centerX - displayWidth/2;
+
+        // Best Time display
+        ctx.fillStyle = '#000'; // Black background
+        ctx.fillRect(displayX, boxY + 120, displayWidth, displayHeight);
+
+        ctx.font = '18px monospace';
+        ctx.fillStyle = '#ffcc00';
+        ctx.textAlign = 'left';
+        ctx.fillText('BEST TIME:', displayX + 10, boxY + 120 + 25);
+
+        ctx.font = 'bold 18px monospace';
+        ctx.fillStyle = '#33ff33'; // Digital green
+        ctx.textAlign = 'right';
+        ctx.fillText(this.cachedBestTime, displayX + displayWidth - 10, boxY + 120 + 25);
+
+        // Current Time display
+        ctx.fillStyle = '#000'; // Black background
+        ctx.fillRect(displayX, boxY + 170, displayWidth, displayHeight);
+
+        ctx.font = '18px monospace';
+        ctx.fillStyle = '#ffcc00';
+        ctx.textAlign = 'left';
+        ctx.fillText('CURRENT TIME:', displayX + 10, boxY + 170 + 25);
+
+        ctx.font = 'bold 18px monospace';
+        ctx.fillStyle = '#33ff33'; // Digital green
+        ctx.textAlign = 'right';
+        ctx.fillText(this.getCurrentTime(), displayX + displayWidth - 10, boxY + 170 + 25);
 
         // Draw new best time message if applicable
         if (this.showBestTimeMsg) {
-            ctx.fillStyle = "green";
-            ctx.font = "30px Arial";
-            ctx.fillText(this.newBestTimeMsg, centerX, centerY - boxHeight/2 - 20);
+            // Add a flashing effect
+            if (Math.floor(Date.now() / 500) % 2 === 0) {
+                ctx.fillStyle = "#3f3"; // Green
+                ctx.font = "bold 30px monospace";
+                ctx.textAlign = 'center';
+                ctx.fillText("NEW RECORD!", centerX, boxY - 20);
+            }
         }
     }
 }
