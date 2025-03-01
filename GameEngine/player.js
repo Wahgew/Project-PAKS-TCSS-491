@@ -49,7 +49,7 @@ class Player {
         this.state = this.STATES.IDLE;
         this.dead = false;
         this.deathAnimation = null;
-        this.win = true;
+        this.win = false;
         this.isGrounded = true;
         this.gravity = 2000;
         this.levers = 0;
@@ -160,7 +160,6 @@ class Player {
 
     update() {
         const TICK = this.game.clockTick;
-
         // Movement constants
         const MIN_WALK = 20;
         const MAX_WALK = 400;
@@ -537,14 +536,19 @@ class Player {
 
     //call this method when the play has reached the exit door
     async winGame() {
-        console.log("winGame called");
+        // Prevent multiple win triggers
+        if (this.win) {
+            console.log("Win already triggered, ignoring duplicate call");
+            return;
+        }
+
         if (!this.game.options.debugging) {
             this.win = true;
 
             // Play level complete sound if audio manager exists
             if (window.AUDIO_MANAGER) {
                 // Create a temporary audio element for the win sound
-                const winSound = new Audio('./sounds/insert-win-sound-here.mp3');
+                const winSound = new Audio('./sounds/temp-win-game.mp3');
 
                 // Set volume based on current audio manager settings
                 winSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
