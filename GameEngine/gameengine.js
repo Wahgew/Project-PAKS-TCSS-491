@@ -85,9 +85,10 @@ class GameEngine {
 
             // Add level options
             const levels = [
-                { value: 0, label: "Level 0 (Test)" },
-                { value: 1, label: "Level 1" },
-                { value: 2, label: "Level 2" }
+                { value: 0, label: "Floor 0 (Test)" },
+                { value: 1, label: "Floor 1" },
+                { value: 2, label: "Floor 2" },
+                { value: 3, label: "Floor 3" }
             ];
 
             levels.forEach(level => {
@@ -207,15 +208,20 @@ class GameEngine {
 
             if (event.key.toLowerCase() === 'enter') {
                 // Handle level complete screen
-                console.log("before if " + this.levelUI.isDisplayingComplete)
                 if (this.levelUI.isDisplayingComplete && !this.Player.dead) {
-                    console.log("in if" + this.levelUI.isDisplayingComplete)
+                    console.log("Enter pressed on level complete screen");
 
+                    // First hide the level complete UI
                     this.levelUI.hideLevelComplete();
-                    this.levelConfig.loadNextLevel();
+
+                    // Add a small delay before loading the next level
+                    // This prevents accidental double-presses from carrying over
+                    setTimeout(() => {
+                        this.levelConfig.loadNextLevel();
+                    }, 100);
                 }
                 // Handle death screen (death screen state)
-                else if (this.Player && this.Player.dead) {  // track player death state
+                else if (this.Player && this.Player.dead) {
                     this.levelUI.hideLevelComplete();
                     this.levelConfig.loadLevel(this.levelConfig.currentLevel); // Reload current level
                 }
@@ -347,7 +353,7 @@ class GameEngine {
             this.ctx.fillStyle = "red";
 
             let offsetX = 35; // Adjust to prevent overlap with cursor
-            let offsetY = 10;
+            let offsetY = 30;
 
             this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
         }

@@ -5,6 +5,7 @@ class LevelUI {
         this.showBestTimeMsg = false;
         this.newBestTimeMsg = '';
         this.cachedBestTime = '--:--:--';  // Default value
+        this.levelCompelte = false;
     }
 
     // New method to update the best time cache
@@ -25,6 +26,9 @@ class LevelUI {
     }
 
     async showLevelComplete() {
+        // If already showing level complete or locked, don't do anything
+        if (this.isDisplayingComplete || this.levelCompelte) return;
+
         this.isDisplayingComplete = true;
 
         // Update the best time cache before comparing times
@@ -48,6 +52,11 @@ class LevelUI {
                 await this.updateBestTimeCache();
             }
         }
+
+        // After a short delay, allow UI to be shown again in future levels
+        setTimeout(() => {
+            this.levelCompelte = false;
+        }, 500);
     }
 
     showNewBestTime(formattedTime) {
@@ -59,6 +68,12 @@ class LevelUI {
     hideLevelComplete() {
         this.isDisplayingComplete = false;
         this.showBestTimeMsg = false;
+
+        // Add small delay before allowing another completion to be shown
+        this.levelCompelte = true;
+        setTimeout(() => {
+            this.levelCompelte = false;
+        }, 500);
     }
 
     formatTime(time) {
@@ -142,7 +157,57 @@ class LevelUI {
 
         // Add floor display
         ctx.fillStyle = '#000';
-        ctx.fillRect(boxX + boxWidth - 100, boxY + 20, 70, 40);
+        ctx.fillRect(boxX + boxWidth - 80, boxY + 10, 70, 40);
+
+        // Calculate next floor number
+        const nextLevel = this.gameEngine.levelConfig.getCurrentLevel() + 1
+
+        // Display next level as floor number with arrow indicating direction
+        ctx.font = 'bold 18px monospace';
+        ctx.fillStyle = '#ff9900'; // Orange color for next floor
+        ctx.textAlign = 'center';
+        ctx.fillText(`FL ${nextLevel}`, boxX + boxWidth - 55, boxY + 40);
+
+        // Add a small "next" label
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#ff9900';
+        ctx.fillText('NEXT', boxX + boxWidth - 45, boxY + 20);
+
+        // Add an up arrow to indicate direction
+        ctx.fillStyle = '#ff9900';
+        ctx.beginPath();
+        ctx.moveTo(boxX-20 + boxWidth - 10, boxY + 40);
+        ctx.lineTo(boxX-20 + boxWidth - 2, boxY + 30);
+        ctx.lineTo(boxX-20 + boxWidth + 2, boxY + 40);
+        ctx.closePath();
+        ctx.fill();
+
+//         // Add next floor display
+//         ctx.fillStyle = '#000'; // Black background for digital display
+//         ctx.fillRect(boxX + boxWidth - 80, boxY + 60, 70, 40);
+//
+// // Calculate next floor number
+//         const nextLevel = this.gameEngine.levelConfig.getCurrentLevel() + 1;
+//
+// // Display next level as floor number with arrow indicating direction
+//         ctx.font = 'bold 24px monospace';
+//         ctx.fillStyle = '#ff9900'; // Orange color for next floor
+//         ctx.textAlign = 'center';
+//         ctx.fillText(`FL ${nextLevel}`, boxX + boxWidth - 45, boxY + 85);
+//
+// // Add a small "next" label
+//         ctx.font = '10px monospace';
+//         ctx.fillStyle = '#ff9900';
+//         ctx.fillText('NEXT', boxX + boxWidth - 45, boxY + 72);
+//
+// // Add an up arrow to indicate direction
+//         ctx.fillStyle = '#ff9900';
+//         ctx.beginPath();
+//         ctx.moveTo(boxX + boxWidth - 15, boxY + 80);
+//         ctx.lineTo(boxX + boxWidth - 5, boxY + 70);
+//         ctx.lineTo(boxX + boxWidth + 5, boxY + 80);
+//         ctx.closePath();
+//         ctx.fill();
 
         // Add "ARRIVED" text
         ctx.font = 'bold 40px monospace';
