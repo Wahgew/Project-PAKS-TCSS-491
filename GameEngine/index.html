@@ -12,6 +12,19 @@
             transform: translate(-50%, -50%);
             z-index: 1;
         }
+        @font-face {
+            font-family: 'Molot';
+            src: url('./fonts/Molot.woff2') format('woff2'),
+                 url('./fonts/Molot.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        /* Apply the Molot font to the index class */
+        .index ,p {
+            font-family: 'Molot', sans-serif;
+            font-weight: normal;
+            font-style: normal;
+        }
         #debugMenu select {
             background-color: white;
             border: 1px solid #ccc;
