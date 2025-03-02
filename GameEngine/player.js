@@ -53,6 +53,8 @@ class Player {
         this.isGrounded = true;
         this.gravity = 2000;
         this.levers = 0;
+        this.previousJumpButtonState = false;
+        this.jumpInputConsumed = false;
 
         this.velocity = {x: 0, y: 0};
 
@@ -191,9 +193,13 @@ class Player {
         if (this.jumpBufferTimer > 0) {
             this.jumpBufferTimer -= TICK;
         }
-        if ((this.game.keys[' '] || this.game.keys['w']) && this.jumpBufferTimer <= 0) {
+        const jumpKeyPressed = this.game.keys[' '] || this.game.keys['w'];
+        if (jumpKeyPressed && !this.previousJumpButtonState && this.jumpBufferTimer <= 0) {
             this.jumpBufferTimer = this.jumpBufferTime;
+            this.jumpInputConsumed = false;
         }
+        this.previousJumpButtonState = jumpKeyPressed;
+
 
         // if (this.win) {
         //     console.log(this.game.entities);
@@ -262,15 +268,17 @@ class Player {
 
         // Jump input handling
         if ((this.game.keys[' '] || this.game.keys['w'] || this.jumpBufferTimer > 0) && this.isGrounded 
-            && this.state !== this.STATES.CROUCHING) {
+            && this.state !== this.STATES.CROUCHING && !this.jumpInputConsumed) {
             this.velocity.y = -MAX_JUMP;
             this.state = this.STATES.JUMPING;
             this.isGrounded = false;
             this.jumpRelease = false;
             this.canWallJump = false;
+            this.jumpBufferTimer = 0; // Reset buffer after using the jump
+            this.jumpInputConsumed = true; // Mark this input as consumed
         }
 
-        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'])) {
+        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'] )) {
             this.velocity.y = this.velocity.y / 2; // velocity cut when jump key released
             this.jumpRelease = true;
             this.canWallJump = false;
@@ -279,6 +287,10 @@ class Player {
         //     this.velocity.y -= 850 * TICK;
         // }
 
+        if (!jumpKeyPressed) {
+            this.jumpInputConsumed = false;
+        }
+        
         // Update state based on movement and keys
         this.updateState();
 
