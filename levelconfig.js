@@ -90,7 +90,58 @@ class LevelConfig {
                     new Spike({gameEngine: this.game, x: 735, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 755, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                 ]
+            },
+
+            3: {
+                map: () => new drawMap(this.TILE_SIZE, this.game),
+                player: () => new Player(this.game, 170, 130), // Starting position near top left
+                exitDoor: () => new exitDoor(this.game, 1805, 119,1), // Exit door near top right
+                hazards: () => [
+                    // Some spike hazards at strategic positions
+                    new Spike({gameEngine: this.game, x: 260, y: 240, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 480, y: 300, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 540, y: 300, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 600, y: 300, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 850, y: 390, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 895, y: 435, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 805, y: 350, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 40, y: 175, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1680, y: 235, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 1090, y: 490, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1150, y: 520, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1210, y: 550, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 1450, y: 305, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 1420, y: 550, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1485, y: 600, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1550, y: 650, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 320, y: 800, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 320, y: 700, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 320, y: 600, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 320, y: 500, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 820, y: 800, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 820, y: 700, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 820, y: 600, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 820, y: 500, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+
+
+
+                    //platfrom
+                    new Platform({
+                        gameEngine: this.game, x: 1200, y: 370, speed: 50, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+                    // Levers that need to be collected
+                    new Lever({gameEngine: this.game, x: 30, y: 800, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                ]
             }
+
             // add more levels below
         };
 
@@ -108,10 +159,14 @@ class LevelConfig {
         const levelConfig = this.getLevelEntities(levelNumber);
         if (!levelConfig) return false;
 
+        // Make sure any level completion UI is hidden first
+        if (this.game.levelUI) {
+            this.game.levelUI.hideLevelComplete();
+        }
+
         // clear existing entities and player reference
         this.game.entities = [];
         this.game.Player = null;
-
 
         // first create and add the map
         const map = levelConfig.map();
@@ -140,13 +195,61 @@ class LevelConfig {
             this.game.timer.reset();
         }
 
+        // Add "elevator ding" sound effect when level loads
+        // this.playElevatorDing();
+
         return true;
     }
 
+    getCurrentLevel() {
+        return this.currentLevel
+    }
+
     loadNextLevel() {
-        if (this.currentLevel !== 10) {
-            this.loadLevel(++this.currentLevel);
-            this.game.timer.reset();
+        if (this.currentLevel < 10) {
+            // Make sure any level completion UI is hidden before loading next level
+            if (this.game.levelUI) {
+                this.game.levelUI.hideLevelComplete();
+            }
+
+            // Increment the current level BEFORE loading it
+            const nextLevel = this.currentLevel + 1;
+
+            // Add a small delay to ensure UI is properly cleared
+            setTimeout(() => {
+                console.log(`Loading next level: ${nextLevel}`);
+
+                // Update currentLevel before loading the level
+                this.currentLevel = nextLevel;
+
+                // Now load the updated level
+                this.loadLevel(nextLevel);
+
+                // Play a random game track for the new level
+                if (window.AUDIO_MANAGER) {
+                    window.AUDIO_MANAGER.playGameMusic();
+                }
+            }, 100);
         }
+    }
+
+    /**
+     * Plays an elevator "ding" sound effect when changing levels
+     */
+    playElevatorDing() {
+        // Create a temporary audio element for the ding sound
+        const dingSound = new Audio('./sounds/sample-adinghere.mp3');
+
+        // Set volume based on current audio manager settings
+        if (window.AUDIO_MANAGER) {
+            dingSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+        } else {
+            dingSound.volume = 0.5;
+        }
+
+        // Play the sound
+        dingSound.play().catch(error => {
+            console.error("Error playing elevator ding:", error);
+        });
     }
 }

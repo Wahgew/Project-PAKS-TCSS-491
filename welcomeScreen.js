@@ -4,6 +4,11 @@ class WelcomeScreen {
         this.levelsCallback = levelsCallback;
         this.aboutCallback = aboutCallback;
         this.createWelcomeScreen();
+
+        // Start playing menu music if audio manager exists
+        if (window.AUDIO_MANAGER) {
+            window.AUDIO_MANAGER.playMenuMusic();
+        }
     }
 
     createWelcomeScreen() {
@@ -69,6 +74,12 @@ class WelcomeScreen {
             // Add click handler
             buttonImg.addEventListener("click", () => {
                 this.hideWelcomeScreen();
+
+                // Special handling for start button to switch music
+                if (button.src.includes("start.png") && window.AUDIO_MANAGER) {
+                    window.AUDIO_MANAGER.stopMenuMusic();
+                    // Game music will be started in the startCallback (startGame function)
+                }
                 button.callback();
             });
 
@@ -85,5 +96,11 @@ class WelcomeScreen {
 
     showWelcomeScreen() {
         this.welcomeContainer.style.display = "flex";
+
+        // Ensure we're playing menu music when returning to welcome screen
+        if (window.AUDIO_MANAGER) {
+            window.AUDIO_MANAGER.stopGameMusic();
+            window.AUDIO_MANAGER.playMenuMusic();
+        }
     }
 }

@@ -29,6 +29,65 @@
             border-color: #666;
             box-shadow: 0 0 3px rgba(0,0,0,0.2);
         }
+
+        .elevator-volume-slider {
+            -webkit-appearance: none; /* Remove default styling in WebKit browsers */
+            appearance: none;         /* Remove default styling */
+            background: #333;         /* Slider background */
+            outline: none;            /* Remove focus outline */
+            border-radius: 4px;       /* Rounded corners */
+            cursor: pointer;
+        }
+
+        /* Track styles */
+        .elevator-volume-slider::-webkit-slider-runnable-track {
+            height: 8px;
+            background: #555;
+            border-radius: 2px;
+        }
+
+        .elevator-volume-slider::-moz-range-track {
+            height: 8px;
+            background: #555;
+            border-radius: 2px;
+        }
+
+        /* Thumb styles */
+        .elevator-volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffcc00;
+            margin-top: -4px; /* Centers thumb on track */
+            border: 1px solid #222;
+        }
+
+        .elevator-volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffcc00;
+            border: 1px solid #222;
+        }
+
+        /* The panel style remains the same */
+        #volumeControlPanel {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            width: 80px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 10px;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000;
+        }
     </style>
     <script type="text/javascript" src="./assetmanager.js"></script>
     <script type="text/javascript" src="./timer.js"></script>
@@ -49,6 +108,8 @@
     <script type="text/javascript" src="./player.js"></script>
     <script type="text/javascript" src="./welcomeScreen.js"></script>
     <script type="text/javascript" src="./LevelsScreen.js"></script>
+    <script type="text/javascript" src="./audiomanager.js"></script>
+    <script type="text/javascript" src="./volumnecontrolui.js"></script>
     <script type="text/javascript" src="./main.js"></script>
     <script>
         console.log(window.screen.availWidth);
