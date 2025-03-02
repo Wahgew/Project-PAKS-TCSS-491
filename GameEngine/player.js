@@ -503,6 +503,7 @@ class Player {
             this.game.keys[key] = false;
         }
         this.levers = 0; // reset levers collected;
+        this.dead = false;
     }
 
     // call this method if you want to kill the player from an entity
