@@ -1,9 +1,10 @@
 class BigBlock {
-    constructor(game, x, y, width, height) {
-        Object.assign(this, {game, x, y, width, height});
-        this.spritesheet = ASSET_MANAGER.getAsset("./sprites/bigblock.png"); // get sprite 1920 x 1080
-        this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
+    constructor(game, x, y, x2, y2) {
+        Object.assign(this, {game, x, y, x2, y2});
+        this.width = x2 - x;
+        this.height = y2 - y;
         this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+        this.colors = ["maroon", 'teal', 'plum', 'darkslategray'] // actual colors are black, "darkcyan", "darkslateblue", 'slategray'
     }
     update() {
         ;
@@ -14,6 +15,7 @@ class BigBlock {
             ctx.strokeStyle = 'red';
             ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+        ctx.fillStyle = this.colors[this.game.currentColor];
+        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }
