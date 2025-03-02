@@ -1,4 +1,5 @@
 class Lever {
+    //testing
     constructor({gameEngine, x, y, speed, moving, direction, reverseTime}) {
         this.game = gameEngine;
         Object.assign(this, {x, y, speed, moving, direction, reverseTime});
