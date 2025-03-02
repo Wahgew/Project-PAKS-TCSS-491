@@ -230,6 +230,20 @@ class Player {
                     that.winGame();
                 }
                 //console.log("Player has collided with exit");
+            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) { // might need to call this 
+                if (that.lastBB.bottom <= entity.BB.top + 5 && that.velocity.y > 0) {
+                    // This is a top collision - set grounded but don't call handleWallSlide
+                    that.velocity.y = 0;
+                    that.isGrounded = true;
+                    that.y = entity.y - that.height;
+                } else if (that.lastBB.top >= entity.BB.bottom - 5 && that.velocity.y < 0) {
+                    // Bottom collision - player hits their head
+                    that.velocity.y = 0; // Stop upward movement
+                    that.y = entity.BB.bottom; // Prevent clipping into the block
+                } else if (that.velocity.x !== 0) {
+                    // This is a side collision - handle wall slide
+                    that.handleWallSlide(true, null, entity.x, entity.y, entity.width);
+                }
             }
         });
 
@@ -243,11 +257,13 @@ class Player {
             this.state = this.STATES.JUMPING;
             this.isGrounded = false;
             this.jumpRelease = false;
+            this.canWallJump = false;
         }
 
         if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'])) {
             this.velocity.y = this.velocity.y / 2; // velocity cut when jump key released
             this.jumpRelease = true;
+            this.canWallJump = false;
         }
         // if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
         //     this.velocity.y -= 850 * TICK;
@@ -277,14 +293,19 @@ class Player {
             // In the air - jumping or falling
             if (this.velocity.y < 0) {
                 this.state = this.STATES.JUMPING;
-            } else {
+            } else if (!this.isWallSliding){
                 this.state = this.STATES.FALLING;
+            } else {
+                this.state = this.STATES.WALL_SLIDING;
             }
             return;
         }
 
         // On the ground
-        if (this.isGrounded) {
+        if (this.isGrounded) { 
+            if (this.isWallSliding) {
+                this.isWallSliding = false;
+            }
             // Check for crouching first (new state)
             if (this.game.keys['s'] && Math.abs(this.velocity.x) < 20) {
                 this.state = this.STATES.CROUCHING;
@@ -420,8 +441,6 @@ class Player {
 
     // Handles horizontal collision detection and response : boundingbox for horizontal movement
     handleHorizontalCollision(horizontalBB, nextX) {
-        const MAX_WALLSLIDE = 175;
-        const MAX_JUMP = 850;
         const collision = this.map.checkCollisions({
             BB: horizontalBB,
             x: nextX,
@@ -431,34 +450,56 @@ class Player {
         });
 
         if (collision.collides) {
-            let jump = false;
-            if ((!this.isGrounded && this.velocity.x !== 0)) { // WALL SLIDE CHECK
-                this.state = this.STATES.WALL_SLIDING;
-                if (this.velocity.y > MAX_WALLSLIDE) {
-                    this.velocity.y = MAX_WALLSLIDE;
-                }
-                if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding left
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = 200;
-                    this.state = this.STATES.JUMPING;
-                    jump = true;
-                }
-                if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding right
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = -200;
-                    this.state = this.STATES.JUMPING;
-                    jump = true;
-                }
-            }
-            if (this.velocity.x > 0 && !jump) {
-                this.x = collision.tileX - this.width;
-            } else if (this.velocity.x < 0 && !jump) {
-                this.x = collision.tileX + this.map.testSize;
-            } if (!jump) {
-                this.velocity.x = 0;
-            }
+            this.handleWallSlide(false, collision);
         } else {
             this.x = nextX;
+        }
+    }
+    handleWallSlide(bigBlock, collision = null , x = 0, y = 0, width = 0) {
+        const MAX_WALLSLIDE = 175;
+        const MAX_JUMP = 850;
+        var jump = false;
+        if ((!this.isGrounded)) { // WALL SLIDE CHECK
+            this.state = this.STATES.WALL_SLIDING;
+            this.isWallSliding = true;
+            if (this.velocity.y > MAX_WALLSLIDE) {
+                this.velocity.y = MAX_WALLSLIDE;
+            }
+            if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) { // holding left
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = 200;
+                this.state = this.STATES.JUMPING;
+                jump = true;
+                this.canWallJump = false;
+                this.isWallSliding = false;
+            }
+            if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])&& this.canWallJump) { // holding right
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = -200;
+                this.state = this.STATES.JUMPING;
+                jump = true;
+                this.canWallJump = false;
+                this.isWallSliding = false;
+            }
+        }
+        if (!bigBlock) { // check if collision is tile or bigblock based.
+            if (this.velocity.x > 0 && !jump) { 
+                this.x = collision.tileX - this.width;
+            } else if (this.velocity.x < 0 && !jump) {
+                this.x = collision.tileX + this.map.testSize; // how does this work???
+            } 
+        } else {
+            if (this.velocity.x > 0 && !jump ) { // right
+                this.x = x- this.width;
+            } else if (this.velocity.x < 0 && !jump ) { // left
+                this.x = (x + width);
+            } 
+        }
+        if (!this.game.keys['w'] && !this.game.keys[' ']) {
+            this.canWallJump = true;
+        }
+        if (!jump) {
+            this.velocity.x = 0;
         }
     }
 
@@ -503,6 +544,7 @@ class Player {
             this.game.keys[key] = false;
         }
         this.levers = 0; // reset levers collected;
+        this.dead = false;
     }
 
     // call this method if you want to kill the player from an entity
