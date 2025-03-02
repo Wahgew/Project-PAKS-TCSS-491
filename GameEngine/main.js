@@ -62,7 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize audio settings when the DOM is loaded
     if (window.AUDIO_MANAGER) {
         window.AUDIO_MANAGER.loadVolumeSettings();
-        window.AUDIO_MANAGER.playMenuMusic();
     }
 
     // Create welcome screen with start game and show levels callbacks

@@ -7,7 +7,7 @@ class WelcomeScreen {
 
         // Start playing menu music if audio manager exists
         if (window.AUDIO_MANAGER) {
-            window.AUDIO_MANAGER.playMenuMusic();
+            //window.AUDIO_MANAGER.playMenuMusic();
         }
     }
 
@@ -213,3 +213,305 @@ class WelcomeScreen {
         }
     }
 }
+
+class ElevatorDoorSequence {
+    constructor(callback) {
+        this.callback = callback;
+        // Prevent audio from playing automatically
+        if (window.AUDIO_MANAGER) {
+            window.AUDIO_MANAGER.stopMenuMusic();
+        }
+        this.createDoorSequence();
+    }
+
+    createDoorSequence() {
+        // Create container
+        this.container = document.createElement("div");
+        this.container.style.position = "fixed";
+        this.container.style.top = "0";
+        this.container.style.left = "0";
+        this.container.style.width = "100%";
+        this.container.style.height = "100%";
+        this.container.style.backgroundColor = "#111";
+        this.container.style.zIndex = "9999"; // Very high z-index to ensure it's on top
+        this.container.style.display = "flex";
+        this.container.style.justifyContent = "center";
+        this.container.style.alignItems = "center";
+        this.container.style.cursor = "pointer";
+
+        // Main container with game dimensions
+        const gameContainer = document.createElement("div");
+        gameContainer.style.position = "relative";
+        gameContainer.style.width = "1024px"; // Match game canvas
+        gameContainer.style.height = "768px"; // Match game canvas
+        gameContainer.style.maxWidth = "90vw";
+        gameContainer.style.maxHeight = "90vh";
+        gameContainer.style.display = "flex";
+        gameContainer.style.justifyContent = "center";
+        gameContainer.style.alignItems = "center";
+
+        // Create elevator frame/threshold (outer frame)
+        const elevatorFrame = document.createElement("div");
+        elevatorFrame.style.position = "relative";
+        elevatorFrame.style.width = "600px";
+        elevatorFrame.style.height = "500px";
+        elevatorFrame.style.backgroundColor = "#333";
+        elevatorFrame.style.border = "10px solid #8a8a8a";
+        elevatorFrame.style.borderRadius = "5px";
+        elevatorFrame.style.boxShadow = "0 0 30px rgba(0, 0, 0, 0.7)";
+
+        // PAKS indicator panel - firmly attach it to the elevator frame
+        const namePanel = document.createElement("div");
+        namePanel.style.position = "absolute";
+        namePanel.style.top = "-40px";
+        namePanel.style.left = "50%";
+        namePanel.style.transform = "translateX(-50%)";
+        namePanel.style.width = "150px";
+        namePanel.style.height = "30px";
+        namePanel.style.backgroundColor = "#222";
+        namePanel.style.border = "3px solid #8a8a8a";
+        namePanel.style.borderRadius = "3px";
+        namePanel.style.display = "flex";
+        namePanel.style.justifyContent = "center";
+        namePanel.style.alignItems = "center";
+        namePanel.style.zIndex = "9999"; // Ensure visibility
+
+        // Create digital PAKS display
+        const paksDisplay = document.createElement("div");
+        paksDisplay.style.width = "130px";
+        paksDisplay.style.height = "20px";
+        paksDisplay.style.backgroundColor = "#00cc00";
+        paksDisplay.style.fontFamily = "monospace";
+        paksDisplay.style.fontWeight = "bold";
+        paksDisplay.style.fontSize = "16px";
+        paksDisplay.style.color = "#003300";
+        paksDisplay.style.display = "flex";
+        paksDisplay.style.justifyContent = "center";
+        paksDisplay.style.alignItems = "center";
+        paksDisplay.innerHTML = "P.A.K.S"; // Using innerHTML to ensure text appears
+        paksDisplay.style.boxShadow = "0 0 10px rgba(0, 204, 0, 0.7)";
+        namePanel.appendChild(paksDisplay);
+
+        // Doors container - this holds both sliding doors
+        const doorsContainer = document.createElement("div");
+        doorsContainer.style.position = "absolute";
+        doorsContainer.style.width = "92%";
+        doorsContainer.style.height = "94%";
+        doorsContainer.style.top = "3%";
+        doorsContainer.style.left = "4%";
+        doorsContainer.style.overflow = "hidden"; // Important: hide doors when they slide
+        doorsContainer.style.backgroundColor = "#444";
+
+        // Create left door
+        this.leftDoor = document.createElement("div");
+        this.leftDoor.style.height = "100%";
+        this.leftDoor.style.width = "50%";
+        this.leftDoor.style.backgroundColor = "#a0a0a0";
+        this.leftDoor.style.position = "absolute";
+        this.leftDoor.style.left = "0";
+        this.leftDoor.style.top = "0";
+        this.leftDoor.style.transition = "transform 1.5s ease-in-out";
+        this.leftDoor.style.borderRight = "2px solid #888";
+        this.leftDoor.style.boxShadow = "inset 0 0 10px rgba(0, 0, 0, 0.5)";
+
+        // Create right door
+        this.rightDoor = document.createElement("div");
+        this.rightDoor.style.height = "100%";
+        this.rightDoor.style.width = "50%";
+        this.rightDoor.style.backgroundColor = "#a0a0a0";
+        this.rightDoor.style.position = "absolute";
+        this.rightDoor.style.right = "0";
+        this.rightDoor.style.top = "0";
+        this.rightDoor.style.transition = "transform 1.5s ease-in-out";
+        this.rightDoor.style.borderLeft = "2px solid #888";
+        this.rightDoor.style.boxShadow = "inset 0 0 10px rgba(0, 0, 0, 0.5)";
+
+        // Add horizontal lines to doors to make them look more like elevator doors
+        for (let i = 1; i < 10; i++) {
+            const leftLine = document.createElement("div");
+            leftLine.style.position = "absolute";
+            leftLine.style.width = "100%";
+            leftLine.style.height = "1px";
+            leftLine.style.backgroundColor = "#888";
+            leftLine.style.top = `${i * 10}%`;
+
+            const rightLine = document.createElement("div");
+            rightLine.style.position = "absolute";
+            rightLine.style.width = "100%";
+            rightLine.style.height = "1px";
+            rightLine.style.backgroundColor = "#888";
+            rightLine.style.top = `${i * 10}%`;
+
+            this.leftDoor.appendChild(leftLine);
+            this.rightDoor.appendChild(rightLine);
+        }
+
+        // Create call button panel on the side
+        const callButtonPanel = document.createElement("div");
+        callButtonPanel.style.position = "absolute";
+        callButtonPanel.style.right = "-70px";
+        callButtonPanel.style.top = "50%";
+        callButtonPanel.style.transform = "translateY(-50%)";
+        callButtonPanel.style.width = "50px";
+        callButtonPanel.style.height = "120px";
+        callButtonPanel.style.backgroundColor = "#333";
+        callButtonPanel.style.border = "4px solid #555";
+        callButtonPanel.style.borderRadius = "5px";
+        callButtonPanel.style.display = "flex";
+        callButtonPanel.style.flexDirection = "column";
+        callButtonPanel.style.alignItems = "center";
+        callButtonPanel.style.justifyContent = "space-evenly";
+        callButtonPanel.style.padding = "10px 0";
+        callButtonPanel.style.zIndex = "9999"; // Ensure visibility
+
+        // Up button
+        const upButton = document.createElement("div");
+        upButton.style.width = "35px";
+        upButton.style.height = "35px";
+        upButton.style.backgroundColor = "#222";
+        upButton.style.border = "2px solid #666";
+        upButton.style.borderRadius = "50%";
+        upButton.style.display = "flex";
+        upButton.style.justifyContent = "center";
+        upButton.style.alignItems = "center";
+        upButton.style.cursor = "pointer";
+        upButton.style.marginBottom = "10px";
+
+        // Up arrow symbol
+        const upArrow = document.createElement("div");
+        upArrow.innerHTML = "▲"; // Simple unicode triangle
+        upArrow.style.color = "#aaa";
+        upArrow.style.fontSize = "14px";
+        upButton.appendChild(upArrow);
+
+        // Down button
+        const downButton = document.createElement("div");
+        downButton.style.width = "35px";
+        downButton.style.height = "35px";
+        downButton.style.backgroundColor = "#222";
+        downButton.style.border = "2px solid #666";
+        downButton.style.borderRadius = "50%";
+        downButton.style.display = "flex";
+        downButton.style.justifyContent = "center";
+        downButton.style.alignItems = "center";
+        downButton.style.cursor = "pointer";
+
+        // Down arrow symbol
+        const downArrow = document.createElement("div");
+        downArrow.innerHTML = "▼"; // Simple unicode triangle
+        downArrow.style.color = "#aaa";
+        downArrow.style.fontSize = "14px";
+        downButton.appendChild(downArrow);
+
+        // Make one button appear pressed
+        const randomButton = Math.random() > 0.5 ? upButton : downButton;
+        randomButton.style.backgroundColor = "#ffcc00";
+        randomButton.querySelector("div").style.color = "#333";
+        randomButton.style.boxShadow = "0 0 10px #ffcc00";
+
+        // Add buttons to panel
+        callButtonPanel.appendChild(upButton);
+        callButtonPanel.appendChild(downButton);
+
+        // Add button handlers for opening doors
+        upButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.openDoors();
+        });
+
+        downButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.openDoors();
+        });
+
+        // Create prompt text
+        this.prompt = document.createElement("div");
+        this.prompt.style.position = "absolute";
+        this.prompt.style.bottom = "50px";
+        this.prompt.style.width = "100%";
+        this.prompt.style.textAlign = "center";
+        this.prompt.style.color = "#ffcc00";
+        this.prompt.style.fontFamily = "monospace";
+        this.prompt.style.fontSize = "24px";
+        this.prompt.style.textShadow = "0 0 10px rgba(255, 204, 0, 0.5)";
+        this.prompt.innerHTML = "Click or press any key to open doors";
+        this.prompt.style.zIndex = "10000"; // Ensure visibility
+
+        // Assembly in proper order - doors go into doors container
+        doorsContainer.appendChild(this.leftDoor);
+        doorsContainer.appendChild(this.rightDoor);
+
+        // Add everything to the elevator frame
+        elevatorFrame.appendChild(doorsContainer);
+        elevatorFrame.appendChild(namePanel);
+        elevatorFrame.appendChild(callButtonPanel);
+
+        // Add elevator to game container
+        gameContainer.appendChild(elevatorFrame);
+        gameContainer.appendChild(this.prompt);
+
+        // Add everything to main container
+        this.container.appendChild(gameContainer);
+
+        // Add to body
+        document.body.appendChild(this.container);
+
+        console.log("Elevator door sequence created");
+
+        // Handle interaction
+        this.container.addEventListener("click", () => this.openDoors());
+        document.addEventListener("keydown", (e) => {
+            if (this.container.parentNode) {
+                this.openDoors();
+            }
+        });
+    }
+
+    openDoors() {
+        // Prevent multiple clicks
+        if (this.doorsOpening) return;
+        this.doorsOpening = true;
+
+        console.log("Opening doors...");
+
+        // Hide prompt
+        this.prompt.style.display = "none";
+
+        // Play door ding sound if available
+        const doorSound = new Audio('./sounds/elevator-ding.mp3');
+        doorSound.volume = 0.3;
+        doorSound.play().catch(e => console.log("Could not play door sound:", e));
+
+        // Animate doors opening
+        setTimeout(() => {
+            this.leftDoor.style.transform = "translateX(-100%)";
+            this.rightDoor.style.transform = "translateX(100%)";
+            console.log("Door animation started");
+        }, 200); // Short delay after the ding
+
+        // Start menu music when doors start opening
+        setTimeout(() => {
+            if (window.AUDIO_MANAGER) {
+                window.AUDIO_MANAGER.playMenuMusic();
+                console.log("Menu music started");
+            }
+        }, 500); // Slight delay so the ding can be heard first
+
+        // Remove container after animation
+        setTimeout(() => {
+            this.container.remove();
+            console.log("Elevator door sequence removed");
+            if (this.callback) this.callback();
+        }, 2000); // Give enough time for doors to fully open
+    }
+}
+
+// Initialize when document is ready
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM loaded, initializing elevator door sequence");
+
+    // Show the elevator door sequence first
+    new ElevatorDoorSequence(() => {
+        console.log("Doors opened, game ready");
+    });
+});
