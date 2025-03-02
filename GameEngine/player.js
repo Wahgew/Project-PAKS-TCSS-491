@@ -240,13 +240,13 @@ class Player {
                     that.winGame();
                 }
                 //console.log("Player has collided with exit");
-            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) { // might need to call this 
-                if (that.lastBB.bottom <= entity.BB.top + 5 && that.velocity.y > 0) {
+            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) { 
+                if (that.lastBB.bottom <= entity.BB.top + 10 && that.velocity.y > 0) {
                     // This is a top collision - set grounded but don't call handleWallSlide
                     that.velocity.y = 0;
                     that.isGrounded = true;
                     that.y = entity.y - that.height;
-                } else if (that.lastBB.top >= entity.BB.bottom - 5 && that.velocity.y < 0) {
+                } else if (that.lastBB.top >= entity.BB.bottom - 10 && that.velocity.y < 0) {
                     // Bottom collision - player hits their head
                     that.velocity.y = 0; // Stop upward movement
                     that.y = entity.BB.bottom; // Prevent clipping into the block
