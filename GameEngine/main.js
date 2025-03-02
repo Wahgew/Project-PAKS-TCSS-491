@@ -57,9 +57,56 @@ function startGame() {
         // gameEngine.levelTimesManager.debugPrintAllTimes();
     });
 }
+
 function showLevels() {
     const levelsScreen = new LevelsScreen();
     levelsScreen.show();
+}
+
+// Add responsive canvas functionality
+function setupResponsiveCanvas() {
+    const canvas = document.getElementById("gameWorld");
+    if (!canvas) return;
+
+    // Function to resize the canvas
+    function resizeCanvas() {
+        // Calculate available space (with some margin)
+        const maxWidth = window.innerWidth * 0.95;
+        const maxHeight = window.innerHeight * 0.85; // Leave room for debug controls
+
+        // Keep aspect ratio based on your game's base resolution
+        // Assuming your base resolution is 1024x768 (from your HTML)
+        const baseWidth = 1024;
+        const baseHeight = 768;
+        const baseAspectRatio = baseWidth / baseHeight;
+
+        let newWidth, newHeight;
+
+        // Determine which dimension is the constraint
+        if (maxWidth / maxHeight > baseAspectRatio) {
+            // Height is the constraint
+            newHeight = maxHeight;
+            newWidth = newHeight * baseAspectRatio;
+        } else {
+            // Width is the constraint
+            newWidth = maxWidth;
+            newHeight = newWidth / baseAspectRatio;
+        }
+
+        // Apply the new dimensions
+        canvas.width = Math.round(newWidth);
+        canvas.height = Math.round(newHeight);
+
+        console.log(`Canvas resized to ${canvas.width}x${canvas.height}`);
+    }
+
+    // Initial resize
+    resizeCanvas();
+
+    // Update on window resize
+    window.addEventListener('resize', resizeCanvas);
+
+    return resizeCanvas; // Return the function in case it needs to be called elsewhere
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -70,6 +117,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create welcome screen with start game and show levels callbacks
     new WelcomeScreen(startGame, showLevels);
+
+    // Setup responsive canvas
+    const resizeCanvas = setupResponsiveCanvas();
 
     function createVolumeToggleButton() {
         console.log("Creating volume toggle button");

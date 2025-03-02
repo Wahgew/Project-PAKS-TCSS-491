@@ -665,18 +665,22 @@ class Player {
         // Only add new handler if debugging is enabled
         if (this.game.options.debugging) {
             this.teleportHandler = (e) => {
+                // Get world coordinates from the game engine
                 const rect = this.game.ctx.canvas.getBoundingClientRect();
                 const mouseX = e.clientX - rect.left;
                 const mouseY = e.clientY - rect.top;
 
-                // Teleport the player
-                this.x = mouseX - this.width / 2;
-                this.y = mouseY - this.height / 2;
+                // Get world coordinates
+                const worldCoords = this.game.getWorldCoordinates(mouseX, mouseY);
+
+                // Teleport the player to world coordinates
+                this.x = worldCoords.x - this.width / 2;
+                this.y = worldCoords.y - this.height / 2;
 
                 // Update the bounding box after teleporting
                 this.updateBB();
 
-                console.log(`Teleported to: (${this.x}, ${this.y})`);
+                console.log(`Teleported to screen: (${mouseX}, ${mouseY}), world: (${this.x}, ${this.y})`);
             };
 
             this.game.ctx.canvas.addEventListener("click", this.teleportHandler);

@@ -142,6 +142,35 @@ class GameEngine {
         }
     }
 
+    getWorldCoordinates(mouseX, mouseY) {
+        // Find the map entity
+        const mapEntity = this.entities.find(entity => entity instanceof drawMap);
+        if (!mapEntity) return { x: mouseX, y: mouseY };
+
+        // Get the map dimensions
+        const mapWidth = mapEntity.map[0].length * mapEntity.drawSize;
+        const mapHeight = mapEntity.map.length * mapEntity.drawSize;
+
+        // Get the canvas dimensions
+        const canvasWidth = this.ctx.canvas.width;
+        const canvasHeight = this.ctx.canvas.height;
+
+        // Calculate the zoom factor
+        const zoomX = canvasWidth / mapWidth;
+        const zoomY = canvasHeight / mapHeight;
+        const zoom = Math.min(zoomX, zoomY) * 0.95;
+
+        // Calculate the offset
+        const offsetX = (canvasWidth / zoom - mapWidth) / 2;
+        const offsetY = (canvasHeight / zoom - mapHeight) / 2;
+
+        // Convert from screen to world coordinates
+        return {
+            x: (mouseX / zoom) - offsetX,
+            y: (mouseY / zoom) - offsetY
+        };
+    }
+
     start() {
         this.running = true;
         const gameLoop = () => {
@@ -156,23 +185,34 @@ class GameEngine {
     startInput() {
         // Move keyboard events to window instead of canvas
         window.addEventListener("keydown", event => {
-            console.log("Key pressed:", event.key.toLowerCase());
             this.keys[event.key.toLowerCase()] = true;
         });
 
         window.addEventListener("keyup", event => {
-            console.log("Key released:", event.key.toLowerCase());
             this.keys[event.key.toLowerCase()] = false;
         });
 
         // Mouse events remain on canvas
-        const getXandY = e => ({
-            x: e.clientX - this.ctx.canvas.getBoundingClientRect().left,
-            y: e.clientY - this.ctx.canvas.getBoundingClientRect().top
-        });
+        const getXandY = e => {
+            const screenCoords = {
+                x: e.clientX - this.ctx.canvas.getBoundingClientRect().left,
+                y: e.clientY - this.ctx.canvas.getBoundingClientRect().top
+            };
+
+            // Convert to world coordinates
+            return this.getWorldCoordinates(screenCoords.x, screenCoords.y);
+        };
 
         this.ctx.canvas.addEventListener("mousemove", e => {
-            this.mouse = getXandY(e);
+            // Store both screen and world coordinates
+            const screenCoords = {
+                x: e.clientX - this.ctx.canvas.getBoundingClientRect().left,
+                y: e.clientY - this.ctx.canvas.getBoundingClientRect().top
+            };
+
+            this.mouseScreen = screenCoords;
+            this.mouse = this.getWorldCoordinates(screenCoords.x, screenCoords.y);
+
             if (this.options.debugging) {
                 console.log("MOUSE_MOVE", this.mouse);
             }
@@ -183,22 +223,6 @@ class GameEngine {
                 console.log("CLICK", getXandY(e));
             }
             this.click = getXandY(e);
-        });
-
-        this.ctx.canvas.addEventListener("wheel", e => {
-            if (this.options.debugging) {
-                console.log("WHEEL", getXandY(e), e.wheelDelta);
-            }
-            e.preventDefault(); // Prevent Scrolling
-            this.wheel = e;
-        });
-
-        this.ctx.canvas.addEventListener("contextmenu", e => {
-            if (this.options.debugging) {
-                console.log("RIGHT_CLICK", getXandY(e));
-            }
-            e.preventDefault(); // Prevent Context Menu
-            this.rightclick = getXandY(e);
         });
 
         // test timer reset and stop
@@ -243,46 +267,65 @@ class GameEngine {
             return;
         }
 
-        // Log canvas state before clearing
-        /* console.log("Canvas state before clear:", {
-            width: this.ctx.canvas.width,
-            height: this.ctx.canvas.height,
-            transform: this.ctx.getTransform()
-        }); */
-
-        // Clear with a visible color first to verify clearing works
+        // Clear with a visible color
         this.ctx.fillStyle = 'white';
         this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
-        // Reset any transformations
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-        // Draw from front to back (map first, then entities)
-        // Find and draw map first
-        const mapEntity = this.entities.find(entity => entity instanceof drawMap);
+        // Calculate zoom factor based on the map size and canvas size
+        let mapEntity = this.entities.find(entity => entity instanceof drawMap);
         if (mapEntity) {
-            this.ctx.save();
-            mapEntity.draw(this.ctx);
-            this.ctx.restore();
-        }
+            // Get the map dimensions
+            const mapWidth = mapEntity.map[0].length * mapEntity.drawSize;
+            const mapHeight = mapEntity.map.length * mapEntity.drawSize;
 
-        // Then draw all other entities
-        this.entities.forEach(entity => {
-            if (!(entity instanceof drawMap)) {
-                if (this.options.debugging) {
-                    const time = Date.now()
-                    if (!this.lastDebugLogTime || time - this.lastDebugLogTime >= 3000) {
-                        console.log("Drawing entity:", entity);
-                        this.lastDebugLogTime = time;
-                    }
+            // Get the canvas dimensions
+            const canvasWidth = this.ctx.canvas.width;
+            const canvasHeight = this.ctx.canvas.height;
+
+            // Calculate the zoom factor (smaller value wins to ensure entire map is visible)
+            const zoomX = canvasWidth / mapWidth;
+            const zoomY = canvasHeight / mapHeight;
+            const zoom = Math.min(zoomX, zoomY) * 0.95; // 0.95 adds a small margin
+
+            // Apply zoom transformation
+            this.ctx.save();
+            this.ctx.scale(zoom, zoom);
+
+            // Center the map in the canvas
+            const offsetX = (canvasWidth / zoom - mapWidth) / 2;
+            const offsetY = (canvasHeight / zoom - mapHeight) / 2;
+            this.ctx.translate(offsetX, offsetY);
+
+            console.log(`Map dimensions: ${mapWidth}x${mapHeight}, Zoom: ${zoom.toFixed(2)}`);
+
+            // Draw the map
+            mapEntity.draw(this.ctx);
+
+            // Draw all other entities with the same transformation
+            this.entities.forEach(entity => {
+                if (!(entity instanceof drawMap)) {
+                    entity.draw(this.ctx);
                 }
+            });
+
+            // Restore the context
+            this.ctx.restore();
+
+            // Draw UI elements without zoom
+            this.drawUI(zoom, offsetX, offsetY);
+        } else {
+            // Fallback if no map is found
+            this.entities.forEach(entity => {
                 this.ctx.save();
                 entity.draw(this.ctx);
                 this.ctx.restore();
-            }
-        });
+            });
+        }
+    }
 
-        // draw timer with elevator theme
+// Add a new method to draw UI elements without the zoom transformation
+    drawUI(zoom, offsetX, offsetY) {
+        // Draw timer with elevator theme
         if (this.timer) {
             const displayTime = this.timer.getDisplayTime();
             const minutes = Math.floor(displayTime / 60);
@@ -299,7 +342,6 @@ class GameEngine {
             // Position in top center
             const displayX = (this.ctx.canvas.width / 2) - (displayWidth / 2);
             const displayY = 20;
-
 
             // Draw panel background
             this.ctx.fillStyle = '#333';
@@ -345,19 +387,26 @@ class GameEngine {
             }
         }
 
-        this.levelUI.draw(this.ctx);
+        // Draw level UI (needs to be modified to work with zoom)
+        if (this.levelUI) {
+            this.levelUI.draw(this.ctx);
+        }
 
-        // draws the x y pos following the cursor
+        // Draw debug cursor position
         if (this.options.debugging && this.mouse) {
             this.ctx.font = "12px Arial";
             this.ctx.fillStyle = "red";
 
-            let offsetX = 35; // Adjust to prevent overlap with cursor
-            let offsetY = 30;
+            // Convert mouse coords back to world coords
+            const worldX = (this.mouse.x / zoom) - offsetX;
+            const worldY = (this.mouse.y / zoom) - offsetY;
 
-            this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
+            const offsetX2 = 35; // Offset for text
+            const offsetY2 = 30;
+
+            this.ctx.fillText(`Screen: (${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX2, this.mouse.y + offsetY2);
+            this.ctx.fillText(`World: (${Math.round(worldX)}, ${Math.round(worldY)})`, this.mouse.x + offsetX2, this.mouse.y + offsetY2 + 15);
         }
-
     }
 
     update() {
