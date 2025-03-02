@@ -56,6 +56,9 @@ class Player {
 
         this.velocity = {x: 0, y: 0};
 
+        // Input buffering 
+        this.jumpBufferTime = 0.15; // Buffer window in seconds
+        this.jumpBufferTimer = 0;   // Current buffer timer
         this.updateBB();
 
         // Initialize animations
@@ -184,6 +187,13 @@ class Player {
             }
             return; // don't process other updates when dead
         }
+        // Update input buffer timers
+        if (this.jumpBufferTimer > 0) {
+            this.jumpBufferTimer -= TICK;
+        }
+        if ((this.game.keys[' '] || this.game.keys['w']) && this.jumpBufferTimer <= 0) {
+            this.jumpBufferTimer = this.jumpBufferTime;
+        }
 
         // if (this.win) {
         //     console.log(this.game.entities);
@@ -251,8 +261,8 @@ class Player {
         this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, ACC_AIR, DEC_REL, DEC_SKID, DEC_SLIDE);
 
         // Jump input handling
-        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded &&
-            this.state !== this.STATES.CROUCHING) {
+        if ((this.game.keys[' '] || this.game.keys['w'] || this.jumpBufferTimer > 0) && this.isGrounded 
+            && this.state !== this.STATES.CROUCHING) {
             this.velocity.y = -MAX_JUMP;
             this.state = this.STATES.JUMPING;
             this.isGrounded = false;
@@ -285,8 +295,13 @@ class Player {
     // Updates the player's state based on current conditions
     updateState() {
         // Update facing direction
-        if (this.velocity.x < 0) this.facing = 0;
-        if (this.velocity.x > 0) this.facing = 1;
+        if (this.velocity.x < 0) {
+            this.facing = 0;
+        }
+        if (this.velocity.x > 0) { 
+            this.facing = 1;
+        }
+    
 
         // Update state based on current movement
         if (!this.isGrounded) {
@@ -459,13 +474,16 @@ class Player {
         const MAX_WALLSLIDE = 175;
         const MAX_JUMP = 850;
         var jump = false;
+
+
         if ((!this.isGrounded)) { // WALL SLIDE CHECK
             this.state = this.STATES.WALL_SLIDING;
             this.isWallSliding = true;
             if (this.velocity.y > MAX_WALLSLIDE) {
                 this.velocity.y = MAX_WALLSLIDE;
             }
-            if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) { // holding left
+            if ((this.game.keys['a'] ) // holding left
+                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) {
                 this.velocity.y = -MAX_JUMP;
                 this.velocity.x = 200;
                 this.state = this.STATES.JUMPING;
@@ -473,7 +491,8 @@ class Player {
                 this.canWallJump = false;
                 this.isWallSliding = false;
             }
-            if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])&& this.canWallJump) { // holding right
+            if ((this.game.keys['d'] || this.wallJumpDirection === 'right' ) // holding right
+                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) { 
                 this.velocity.y = -MAX_JUMP;
                 this.velocity.x = -200;
                 this.state = this.STATES.JUMPING;
