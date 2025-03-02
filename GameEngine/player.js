@@ -69,7 +69,7 @@ class Player {
 
         this.map = this.game.entities.find(entity => entity instanceof drawMap);
         if (this.map) {
-            console.log("Map found, tile size:", this.map.testSize);
+            console.log("Map found, tile size:", this.map.drawSize);
         } else {
             console.error("Map not found");
         }
@@ -448,8 +448,8 @@ class Player {
         let nextY = this.y + this.velocity.y * TICK;
 
         // Get map dimensions
-        const mapWidth = this.map.map[0].length * this.map.testSize;
-        const mapHeight = this.map.map.length * this.map.testSize;
+        const mapWidth = this.map.map[0].length * this.map.drawSize;
+        const mapHeight = this.map.map.length * this.map.drawSize;
 
         // Constrain to map boundaries
         nextX = Math.max(0, Math.min(nextX, mapWidth - this.width));
@@ -517,7 +517,7 @@ class Player {
             if (this.velocity.x > 0 && !jump) { 
                 this.x = collision.tileX - this.width;
             } else if (this.velocity.x < 0 && !jump) {
-                this.x = collision.tileX + this.map.testSize; // how does this work???
+                this.x = collision.tileX + this.map.drawSize; // how does this work???
             } 
         } else {
             if (this.velocity.x > 0 && !jump ) { // right
@@ -550,7 +550,7 @@ class Player {
                 this.isGrounded = true;
                 this.velocity.y = 0;
             } else if (this.velocity.y < 0) {
-                this.y = collision.tileY + this.map.testSize;
+                this.y = collision.tileY + this.map.drawSize;
                 this.velocity.y = 0;
             }
         } else {

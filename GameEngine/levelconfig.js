@@ -132,7 +132,7 @@ class LevelConfig {
                     new Spike({gameEngine: this.game, x: 820, y: 800, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 820, y: 700, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 820, y: 500, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    
+
                     new BigBlock(this.game, 675, 25, 1150, 150),
                     new BigBlock(this.game, 900, 730, 1150, 875),
                     new BigBlock(this.game, 360, 800, 750, 875),
@@ -144,10 +144,10 @@ class LevelConfig {
                     }),
                     new Platform({
                         gameEngine: this.game, x: 50, y: 740, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
-                    }), 
+                    }),
                     new Platform({
                         gameEngine: this.game, x: 50, y: 575, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
-                    }), 
+                    }),
                     // Levers that need to be collected
                     new Lever({gameEngine: this.game, x: 150, y: 490, speed: 0, moving: false, direction: null, reverseTime: 0}),
                 ]
@@ -178,6 +178,7 @@ class LevelConfig {
         // clear existing entities and player reference
         this.game.entities = [];
         this.game.Player = null;
+
 
         // first create and add the map
         const map = levelConfig.map();
