@@ -36,6 +36,8 @@ class LevelsScreen {
         this.createLevel12Button();
         this.createnextButton();
         this.createbackButton();
+        
+        this.createInstructionButton();
         // Append levels screen to body
         document.body.appendChild(this.levelsContainer);
     }
@@ -76,6 +78,40 @@ class LevelsScreen {
 
         this.levelsContainer.appendChild(button);
     }
+
+    createInstructionsButton(x, y, level, clickHandler) {
+        const button = document.createElement("img");
+        button.src = "./sprites/instructions.png"; // Use same default image as other buttons
+        button.alt = `Instructions`;
+        button.style.position = "absolute";
+        button.style.width = "225px"; // Match the size of other buttons
+        button.style.height = "50px";
+        button.style.cursor = "pointer";
+        button.style.transition = "0.3s ease-in-out";
+        button.style.left = `${x}px`;
+        button.style.top = `${y}px`;
+    
+        // Store the original image
+        const originalSrc = button.src;
+        
+        // Add hover effects
+        button.addEventListener("mouseover", () => {
+            button.style.transform = "scale(1.1) rotate(0.1deg)";
+            button.style.filter = "drop-shadow(0 0 7px black)";
+        });
+    
+        button.addEventListener("mouseout", () => {
+            // Restore original image and styling
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
+        });
+    
+        // Attach a unique event listener
+        button.addEventListener("click", clickHandler);
+    
+        this.levelsContainer.appendChild(button);
+    }
+    
 
     // Individual methods for each button
     createLevel1Button() {
@@ -138,6 +174,76 @@ class LevelsScreen {
 
     createbackButton() {
         this.createButton(234, 454.5, 14, () => this.goTogame());
+    }
+
+    createInstructionButton() {
+        this.createInstructionsButton(75, 135, 15, () => this.showInstructions());
+    }
+
+    showInstructions() {
+        console.log("Showing instructions...");
+        
+        // Check if instructions panel already exists
+        let instructionsPanel = document.getElementById("instructionsPanel");
+        
+        if (instructionsPanel) {
+            // If it exists, just toggle its visibility
+            if (instructionsPanel.style.display === "none") {
+                instructionsPanel.style.display = "block";
+            } else {
+                instructionsPanel.style.display = "none";
+            }
+            return;
+        }
+        
+        // Create a new instructions panel
+        instructionsPanel = document.createElement("div");
+        instructionsPanel.id = "instructionsPanel";
+        instructionsPanel.style.position = "fixed";
+        instructionsPanel.style.width = "500px";
+        instructionsPanel.style.height = "400px";
+        instructionsPanel.style.left = "50%";
+        instructionsPanel.style.top = "50%";
+        instructionsPanel.style.transform = "translate(-50%, -50%)";
+        instructionsPanel.style.zIndex = "10";
+        instructionsPanel.style.background = "transparent"; // Set background to transparent
+        
+        // Create the image element with the elevator instructions
+        const instructionsImage = document.createElement("img");
+        instructionsImage.src = "./sprites/instructionsUI.png"; // Path to your instruction image
+        instructionsImage.style.width = "100%";
+        instructionsImage.style.height = "100%";
+        instructionsImage.style.objectFit = "contain";
+        
+        instructionsPanel.appendChild(instructionsImage);
+        
+        // Add close button
+        const closeButton = document.createElement("button");
+        closeButton.textContent = "×";
+        closeButton.style.position = "absolute";
+        closeButton.style.top = "25px";
+        closeButton.style.right = "30px";
+        closeButton.style.background = "rgba(0, 0, 0, 0.7)";
+        closeButton.style.color = "white";
+        closeButton.style.border = "none";
+        closeButton.style.borderRadius = "50%";
+        closeButton.style.width = "20px";
+        closeButton.style.height = "20px";
+        closeButton.style.fontSize = "16px"; // Slightly smaller font size to fit better
+        closeButton.style.lineHeight = "1";
+        closeButton.style.paddingBottom = "2px"; // Adjust to center × vertically
+        closeButton.style.cursor = "pointer";
+        closeButton.style.display = "flex";
+        closeButton.style.justifyContent = "center";
+        closeButton.style.alignItems = "center";
+        closeButton.addEventListener("click", () => {
+            instructionsPanel.style.display = "none";
+        });
+        
+        instructionsPanel.appendChild(closeButton);
+        
+        // Add the panel to the body
+        document.body.appendChild(instructionsPanel);
     }
 
     // Methods for handling level clicks
@@ -205,7 +311,6 @@ class LevelsScreen {
         console.log("Navigating to game...");
         alert("Loading game...");
     }
+
 }
-
-
 
