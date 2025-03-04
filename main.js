@@ -4,12 +4,13 @@ function startGame() {
     const gameEngine = new GameEngine();
     ASSET_MANAGER = new AssetManager(); // Declared globally, accessible everywhere if I set it to const the map not gonna load when pressing start
 
-    // block
+    // "block/tiles"
     ASSET_MANAGER.queueDownload("./sprites/block.png");
     ASSET_MANAGER.queueDownload("./sprites/block2.png");
     ASSET_MANAGER.queueDownload("./sprites/block3.png");
     ASSET_MANAGER.queueDownload("./sprites/block4.png");
     // player assets
+    ASSET_MANAGER.queueDownload("./sprites/bigblock.png");
     ASSET_MANAGER.queueDownload("./sprites/idle.png");
     ASSET_MANAGER.queueDownload("./sprites/walk.png");
     ASSET_MANAGER.queueDownload("./sprites/run.png");
@@ -31,6 +32,9 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/leverOff.png");
     ASSET_MANAGER.queueDownload("./sprites/exit_door_locked.png");
     ASSET_MANAGER.queueDownload("./sprites/exit_door_unlocked.png");
+    // transitions
+    ASSET_MANAGER.queueDownload("./sprites/elevator_left.png");
+    ASSET_MANAGER.queueDownload("./sprites/elevator_right.png");
 
     ASSET_MANAGER.downloadAll(async () => {
         const canvas = document.getElementById("gameWorld");
@@ -62,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize audio settings when the DOM is loaded
     if (window.AUDIO_MANAGER) {
         window.AUDIO_MANAGER.loadVolumeSettings();
-        window.AUDIO_MANAGER.playMenuMusic();
     }
 
     // Create welcome screen with start game and show levels callbacks

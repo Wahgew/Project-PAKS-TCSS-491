@@ -53,9 +53,14 @@ class Player {
         this.isGrounded = true;
         this.gravity = 2000;
         this.levers = 0;
+        this.previousJumpButtonState = false;
+        this.jumpInputConsumed = false;
 
         this.velocity = {x: 0, y: 0};
 
+        // Input buffering 
+        this.jumpBufferTime = 0.15; // Buffer window in seconds
+        this.jumpBufferTimer = 0;   // Current buffer timer
         this.updateBB();
 
         // Initialize animations
@@ -64,7 +69,7 @@ class Player {
 
         this.map = this.game.entities.find(entity => entity instanceof drawMap);
         if (this.map) {
-            console.log("Map found, tile size:", this.map.testSize);
+            console.log("Map found, tile size:", this.map.drawSize);
         } else {
             console.error("Map not found");
         }
@@ -184,6 +189,17 @@ class Player {
             }
             return; // don't process other updates when dead
         }
+        // Update input buffer timers
+        if (this.jumpBufferTimer > 0) {
+            this.jumpBufferTimer -= TICK;
+        }
+        const jumpKeyPressed = this.game.keys[' '] || this.game.keys['w'];
+        if (jumpKeyPressed && !this.previousJumpButtonState && this.jumpBufferTimer <= 0) {
+            this.jumpBufferTimer = this.jumpBufferTime;
+            this.jumpInputConsumed = false;
+        }
+        this.previousJumpButtonState = jumpKeyPressed;
+
 
         // if (this.win) {
         //     console.log(this.game.entities);
@@ -230,6 +246,20 @@ class Player {
                     that.winGame();
                 }
                 //console.log("Player has collided with exit");
+            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) { 
+                if (that.lastBB.bottom <= entity.BB.top + 10 && that.velocity.y > 0) {
+                    // This is a top collision - set grounded but don't call handleWallSlide
+                    that.velocity.y = 0;
+                    that.isGrounded = true;
+                    that.y = entity.y - that.height;
+                } else if (that.lastBB.top >= entity.BB.bottom - 10 && that.velocity.y < 0) {
+                    // Bottom collision - player hits their head
+                    that.velocity.y = 0; // Stop upward movement
+                    that.y = entity.BB.bottom; // Prevent clipping into the block
+                } else if (that.velocity.x !== 0) {
+                    // This is a side collision - handle wall slide
+                    that.handleWallSlide(true, null, entity.x, entity.y, entity.width);
+                }
             }
         });
 
@@ -237,22 +267,30 @@ class Player {
         this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, ACC_AIR, DEC_REL, DEC_SKID, DEC_SLIDE);
 
         // Jump input handling
-        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded &&
-            this.state !== this.STATES.CROUCHING) {
+        if ((this.game.keys[' '] || this.game.keys['w'] || this.jumpBufferTimer > 0) && this.isGrounded 
+            && this.state !== this.STATES.CROUCHING && !this.jumpInputConsumed) {
             this.velocity.y = -MAX_JUMP;
             this.state = this.STATES.JUMPING;
             this.isGrounded = false;
             this.jumpRelease = false;
+            this.canWallJump = false;
+            this.jumpBufferTimer = 0; // Reset buffer after using the jump
+            this.jumpInputConsumed = true; // Mark this input as consumed
         }
 
-        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'])) {
+        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'] )) {
             this.velocity.y = this.velocity.y / 2; // velocity cut when jump key released
             this.jumpRelease = true;
+            this.canWallJump = false;
         }
         // if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
         //     this.velocity.y -= 850 * TICK;
         // }
 
+        if (!jumpKeyPressed) {
+            this.jumpInputConsumed = false;
+        }
+        
         // Update state based on movement and keys
         this.updateState();
 
@@ -269,22 +307,32 @@ class Player {
     // Updates the player's state based on current conditions
     updateState() {
         // Update facing direction
-        if (this.velocity.x < 0) this.facing = 0;
-        if (this.velocity.x > 0) this.facing = 1;
+        if (this.velocity.x < 0) {
+            this.facing = 0;
+        }
+        if (this.velocity.x > 0) { 
+            this.facing = 1;
+        }
+    
 
         // Update state based on current movement
         if (!this.isGrounded) {
             // In the air - jumping or falling
             if (this.velocity.y < 0) {
                 this.state = this.STATES.JUMPING;
-            } else {
+            } else if (!this.isWallSliding){
                 this.state = this.STATES.FALLING;
+            } else {
+                this.state = this.STATES.WALL_SLIDING;
             }
             return;
         }
 
         // On the ground
-        if (this.isGrounded) {
+        if (this.isGrounded) { 
+            if (this.isWallSliding) {
+                this.isWallSliding = false;
+            }
             // Check for crouching first (new state)
             if (this.game.keys['s'] && Math.abs(this.velocity.x) < 20) {
                 this.state = this.STATES.CROUCHING;
@@ -400,8 +448,8 @@ class Player {
         let nextY = this.y + this.velocity.y * TICK;
 
         // Get map dimensions
-        const mapWidth = this.map.map[0].length * this.map.testSize;
-        const mapHeight = this.map.map.length * this.map.testSize;
+        const mapWidth = this.map.map[0].length * this.map.drawSize;
+        const mapHeight = this.map.map.length * this.map.drawSize;
 
         // Constrain to map boundaries
         nextX = Math.max(0, Math.min(nextX, mapWidth - this.width));
@@ -420,8 +468,6 @@ class Player {
 
     // Handles horizontal collision detection and response : boundingbox for horizontal movement
     handleHorizontalCollision(horizontalBB, nextX) {
-        const MAX_WALLSLIDE = 175;
-        const MAX_JUMP = 850;
         const collision = this.map.checkCollisions({
             BB: horizontalBB,
             x: nextX,
@@ -431,34 +477,60 @@ class Player {
         });
 
         if (collision.collides) {
-            let jump = false;
-            if ((!this.isGrounded && this.velocity.x !== 0)) { // WALL SLIDE CHECK
-                this.state = this.STATES.WALL_SLIDING;
-                if (this.velocity.y > MAX_WALLSLIDE) {
-                    this.velocity.y = MAX_WALLSLIDE;
-                }
-                if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding left
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = 200;
-                    this.state = this.STATES.JUMPING;
-                    jump = true;
-                }
-                if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding right
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = -200;
-                    this.state = this.STATES.JUMPING;
-                    jump = true;
-                }
-            }
-            if (this.velocity.x > 0 && !jump) {
-                this.x = collision.tileX - this.width;
-            } else if (this.velocity.x < 0 && !jump) {
-                this.x = collision.tileX + this.map.testSize;
-            } if (!jump) {
-                this.velocity.x = 0;
-            }
+            this.handleWallSlide(false, collision);
         } else {
             this.x = nextX;
+        }
+    }
+    handleWallSlide(bigBlock, collision = null , x = 0, y = 0, width = 0) {
+        const MAX_WALLSLIDE = 175;
+        const MAX_JUMP = 850;
+        var jump = false;
+
+
+        if ((!this.isGrounded)) { // WALL SLIDE CHECK
+            this.state = this.STATES.WALL_SLIDING;
+            this.isWallSliding = true;
+            if (this.velocity.y > MAX_WALLSLIDE) {
+                this.velocity.y = MAX_WALLSLIDE;
+            }
+            if ((this.game.keys['a'] ) // holding left
+                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) {
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = 200;
+                this.state = this.STATES.JUMPING;
+                jump = true;
+                this.canWallJump = false;
+                this.isWallSliding = false;
+            }
+            if ((this.game.keys['d'] || this.wallJumpDirection === 'right' ) // holding right
+                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) { 
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = -200;
+                this.state = this.STATES.JUMPING;
+                jump = true;
+                this.canWallJump = false;
+                this.isWallSliding = false;
+            }
+        }
+        if (!bigBlock) { // check if collision is tile or bigblock based.
+            if (this.velocity.x > 0 && !jump) { 
+                this.x = collision.tileX - this.width;
+            } else if (this.velocity.x < 0 && !jump) {
+                this.x = collision.tileX + this.map.drawSize; // how does this work???
+            } 
+        } else {
+            if (this.velocity.x > 0 && !jump ) { // right
+                this.x = x- this.width;
+            } else if (this.velocity.x < 0 && !jump ) { // left
+                this.x = (x + width);
+            } 
+        }
+        if (!this.game.keys['w'] && !this.game.keys[' ']) {
+            this.canWallJump = true;
+        }
+        if (!jump) {
+            this.velocity.x = 0;
         }
     }
 
@@ -478,7 +550,7 @@ class Player {
                 this.isGrounded = true;
                 this.velocity.y = 0;
             } else if (this.velocity.y < 0) {
-                this.y = collision.tileY + this.map.testSize;
+                this.y = collision.tileY + this.map.drawSize;
                 this.velocity.y = 0;
             }
         } else {
@@ -503,6 +575,7 @@ class Player {
             this.game.keys[key] = false;
         }
         this.levers = 0; // reset levers collected;
+        this.dead = false;
     }
 
     // call this method if you want to kill the player from an entity

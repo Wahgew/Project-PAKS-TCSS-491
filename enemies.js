@@ -95,9 +95,10 @@ class Projectile {
 
     updateBB() {
         this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
-    };
+    }
 
     update() {
+        // Set velocity based on direction
         switch (this.direction) {
             case 'UP':
                 this.velocity.y = -this.speed;
@@ -112,9 +113,35 @@ class Projectile {
                 this.velocity.x = -this.speed;
                 break;
         }
-        this.x += this.game.clockTick * this.velocity.x; 
+
+        // Update position
+        this.x += this.game.clockTick * this.velocity.x;
         this.y += this.game.clockTick * this.velocity.y;
-        
+
+        // Check for collisions with map
+        const map = this.game.entities.find(entity => entity instanceof drawMap);
+        if (map) {
+            const collision = map.checkCollisions({
+                BB: this.BB,
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height
+            });
+
+            if (collision.collides) {
+                this.removeFromWorld = true;
+                return; // Stop processing if we're removing from world
+            }
+        }
+
+        // Check for collisions with big blocks
+        this.game.entities.forEach(entity => {
+            if (entity instanceof BigBlock && this.BB.collide(entity.BB)) {
+                this.removeFromWorld = true;
+            }
+        });
+
         this.updateBB();
     }
 
@@ -203,8 +230,76 @@ class Spike {
         } else if (this.moving && !this.tracking) { 
            updateMovement(this.game, this)
         }
-        this.x += this.game.clockTick * this.velocity.x; 
-        this.y += this.game.clockTick * this.velocity.y;
+        // Calculate next position
+        const nextX = this.x + this.game.clockTick * this.velocity.x;
+        const nextY = this.y + this.game.clockTick * this.velocity.y;
+
+        // Check for collisions with map
+        const map = this.game.entities.find(entity => entity instanceof drawMap);
+        if (map) {
+            // Check horizontal movement collision
+            const horizontalBB = new BoundingBox(nextX, this.y, this.width, this.height);
+            const horizontalCollision = map.checkCollisions({
+                BB: horizontalBB,
+                x: nextX,
+                y: this.y,
+                width: this.width,
+                height: this.height
+            });
+
+            // Check vertical movement collision
+            const verticalBB = new BoundingBox(this.x, nextY, this.width, this.height);
+            const verticalCollision = map.checkCollisions({
+                BB: verticalBB,
+                x: this.x,
+                y: nextY,
+                width: this.width,
+                height: this.height
+            });
+
+            // Apply horizontal movement if no collision
+            if (!horizontalCollision.collides) {
+                this.x = nextX;
+            } else if (this.tracking) {
+                // If tracking and hit a wall, reverse direction
+                this.velocity.x = -this.velocity.x;
+            }
+
+            // Apply vertical movement if no collision
+            if (!verticalCollision.collides) {
+                this.y = nextY;
+            } else if (this.tracking) {
+                // If tracking and hit a wall, reverse direction
+                this.velocity.y = -this.velocity.y;
+            }
+        } else {
+            // If no map found, just apply movement
+            this.x = nextX;
+            this.y = nextY;
+        }
+
+        // Check for collisions with BigBlock entities
+        this.game.entities.forEach(entity => {
+            if (entity instanceof BigBlock) {
+                const horizontalBB = new BoundingBox(this.x, this.y, this.width, this.height);
+                if (horizontalBB.collide(entity.BB)) {
+                    // Restore previous position and possibly reverse direction
+                    this.x = prevX;
+                    if (this.tracking) {
+                        this.velocity.x = -this.velocity.x;
+                    }
+                }
+
+                const verticalBB = new BoundingBox(this.x, this.y, this.width, this.height);
+                if (verticalBB.collide(entity.BB)) {
+                    // Restore previous position and possibly reverse direction
+                    this.y = prevY;
+                    if (this.tracking) {
+                        this.velocity.y = -this.velocity.y;
+                    }
+                }
+            }
+        });
         this.updateBB();
     }
 

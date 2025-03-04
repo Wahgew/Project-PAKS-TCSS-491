@@ -12,6 +12,19 @@
             transform: translate(-50%, -50%);
             z-index: 1;
         }
+        @font-face {
+            font-family: 'Molot';
+            src: url('./fonts/Molot.woff2') format('woff2'),
+                 url('./fonts/Molot.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        /* Apply the Molot font to the index class */
+        .index ,p {
+            font-family: 'Molot', sans-serif;
+            font-weight: normal;
+            font-style: normal;
+        }
         #debugMenu select {
             background-color: white;
             border: 1px solid #ccc;
@@ -89,10 +102,12 @@
             z-index: 1000;
         }
     </style>
+    <script type="text/javascript" src="./autoScreenResizer.js"></script>
     <script type="text/javascript" src="./assetmanager.js"></script>
     <script type="text/javascript" src="./timer.js"></script>
     <script type="text/javascript" src="./deathAnimate.js"></script>
     <script type="text/javascript" src="./exitDoor.js"></script>
+    <script type="text/javascript" src="./transition.js"></script>
     <script type="text/javascript" src="./leveltimesmanager.js"></script>
     <script type="text/javascript" src="./gameengine.js"></script>
     <script type="text/javascript" src="./levelconfig.js"></script>
@@ -102,6 +117,7 @@
     <script type="text/javascript" src="./boundingBox.js"></script>
     <script type="text/javascript" src="./platform.js"></script>
     <script type="text/javascript" src="./lever.js"></script>
+    <script type="text/javascript" src="./bigblock.js"></script>
     <script type="text/javascript" src="./drawMap.js"></script>
     <script type="text/javascript" src="./enemies.js"></script>
     <script type="text/javascript" src="./deathParticle.js"></script>
