@@ -112,7 +112,6 @@ class LevelsScreen {
         this.levelsContainer.appendChild(button);
     }
     
-
     // Individual methods for each button
     createLevel1Button() {
         this.createButton(115, 244, 1, () => this.goToLevel1());
@@ -246,71 +245,124 @@ class LevelsScreen {
         document.body.appendChild(instructionsPanel);
     }
 
+    // Helper method to start the game
+    startGame(levelNumber) {
+        console.log(`Starting game at level ${levelNumber}...`);
+        this.hide(); // Hide the levels screen
+        
+        // Look for existing GameEngine instances
+        let gameEngine = window.gameEngine;
+        
+        if (!gameEngine) {
+            // If game engine doesn't exist yet, create it
+            gameEngine = new GameEngine();
+            window.gameEngine = gameEngine; // Store it for future reference
+            
+            // Initialize asset manager if needed
+            if (!window.ASSET_MANAGER) {
+                startGame(); // Call the original startGame function first
+                
+                // Then load our specific level
+                setTimeout(() => {
+                    if (gameEngine.levelConfig) {
+                        gameEngine.levelConfig.loadLevel(levelNumber);
+                        gameEngine.levelConfig.currentLevel = levelNumber;
+                    }
+                }, 500); // Give time for game initialization
+            } else {
+                // Asset manager exists, so we can just load the level
+                if (gameEngine.levelConfig) {
+                    gameEngine.levelConfig.loadLevel(levelNumber);
+                    gameEngine.levelConfig.currentLevel = levelNumber;
+                }
+            }
+        } else {
+            // Game engine exists, just load the level
+            if (gameEngine.levelConfig) {
+                gameEngine.levelConfig.loadLevel(levelNumber);
+                gameEngine.levelConfig.currentLevel = levelNumber;
+            }
+        }
+        
+        // Switch from menu music to game music if needed
+        if (window.AUDIO_MANAGER) {
+            window.AUDIO_MANAGER.stopMenuMusic();
+            window.AUDIO_MANAGER.playGameMusic();
+        }
+    }
+    
     // Methods for handling level clicks
     goToLevel1() {
-        console.log("Navigating to Level 1...");
-        alert("Loading Level 1...");
+        console.log("Loading Level 1 map");
+        this.startGame(1);
     }
-
+    
     goToLevel2() {
-        console.log("Navigating to Level 2...");
-        alert("Loading Level 2...");
+        console.log("Loading Level 2 map");
+        this.startGame(2);
     }
-
+    
     goToLevel3() {
-        console.log("Navigating to Level 3...");
-        alert("Loading Level 3...");
+        console.log("Loading Level 3 map");
+        this.startGame(3);
     }
 
+    // Map remaining levels
     goToLevel4() {
-        console.log("Navigating to Level 4...");
-        alert("Loading Level 4...");
+        // Currently only have 3 maps, so reload level 1 for demo purposes
+        this.startGame(1);
     }
 
     goToLevel5() {
-        console.log("Navigating to Level 5...");
-        alert("Loading Level 5...");
+        // Currently only have 3 maps, so reload level 2 for demo purposes
+        this.startGame(2);
     }
 
     goToLevel6() {
-        console.log("Navigating to Level 6...");
-        alert("Loading Level 6...");
+        // Currently only have 3 maps, so reload level 3 for demo purposes
+        this.startGame(3);
     }
 
     goToLevel7() {
-        console.log("Navigating to Level 7...");
-        alert("Loading Level 7...");
+        // Currently only have 3 maps, so reload level 1 for demo purposes
+        this.startGame(1);
     }
 
     goToLevel8() {
-        console.log("Navigating to Level 8...");
-        alert("Loading Level 8...");
+        // Currently only have 3 maps, so reload level 2 for demo purposes
+        this.startGame(2);
     }
 
     goToLevel9() {
-        console.log("Navigating to Level 9...");
-        alert("Loading Level 9...");
+        // Currently only have 3 maps, so reload level 3 for demo purposes
+        this.startGame(3);
     }
 
     goToLevel10() {
-        console.log("Navigating to Level 10...");
-        alert("Loading Level 10...");
+        // Currently only have 3 maps, so reload level 1 for demo purposes
+        this.startGame(1);
     }
 
     goToLevel11() {
-        console.log("Navigating to Level 11...");
-        alert("Loading Level 11...");
+        // Currently only have 3 maps, so reload level 2 for demo purposes
+        this.startGame(2);
     }
 
     goToLevel12() {
-        console.log("Navigating to Level 12...");
-        alert("Loading Level 12...");
+        // Currently only have 3 maps, so reload level 3 for demo purposes
+        this.startGame(3);
     }
 
     goTogame() {
-        console.log("Navigating to game...");
-        alert("Loading game...");
+        console.log("Going back to game...");
+        this.hide(); // Hide the levels screen
+        
+        // If a game is already running, just return to it
+        if (window.gameEngine) {
+            // No need to do anything; hiding the level screen will reveal the game
+        } else {
+            // If no game is running, start one at level 1
+            this.startGame(1);
+        }
     }
-
 }
-
