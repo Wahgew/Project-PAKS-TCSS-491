@@ -96,7 +96,7 @@ class Player {
 
         // Running animation
         this.animations[this.STATES.RUNNING] = new Animator(
-            this.sprites.run, 16, 27, 176, 208, 6, 0.08
+            this.sprites.run, 67, 27, 201, 208, 5, 0.08
         );
 
         // Skidding animation (can reuse run with different parameters or use a different spritesheet)
