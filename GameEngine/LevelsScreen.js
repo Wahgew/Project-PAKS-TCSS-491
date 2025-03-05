@@ -40,18 +40,14 @@ class LevelsScreen {
         this.createInstructionButton();
         // Append levels screen to body
         document.body.appendChild(this.levelsContainer);
-
-        console.log("Level Screen created and buttons initialized");
     }
 
     show() {
         this.levelsContainer.style.display = "block";
-        console.log("Level selection screen shown");
     }
 
     hide() {
         this.levelsContainer.style.display = "none";
-        console.log("Level selection screen hidden");
     }
 
     createButton(x, y, level, clickHandler) {
@@ -81,7 +77,6 @@ class LevelsScreen {
         button.addEventListener("click", clickHandler);
 
         this.levelsContainer.appendChild(button);
-        console.log(`Created button for level ${level} at position (${x}, ${y})`);
         return button;
     }
 
@@ -116,69 +111,64 @@ class LevelsScreen {
         button.addEventListener("click", clickHandler);
     
         this.levelsContainer.appendChild(button);
-        console.log(`Created instructions button at position (${x}, ${y})`);
         return button;
     }
     
     // Individual methods for each level button - properly referencing specific level numbers
     createLevel1Button() {
-        this.createButton(115, 244, 1, () => this.goToLevel(1));
+        this.createButton(115, 244, 1, () => this.goToLevel1());
     }
 
     createLevel2Button() {
-        this.createButton(196, 244, 2, () => this.goToLevel(2));
+        this.createButton(196, 244, 2, () => this.goToLevel2());
     }
 
     createLevel3Button() {
-        this.createButton(279, 244, 3, () => this.goToLevel(3));
+        this.createButton(279, 244, 3, () => this.goToLevel3());
     }
 
     createLevel4Button() {
-        this.createButton(115, 298, 4, () => this.goToLevel(4));
+        this.createButton(115, 298, 4, () => this.goToLevel4());
     }
 
     createLevel5Button() {
-        this.createButton(196, 298, 5, () => this.goToLevel(5));
+        this.createButton(196, 298, 5, () => this.goToLevel5());
     }
 
     createLevel6Button() {
-        this.createButton(279, 298, 6, () => this.goToLevel(6));
+        this.createButton(279, 298, 6, () => this.goToLevel6());
     }
 
     createLevel7Button() {
-        this.createButton(117, 353, 7, () => this.goToLevel(7));
+        this.createButton(117, 353, 7, () => this.goToLevel7());
     }
 
     createLevel8Button() {
-        this.createButton(197, 353, 8, () => this.goToLevel(8));
+        this.createButton(197, 353, 8, () => this.goToLevel8());
     }
 
     createLevel9Button() {
-        this.createButton(280.5, 353, 9, () => this.goToLevel(9));
+        this.createButton(280.5, 353, 9, () => this.goToLevel9());
     }
 
     createLevel10Button() {
-        this.createButton(117, 409, 10, () => this.goToLevel(10));
+        this.createButton(117, 409, 10, () => this.goToLevel10());
     }
 
     createLevel11Button() {
-        this.createButton(197, 409, 11, () => this.goToLevel(11));
+        this.createButton(197, 409, 11, () => this.goToLevel11());
     }
 
     createLevel12Button() {
-        this.createButton(280.95, 409, 12, () => this.goToLevel(12));
+        this.createButton(280.95, 409, 12, () => this.goToLevel12());
     }
 
     createnextButton() {
         this.createButton(153, 455, 13, () => {
-            console.log("Next button clicked");
             this.hide(); // Hide the levels screen
             const welcomeScreen = document.getElementById("welcomeScreen");
             if (welcomeScreen) {
                 welcomeScreen.style.display = "flex"; // Show the welcome screen
-                console.log("Welcome screen displayed");
-            } else {
-                console.log("Welcome screen element not found");
             }
         });
     }
@@ -192,7 +182,7 @@ class LevelsScreen {
     }
 
     showInstructions() {
-        console.log("Showing instructions panel");
+        console.log("Showing instructions...");
         
         // Check if instructions panel already exists
         let instructionsPanel = document.getElementById("instructionsPanel");
@@ -201,10 +191,8 @@ class LevelsScreen {
             // If it exists, just toggle its visibility
             if (instructionsPanel.style.display === "none") {
                 instructionsPanel.style.display = "block";
-                console.log("Existing instructions panel shown");
             } else {
                 instructionsPanel.style.display = "none";
-                console.log("Existing instructions panel hidden");
             }
             return;
         }
@@ -250,29 +238,21 @@ class LevelsScreen {
         closeButton.style.alignItems = "center";
         closeButton.addEventListener("click", () => {
             instructionsPanel.style.display = "none";
-            console.log("Instructions panel closed");
         });
         
         instructionsPanel.appendChild(closeButton);
         
         // Add the panel to the body
         document.body.appendChild(instructionsPanel);
-        console.log("New instructions panel created and added to document");
-    }
-
-    // A unified method to handle level loading to avoid code duplication
-    goToLevel(levelNumber) {
-        console.log(`Level ${levelNumber} button clicked`);
-        this.loadLevel(levelNumber);
     }
 
     // Modified level loading approach that ensures game is initialized properly
-    loadLevel(levelNumber) {
-        console.log(`Loading level ${levelNumber}`);
+    loadLevel(levelNum) {
+        console.log(`Loading level ${levelNum}`);
         this.hide(); // Hide the levels screen
         
         // Store target level in a global variable to be used after initialization
-        window.targetLevelToLoad = levelNumber;
+        window.targetLevelToLoad = levelNum;
         
         // If game engine doesn't exist yet, we need to initialize it
         if (!window.gameEngine) {
@@ -293,7 +273,6 @@ class LevelsScreen {
                         const gameCanvas = document.getElementById("gameWorld");
                         if (gameCanvas) {
                             gameCanvas.style.display = "block";
-                            console.log("Game canvas made visible");
                         }
                         
                         // Switch music if needed
@@ -309,22 +288,21 @@ class LevelsScreen {
                 }, 200); // Check every 200ms
             }
             
-            // Start the game
+            // Start the game (this is the function from paste-3.txt)
             startGame();
 
         } else {
             // Game already exists, directly load level
-            console.log(`Game engine exists, loading level ${levelNumber}`);
+            console.log(`Game engine exists, loading level ${levelNum}`);
             if (window.gameEngine.levelConfig) {
                 // Set the current level before loading it
-                window.gameEngine.levelConfig.currentLevel = levelNumber;
-                window.gameEngine.levelConfig.loadLevel(levelNumber);
+                window.gameEngine.levelConfig.currentLevel = levelNum;
+                window.gameEngine.levelConfig.loadLevel(levelNum);
                 
                 // Ensure the game canvas is visible
                 const gameCanvas = document.getElementById("gameWorld");
                 if (gameCanvas) {
                     gameCanvas.style.display = "block";
-                    console.log("Game canvas made visible");
                 }
                 
                 // Switch music if needed
@@ -338,25 +316,90 @@ class LevelsScreen {
         }
     }
     
+    // Methods for handling level clicks - each loads the correct level number
+    goToLevel1() {
+        console.log("Loading level 1");
+        this.loadLevel(1);
+    }
+
+    goToLevel2() {
+        console.log("Loading level 2");
+        this.loadLevel(2);
+    }
+
+    goToLevel3() {
+        console.log("Loading level 3");
+        this.loadLevel(3);
+    }
+
+    goToLevel4() {
+        console.log("Loading level 0 (test level)");
+        this.loadLevel(0);
+    }
+
+    // For levels 5-12, 
+    goToLevel5() {
+        console.log("Level 5 - Coming Soon");
+        alert("Level 5 coming soon!");
+        
+    }
+
+    goToLevel6() {
+        console.log("Level 6 - Coming Soon");
+        alert("Level 6 coming soon!");
+        
+    }
+
+    goToLevel7() {
+        console.log("Level 7 - Coming Soon");
+        alert("Level 7 coming soon!");
+        
+    }
+
+    goToLevel8() {
+        console.log("Level 8 - Coming Soon");
+        alert("Level 8 coming soon!");
+        
+    }
+
+    goToLevel9() {
+        console.log("Level 9 - Coming Soon");
+        alert("Level 9 coming soon!");
+        
+    }
+
+    goToLevel10() {
+        console.log("Level 10 - Coming Soon");
+        alert("Level 10 coming soon!");
+        
+    }
+
+    goToLevel11() {
+        console.log("Level 11 - Coming Soon");
+        alert("Level 11 coming soon!");
+        
+    }
+
+    goToLevel12() {
+        console.log("Level 12 - Coming Soon");
+        alert("Level 12 coming soon!");
+        
+    }
+
     goTogame() {
-        console.log("Back button clicked - returning to current game");
+        console.log("Going back to current game...");
         this.hide(); // Hide the levels screen
         
         // If a game is already running, just return to it
         if (window.gameEngine) {
-            console.log("Game engine exists, returning to current game");
             // No need to do anything; hiding the level screen will reveal the game
             // Make sure the canvas is visible
             const gameCanvas = document.getElementById("gameWorld");
             if (gameCanvas) {
                 gameCanvas.style.display = "block";
-                console.log("Game canvas made visible");
-            } else {
-                console.log("Game canvas element not found");
             }
         } else {
             // If no game is running, start one at level 1
-            console.log("No game engine found, starting new game at level 1");
             this.loadLevel(1);
         }
     }
