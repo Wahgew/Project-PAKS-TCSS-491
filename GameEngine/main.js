@@ -20,6 +20,7 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/wall-slide.png");
     ASSET_MANAGER.queueDownload("./sprites/crouch.png");
     ASSET_MANAGER.queueDownload("./sprites/fall.png");
+    ASSET_MANAGER.queueDownload("./sprites/menu.png");
 
     // hazard assets
     ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
@@ -43,6 +44,12 @@ function startGame() {
 
         await gameEngine.init(ctx);
         gameEngine.levelConfig = new LevelConfig(gameEngine);
+
+
+        if (!window.SIMPLE_GAME_MENU) {
+            window.SIMPLE_GAME_MENU = new GameMenu(gameEngine);
+        }
+        window.SIMPLE_GAME_MENU.show();
 
         // Check if a specific level was requested from LevelsScreen
         // I replaced the hardcoded set to level 1
@@ -68,6 +75,11 @@ function startGame() {
     });
 }
 function showLevels() {
+    // Hide menu if it exists
+    if (window.SIMPLE_GAME_MENU) {
+        window.SIMPLE_GAME_MENU.hide();
+    }
+    
     const levelsScreen = new LevelsScreen();
     levelsScreen.show();
 }
