@@ -46,10 +46,10 @@ function startGame() {
         gameEngine.levelConfig = new LevelConfig(gameEngine);
 
 
-        if (!window.SIMPLE_GAME_MENU) {
-            window.SIMPLE_GAME_MENU = new GameMenu(gameEngine);
+        if (!window.GAME_MENU) {
+            window.GAME_MENU = new GameMenu(gameEngine);
         }
-        window.SIMPLE_GAME_MENU.show();
+        window.GAME_MENU.show();
 
         // Check if a specific level was requested from LevelsScreen
         // I replaced the hardcoded set to level 1
@@ -74,10 +74,17 @@ function startGame() {
         // gameEngine.levelTimesManager.debugPrintAllTimes();
     });
 }
+
 function showLevels() {
-    // Hide menu if it exists
-    if (window.SIMPLE_GAME_MENU) {
-        window.SIMPLE_GAME_MENU.hide();
+    // Hide game menu if it exists
+    if (window.GAME_MENU) {
+        window.GAME_MENU.hide();
+    }
+    
+    // Hide game canvas
+    const gameCanvas = document.getElementById('gameWorld');
+    if (gameCanvas) {
+        gameCanvas.style.display = 'none';
     }
     
     const levelsScreen = new LevelsScreen();

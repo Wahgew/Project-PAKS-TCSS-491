@@ -1,4 +1,4 @@
-// simpleGameMenu.js - A simplified menu button implementation
+// gameMenu.js - Full implementation with fixes for screen transitions
 
 class GameMenu {
     constructor(gameEngine) {
@@ -8,11 +8,11 @@ class GameMenu {
         this.menuPanel = null;
         this.isGameRunning = false;
         
-        // Create the button and panel
+        // Create the elements
         this.createMenuButton();
         this.createMenuPanel();
         
-        // Initialize listeners
+        // Initialize event listeners
         this.initEventListeners();
     }
     
@@ -108,11 +108,27 @@ class GameMenu {
                 this.hideMenu();
             }
         });
+        
+        // Add keyboard shortcut (Escape key)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isGameRunning) {
+                if (this.visible) {
+                    this.hideMenu();
+                } else {
+                    this.showMenu();
+                }
+            }
+        });
     }
     
     showMenu() {
         this.menuPanel.style.display = 'flex';
         this.visible = true;
+        
+        // Pause the game when menu is shown
+        if (this.gameEngine && !this.gameEngine.isPaused) {
+            this.gameEngine.isPaused = true;
+        }
     }
     
     hideMenu() {
@@ -132,6 +148,12 @@ class GameMenu {
     show() {
         this.menuButton.style.display = 'block';
         this.isGameRunning = true;
+        
+        // Make sure game canvas is visible
+        const gameCanvas = document.getElementById('gameWorld');
+        if (gameCanvas) {
+            gameCanvas.style.display = 'block';
+        }
     }
     
     // Hide the menu button when game exits
@@ -143,14 +165,14 @@ class GameMenu {
     
     // Menu actions
     resumeGame() {
-        if (this.gameEngine.isPaused) {
+        if (this.gameEngine && this.gameEngine.isPaused) {
             this.gameEngine.isPaused = false;
         }
         this.hideMenu();
     }
     
     pauseGame() {
-        if (!this.gameEngine.isPaused) {
+        if (this.gameEngine && !this.gameEngine.isPaused) {
             this.gameEngine.isPaused = true;
         }
         this.hideMenu();
@@ -158,12 +180,55 @@ class GameMenu {
     
     showLevels() {
         this.hide(); // Hide menu first
+        
+        // Stop the game engine
+        if (this.gameEngine) {
+            // Pause the game
+            this.gameEngine.isPaused = true;
+            
+            // Hide the game canvas
+            const gameCanvas = document.getElementById('gameWorld');
+            if (gameCanvas) {
+                gameCanvas.style.display = 'none';
+            }
+            
+            // Clear the canvas
+            if (this.gameEngine.ctx) {
+                const canvas = this.gameEngine.ctx.canvas;
+                this.gameEngine.ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        
+        // Play menu music instead of game music
+        if (window.AUDIO_MANAGER) {
+            window.AUDIO_MANAGER.stopGameMusic();
+            window.AUDIO_MANAGER.playMenuMusic();
+        }
+        
+        // Now show the levels screen
         const levelsScreen = new LevelsScreen();
         levelsScreen.show();
     }
     
     exitGame() {
         this.hide(); // Hide menu first
+        
+        // Stop the game engine
+        if (this.gameEngine) {
+            this.gameEngine.stop();
+            
+            // Hide the game canvas
+            const gameCanvas = document.getElementById('gameWorld');
+            if (gameCanvas) {
+                gameCanvas.style.display = 'none';
+            }
+            
+            // Clear the canvas
+            if (this.gameEngine.ctx) {
+                const canvas = this.gameEngine.ctx.canvas;
+                this.gameEngine.ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
         
         // Stop game music and play menu music
         if (window.AUDIO_MANAGER) {
@@ -173,11 +238,8 @@ class GameMenu {
         
         // Return to welcome screen
         new WelcomeScreen(startGame, showLevels);
-        
-        // Stop game engine
-        this.gameEngine.stop();
     }
 }
 
-// Create a global reference
-let SIMPLE_GAME_MENU;
+// Create a global reference for easy access
+let GAME_MENU;
