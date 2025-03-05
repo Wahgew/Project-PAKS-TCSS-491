@@ -38,11 +38,9 @@ class Timer {
 
     // Stop the current game timer
     stop() {
-        console.log("Stop method called");
-        console.log("isRunning value:", this.isRunning);
-        console.log("Current stack trace:", new Error().stack);
+        // console.log("isRunning value:", this.isRunning);
+        // console.log("Current stack trace:", new Error().stack);
         if (this.isRunning) {
-            console.log("In the if of stopped time")
             console.log("Timer stopped at:", this.gameTime.toFixed(2));
             this.isRunning = false;
             this.savedTime = this.gameTime;
@@ -52,22 +50,20 @@ class Timer {
 
     // start the time
     start() {
-        console.log("Start method called, isRunning was:", this.isRunning);
+        // console.log("Start method called, isRunning was:", this.isRunning);
         if (!this.isRunning) {
             this.isRunning = true;
             this.lastTimestamp = Date.now();  // Reset timestamp to avoid huge delta
-            console.log("isRunning set to true in start()");
         }
     }
 
     // reset timer for new level
     reset() {
-        console.log("Reset method called, isRunning was:", this.isRunning);
+        // console.log("Reset method called, isRunning was:", this.isRunning);
         this.gameTime = 0;
         this.lastTimestamp = 0;
         this.isRunning = true;
         this.savedTime = 0;
-        console.log("isRunning set to true in reset()");
     }
 
     // Get the time to display (either current running time or saved stopped time)

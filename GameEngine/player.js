@@ -2,7 +2,7 @@ class Player {
     constructor(game, x, y) {
         Object.assign(this, {game, x, y});
 
-        this.height = 76;
+        this.height = 74;
         this.width = 20;
 
         // initial starting pos of player
@@ -17,41 +17,59 @@ class Player {
             console.error("Game instance not properly initialized for player");
         }
 
-        // Load spritesheets
-        this.idleSpritesheet = ASSET_MANAGER.getAsset("./sprites/idle.png");
-        this.runSpritesheet = ASSET_MANAGER.getAsset("./sprites/run.png");
-        this.jumpSpritesheet = ASSET_MANAGER.getAsset("./sprites/jump.png");
-        this.slideSpritesheet = ASSET_MANAGER.getAsset("./sprites/slide.png");
-        this.walkSpritesheet = ASSET_MANAGER.getAsset("./sprites/walk.png");
+        // State constants for better readability
+        this.STATES = {
+            IDLE: 0,
+            WALKING: 1,
+            RUNNING: 2,
+            SKIDDING: 3,
+            JUMPING: 4,
+            SLIDING: 5,
+            WALL_SLIDING: 6,
+            CROUCHING: 7,
+            FALLING: 8
+        };
 
-        //Load flip animation
-        this.RwalkSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rwalk.png");
-        this.RrunSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rrun.png");
-        this.RslideSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rslide.png");
-        this.RjumpSpritesheet = ASSET_MANAGER.getAsset("./sprites/Rjump.png");
-
-
-        this.testSprite = ASSET_MANAGER.getAsset("./sprites/temptest.png");
-        this.testAnimator = new Animator(this.testSprite, 0, 0, 54, 60, 1, 1);
+        // Load spritesheets (just right-facing versions)
+        this.sprites = {
+            idle: ASSET_MANAGER.getAsset("./sprites/idle.png"),
+            walk: ASSET_MANAGER.getAsset("./sprites/walk.png"),
+            run: ASSET_MANAGER.getAsset("./sprites/run.png"),
+            skid: ASSET_MANAGER.getAsset("./sprites/skid.png"),
+            jump: ASSET_MANAGER.getAsset("./sprites/jump.png"),
+            slide: ASSET_MANAGER.getAsset("./sprites/slide.png"),
+            wall_slide: ASSET_MANAGER.getAsset("./sprites/wall-slide.png"),
+            crouch: ASSET_MANAGER.getAsset("./sprites/crouch.png"),
+            fall: ASSET_MANAGER.getAsset("./sprites/fall.png"),
+            // Add crouch spritesheet when available
+            // crouch: ASSET_MANAGER.getAsset("./sprites/crouch.png")
+        };
 
         this.facing = 1; // 0 = left, 1 = right
-        this.state = 0; // 0 = idle, 1 = walking, 2 = running, 3 = skidding, 4 = jumping/falling, 5 = crouching/sliding, 6 = wall sliding
+        this.state = this.STATES.IDLE;
         this.dead = false;
-        this.win = true;
+        this.deathAnimation = null;
+        this.win = false;
         this.isGrounded = true;
         this.gravity = 2000;
         this.levers = 0;
+        this.previousJumpButtonState = false;
+        this.jumpInputConsumed = false;
 
         this.velocity = {x: 0, y: 0};
 
+        // Input buffering 
+        this.jumpBufferTime = 0.15; // Buffer window in seconds
+        this.jumpBufferTimer = 0;   // Current buffer timer
         this.updateBB();
 
-        this.animations = [];
+        // Initialize animations
+        this.animations = {};
         this.loadAnimations();
 
         this.map = this.game.entities.find(entity => entity instanceof drawMap);
         if (this.map) {
-            console.log("Map found, tile size:", this.map.testSize);
+            console.log("Map found, tile size:", this.map.drawSize);
         } else {
             console.error("Map not found");
         }
@@ -63,86 +81,90 @@ class Player {
     }
 
     loadAnimations() {
-        // Initialize animation array
-        for (let i = 0; i < 7; i++) {
-            this.animations.push([]);
-            for (let j = 0; j < 3; j++) {
-                this.animations[i].push([]);
-                for (let k = 0; k < 2; k++) {
-                    this.animations[i][j].push(null);
-                }
-            }
-        }
+        // Create animations with a simpler structure
+        // Parameters: spritesheet, xStart, yStart, width, height, frameCount, frameDuration
 
         // Idle animation
-        this.animations[0][0][1] = new Animator(
-            this.idleSpritesheet, 
-            0, 5, 170, 175, 4, 0.15
-        );
-        this.animations[0][0][0] = new Animator(
-            this.idleSpritesheet,
-            0, 5, 170, 175, 4, 0.15
+        this.animations[this.STATES.IDLE] = new Animator(
+            this.sprites.idle, -45, 27, 133, 208, 5, 0.15
         );
 
         // Walk animation
-        this.animations[1][0][1] = new Animator(
-            this.walkSpritesheet,
-            0, 13, 144, 190, 5, 0.1
-        );
-        this.animations[1][0][0] = new Animator(
-            this.RwalkSpritesheet,
-            0, 13, 144, 190, 5, 0.1
+        this.animations[this.STATES.WALKING] = new Animator(
+            this.sprites.walk, -10, 27, 138, 208, 5, 0.15
         );
 
-        // Running animation (faster)
-        this.animations[2][0][1] = new Animator(
-            this.runSpritesheet,
-            0, 0, 175, 145, 5, 0.08  // Faster animation for running
-        );
-        this.animations[2][0][0] = new Animator(
-            this.RrunSpritesheet,
-            0, 0, 175, 145, 5, 0.08
+        // Running animation
+        this.animations[this.STATES.RUNNING] = new Animator(
+            this.sprites.run, 16, 27, 176, 208, 6, 0.08
         );
 
-        // Jump animation
-        for (let i = 3; i <= 4; i++) {
-            this.animations[i][0][1] = new Animator(
-                this.jumpSpritesheet,
-                0, 0, 181, 175, 2, 0.2
-            );
-            this.animations[i][0][0] = new Animator(
-                this.RjumpSpritesheet,
-                0, 0, 181, 175, 2, 0.2
-            );
-        }
-
-        // Slide animation
-        this.animations[5][0][1] = new Animator(
-            this.slideSpritesheet,
-            0, 0, 200, 120, 3, 0.1
+        // Skidding animation (can reuse run with different parameters or use a different spritesheet)
+        this.animations[this.STATES.SKIDDING] = new Animator(
+            this.sprites.skid, -70, 27, 176, 208, 1, 1
         );
-        this.animations[5][0][0] = new Animator(
-            this.RslideSpritesheet,
-            0, 0, 200, 120, 3, 0.1
+
+        // Jumping animation
+        this.animations[this.STATES.JUMPING] = new Animator(
+            this.sprites.jump, 0, 30, 188, 208, 1, 1
+        );
+
+        // Falling animation (can be the same as jumping or use different frames)
+        this.animations[this.STATES.FALLING] = new Animator(
+            this.sprites.fall, -25, 20, 170, 175, 3, 0.3
+        );
+
+        // Sliding animation
+        this.animations[this.STATES.SLIDING] = new Animator(
+            this.sprites.slide, 17, 67, 204, 175, 3, 0.6
+        );
+
+        // Wall sliding animation
+        this.animations[this.STATES.WALL_SLIDING] = new Animator(
+            this.sprites.wall_slide, -70, 35, 176, 175, 1, 1
+        );
+
+        // Crouching animation - using slide as temporary placeholder
+        // Replace this when you have a dedicated crouch spritesheet
+        this.animations[this.STATES.CROUCHING] = new Animator(
+            this.sprites.crouch, 0, 67, 186, 175, 1, 1
         );
     }
 
     updateBB() {
-        if (this.state != 5) { // player not crouching/sliding
-            this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+        if (this.state === this.STATES.SLIDING) {
+            // Sliding: lower, wider bounding box (more horizontal)
+            this.BB = new BoundingBox(
+                this.x,
+                this.y + this.height / 1.5,
+                this.width * 3,  // Wider for sliding
+                this.height / 3  // Lower height
+            );
+        } else if (this.state === this.STATES.CROUCHING) {
+            // Crouching: reduced height, same width
+            this.BB = new BoundingBox(
+                this.x,
+                this.y + this.height / 2,  // Start lower
+                this.width,                // Normal width
+                this.height / 2            // Half height
+            );
+        } else {
+            // Standard bounding box for other states
+            this.BB = new BoundingBox(
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
         }
-        else { // player is crouching
-            this.BB = new BoundingBox(this.x, this.y + this.height / 1.5, this.width * 3, this.height / 3);
-        }
-    };
+    }
 
     updateLastBB() {
         this.lastBB = this.BB;
-    };
+    }
 
     update() {
         const TICK = this.game.clockTick;
-
         // Movement constants
         const MIN_WALK = 20;
         const MAX_WALK = 400;
@@ -154,7 +176,7 @@ class Player {
         const DEC_SLIDE = 300;
         const DEC_REL = 600;
         const DEC_SKID = 1200;
-        
+
         const MAX_FALL = 2000;
         const MAX_JUMP = 850;
 
@@ -165,9 +187,19 @@ class Player {
                 this.restartGame();
                 console.log(this.game.entities);
             }
-            // may want to load the death animation here then return.
-            return; // don't process other updates when dead restart the game instead
+            return; // don't process other updates when dead
         }
+        // Update input buffer timers
+        if (this.jumpBufferTimer > 0) {
+            this.jumpBufferTimer -= TICK;
+        }
+        const jumpKeyPressed = this.game.keys[' '] || this.game.keys['w'];
+        if (jumpKeyPressed && !this.previousJumpButtonState && this.jumpBufferTimer <= 0) {
+            this.jumpBufferTimer = this.jumpBufferTime;
+            this.jumpInputConsumed = false;
+        }
+        this.previousJumpButtonState = jumpKeyPressed;
+
 
         // if (this.win) {
         //     console.log(this.game.entities);
@@ -205,12 +237,29 @@ class Player {
                     that.BB.bottom = entity.BB.top; // lock bounding box position
                     that.y = entity.BB.top - that.BB.height;
                 }
-            } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) { // need to tie into door/exit
+            } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) {
                 that.levers++;
                 entity.collected = true;
-            } else if (entity.BB && entity instanceof exitDoor && that.BB.collide(entity.BB) && entity.levers <= that.levers) {
-                that.winGame();
+            } else if (entity.BB && entity instanceof exitDoor) {
+                entity.collectedLevers = that.levers;
+                if (that.BB.collide(entity.BB) && entity.levers <= that.levers) {
+                    that.winGame();
+                }
                 //console.log("Player has collided with exit");
+            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) { 
+                if (that.lastBB.bottom <= entity.BB.top + 10 && that.velocity.y > 0) {
+                    // This is a top collision - set grounded but don't call handleWallSlide
+                    that.velocity.y = 0;
+                    that.isGrounded = true;
+                    that.y = entity.y - that.height;
+                } else if (that.lastBB.top >= entity.BB.bottom - 10 && that.velocity.y < 0) {
+                    // Bottom collision - player hits their head
+                    that.velocity.y = 0; // Stop upward movement
+                    that.y = entity.BB.bottom; // Prevent clipping into the block
+                } else if (that.velocity.x !== 0) {
+                    // This is a side collision - handle wall slide
+                    that.handleWallSlide(true, null, entity.x, entity.y, entity.width);
+                }
             }
         });
 
@@ -218,20 +267,30 @@ class Player {
         this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, ACC_AIR, DEC_REL, DEC_SKID, DEC_SLIDE);
 
         // Jump input handling
-        if ((this.game.keys[' '] || this.game.keys['w']) && this.isGrounded) {
+        if ((this.game.keys[' '] || this.game.keys['w'] || this.jumpBufferTimer > 0) && this.isGrounded 
+            && this.state !== this.STATES.CROUCHING && !this.jumpInputConsumed) {
             this.velocity.y = -MAX_JUMP;
-            this.state = 4;
+            this.state = this.STATES.JUMPING;
             this.isGrounded = false;
             this.jumpRelease = false;
+            this.canWallJump = false;
+            this.jumpBufferTimer = 0; // Reset buffer after using the jump
+            this.jumpInputConsumed = true; // Mark this input as consumed
         }
-        if (this.velocity.y < 0 && this.jumpRelease == false && (!this.game.keys[' '] && !this.game.keys['w'])) {
-            this.velocity.y = this.velocity.y / 2; // velocity cut, reduce upward movement when w is released.
+
+        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'] )) {
+            this.velocity.y = this.velocity.y / 2; // velocity cut when jump key released
             this.jumpRelease = true;
+            this.canWallJump = false;
         }
         // if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
         //     this.velocity.y -= 850 * TICK;
         // }
 
+        if (!jumpKeyPressed) {
+            this.jumpInputConsumed = false;
+        }
+        
         // Update state based on movement and keys
         this.updateState();
 
@@ -244,99 +303,132 @@ class Player {
         // Handle collisions and position updates
         this.handleCollisions(TICK);
     }
-    
+
     // Updates the player's state based on current conditions
     updateState() {
-        if (this.velocity.x < 0) this.facing = 0;
-        if (this.velocity.x > 0) this.facing = 1;
+        // Update facing direction
+        if (this.velocity.x < 0) {
+            this.facing = 0;
+        }
+        if (this.velocity.x > 0) { 
+            this.facing = 1;
+        }
+    
 
+        // Update state based on current movement
         if (!this.isGrounded) {
-            this.state = 4; // Jumping/Falling
+            // In the air - jumping or falling
+            if (this.velocity.y < 0) {
+                this.state = this.STATES.JUMPING;
+            } else if (!this.isWallSliding){
+                this.state = this.STATES.FALLING;
+            } else {
+                this.state = this.STATES.WALL_SLIDING;
+            }
             return;
         }
 
-		if (this.isGrounded) {
-            if (this.game.keys['s']) {
-                this.state = 5;
+        // On the ground
+        if (this.isGrounded) { 
+            if (this.isWallSliding) {
+                this.isWallSliding = false;
+            }
+            // Check for crouching first (new state)
+            if (this.game.keys['s'] && Math.abs(this.velocity.x) < 20) {
+                this.state = this.STATES.CROUCHING;
                 return;
-            } else if (Math.abs(this.velocity.x) < 20) { // MIN_WALK
-                this.state = 0; // Idle
+            }
+            // Check for sliding (when moving and pressing crouch)
+            else if (this.game.keys['s'] && Math.abs(this.velocity.x) >= 20) {
+                this.state = this.STATES.SLIDING;
                 return;
-            } else if (this.game.keys['shift'] && (this.game.keys['d'] || this.game.keys['a'])) {
-                this.state = 2;
+            }
+            // Check for idle
+            else if (Math.abs(this.velocity.x) < 20) {
+                this.state = this.STATES.IDLE;
                 return;
-            } else if (this.game.keys['d'] || this.game.keys['a']) {
-                this.state = 1;
+            }
+            // Check for running
+            else if (this.game.keys['shift'] && (this.game.keys['d'] || this.game.keys['a'])) {
+                this.state = this.STATES.RUNNING;
                 return;
-            } else this.state = 0;
+            }
+            // Check for skidding
+            else if ((this.game.keys['a'] && this.velocity.x > 20) ||
+                (this.game.keys['d'] && this.velocity.x < -20)) {
+                this.state = this.STATES.SKIDDING;
+                return;
+            }
+            // Default to walking
+            else if (this.game.keys['d'] || this.game.keys['a']) {
+                this.state = this.STATES.WALKING;
+                return;
+            }
+            // Fallback to idle
+            else {
+                this.state = this.STATES.IDLE;
+            }
         }
     }
 
     // Updates horizontal movement based on input
     updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, ACC_AIR, DEC_REL, DEC_SKID, DEC_SLIDE) {
-         // HORIZONTAL MOVEMENT/PHYSICS
-         if (this.state !== 4) { // if player is not jumping
+        // Don't move horizontally if crouching
+        if (this.state === this.STATES.CROUCHING) {
+            this.velocity.x = 0;
+            return;
+        }
+
+        // HORIZONTAL MOVEMENT/PHYSICS
+        if (this.state !== this.STATES.JUMPING && this.state !== this.STATES.FALLING) {
             // idle, walking, running, skidding ground physics
             if (Math.abs(this.velocity.x) < MIN_WALK) {
                 this.velocity.x = 0;
-                this.state = 0;
+
                 if (this.game.keys['a'] && !this.game.keys['s']) {
                     this.velocity.x -= MIN_WALK;
                 } else if (this.game.keys['d'] && !this.game.keys['s']) {
                     this.velocity.x += MIN_WALK;
-                } else if (this.game.keys['s']) {
-                    this.state = 5;
                 }
-
             } else if (Math.abs(this.velocity.x) >= MIN_WALK) { // accelerating or decelerating
                 if (this.facing === 0) { // left
                     if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // moving
                         if (this.game.keys['shift']) { // if sprinting
                             this.velocity.x -= ACC_RUN * TICK;
-                            this.state = 2;
                         } else {
                             this.velocity.x -= ACC_WALK * TICK;
-                            this.state = 1;
                         }
                     } else if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // skidding
                         this.velocity.x += DEC_SKID * TICK;
-                        this.state = 3;
                     } else if (this.game.keys['s']) {
                         this.velocity.x += DEC_SLIDE * TICK;
-                        this.state = 5;
                     } else { // holding nothing
                         this.velocity.x += DEC_REL * TICK;
-                        this.state = 1;
                     }
                 }
                 if (this.facing === 1) { // right
                     if (this.game.keys['d'] && !this.game.keys['a'] && !this.game.keys['s']) { // moving
                         if (this.game.keys['shift']) { // if sprinting
                             this.velocity.x += ACC_RUN * TICK;
-                            this.state = 2;
                         } else {
                             this.velocity.x += ACC_WALK * TICK;
-                            this.state = 1;
                         }
                     } else if (this.game.keys['a'] && !this.game.keys['d'] && !this.game.keys['s']) { // skidding
                         this.velocity.x -= DEC_SKID * TICK;
-                        this.state = 3;
                     }  else if (this.game.keys['s']) {
                         this.velocity.x -= DEC_SLIDE * TICK;
-                        this.state = 5;
                     } else { // holding nothing
                         this.velocity.x -= DEC_REL * TICK;
-                        this.state = 1;
                     }
                 }
             }
-       } else if (this.state === 4) { // mid-air
+        } else { // mid-air
             if (this.game.keys['a'] && !this.game.keys['d']) {
                 this.velocity.x -= ACC_AIR * TICK;
             } else if (this.game.keys['d'] && !this.game.keys['a']) {
                 this.velocity.x += ACC_AIR * TICK;
             }
-       }
+        }
     }
 
     // Applies maximum velocity limits to both horizontal and vertical movement
@@ -349,21 +441,21 @@ class Player {
         this.velocity.y = Math.min(this.velocity.y, MAX_FALL);
     }
 
-    //Collision - Tike time elapsed since last update
+    // Handles collisions and movement - TICK is time elapsed since last update
     handleCollisions(TICK) {
         // Calculate next position
         let nextX = this.x + this.velocity.x * TICK;
         let nextY = this.y + this.velocity.y * TICK;
 
         // Get map dimensions
-        const mapWidth = this.map.map[0].length * this.map.testSize;
-        const mapHeight = this.map.map.length * this.map.testSize;
+        const mapWidth = this.map.map[0].length * this.map.drawSize;
+        const mapHeight = this.map.map.length * this.map.drawSize;
 
         // Constrain to map boundaries
         nextX = Math.max(0, Math.min(nextX, mapWidth - this.width));
         nextY = Math.max(0, Math.min(nextY, mapHeight - this.height));
 
-        // Check collisions
+        // Create temporary bounding boxes for collision detection
         const horizontalBB = new BoundingBox(nextX, this.y, this.width, this.height);
         const verticalBB = new BoundingBox(this.x, nextY, this.width, this.height);
 
@@ -371,13 +463,11 @@ class Player {
         this.handleVerticalCollision(verticalBB, nextY, mapHeight);
 
         // Update bounding box
-        this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
+        this.updateBB();
     }
 
     // Handles horizontal collision detection and response : boundingbox for horizontal movement
     handleHorizontalCollision(horizontalBB, nextX) {
-        const MAX_WALLSLIDE = 175;
-        const MAX_JUMP = 850;
         const collision = this.map.checkCollisions({
             BB: horizontalBB,
             x: nextX,
@@ -387,34 +477,60 @@ class Player {
         });
 
         if (collision.collides) {
-            var jump = false;
-            if ((!this.isGrounded && this.velocity.x != 0)) { // WALL SLIDE CHECK
-                this.state = 6;
-                if (this.velocity.y > MAX_WALLSLIDE) {
-                    this.velocity.y = MAX_WALLSLIDE;
-                }
-                if (this.game.keys['a'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding left
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = 200;
-                    this.state = 4;
-                    jump = true;
-                }
-                if (this.game.keys['d'] && (this.game.keys['w'] || this.game.keys[' '])) { // holding right
-                    this.velocity.y = -MAX_JUMP;
-                    this.velocity.x = -200;
-                    this.state = 4;
-                    jump = true;
-                }
-            }
-            if (this.velocity.x > 0 && !jump) {
-                this.x = collision.tileX - this.width;
-            } else if (this.velocity.x < 0 && !jump) {
-                this.x = collision.tileX + this.map.testSize;
-            } if (!jump) {
-                this.velocity.x = 0;
-            }
+            this.handleWallSlide(false, collision);
         } else {
             this.x = nextX;
+        }
+    }
+    handleWallSlide(bigBlock, collision = null , x = 0, y = 0, width = 0) {
+        const MAX_WALLSLIDE = 175;
+        const MAX_JUMP = 850;
+        var jump = false;
+
+
+        if ((!this.isGrounded)) { // WALL SLIDE CHECK
+            this.state = this.STATES.WALL_SLIDING;
+            this.isWallSliding = true;
+            if (this.velocity.y > MAX_WALLSLIDE) {
+                this.velocity.y = MAX_WALLSLIDE;
+            }
+            if ((this.game.keys['a'] ) // holding left
+                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) {
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = 200;
+                this.state = this.STATES.JUMPING;
+                jump = true;
+                this.canWallJump = false;
+                this.isWallSliding = false;
+            }
+            if ((this.game.keys['d'] || this.wallJumpDirection === 'right' ) // holding right
+                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) { 
+                this.velocity.y = -MAX_JUMP;
+                this.velocity.x = -200;
+                this.state = this.STATES.JUMPING;
+                jump = true;
+                this.canWallJump = false;
+                this.isWallSliding = false;
+            }
+        }
+        if (!bigBlock) { // check if collision is tile or bigblock based.
+            if (this.velocity.x > 0 && !jump) { 
+                this.x = collision.tileX - this.width;
+            } else if (this.velocity.x < 0 && !jump) {
+                this.x = collision.tileX + this.map.drawSize; // how does this work???
+            } 
+        } else {
+            if (this.velocity.x > 0 && !jump ) { // right
+                this.x = x- this.width;
+            } else if (this.velocity.x < 0 && !jump ) { // left
+                this.x = (x + width);
+            } 
+        }
+        if (!this.game.keys['w'] && !this.game.keys[' ']) {
+            this.canWallJump = true;
+        }
+        if (!jump) {
+            this.velocity.x = 0;
         }
     }
 
@@ -434,7 +550,7 @@ class Player {
                 this.isGrounded = true;
                 this.velocity.y = 0;
             } else if (this.velocity.y < 0) {
-                this.y = collision.tileY + this.map.testSize;
+                this.y = collision.tileY + this.map.drawSize;
                 this.velocity.y = 0;
             }
         } else {
@@ -445,6 +561,7 @@ class Player {
 
     // resets the game
     restartGame() {
+        this.deathAnimation = null;
         // loads the new level
         this.game.levelConfig.loadLevel(this.game.levelConfig.currentLevel);
 
@@ -458,45 +575,79 @@ class Player {
             this.game.keys[key] = false;
         }
         this.levers = 0; // reset levers collected;
+        this.dead = false;
     }
 
     // call this method if you want to kill the player from an entity
     kill() {
         if (!this.game.options.debugging) {
             this.dead = true;
-            // add any death-related effects or sounds here
+
+            // Play death sound if audio manager exists
+            if (window.AUDIO_MANAGER) {
+                // Create a temporary audio element for the death sound
+                const deathSound = new Audio('./sounds/death_sound.mp3');
+
+                // Set volume based on current audio manager settings
+                deathSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+
+                // Play the sound
+                deathSound.play().catch(error => {
+                    console.error("Error playing death sound:", error);
+                });
+            }
+
+            // Create death animation at player's center position
+            this.deathAnimation = new DeathAnimation(
+                this.x + this.width / 2,
+                this.y + this.height / 2
+            );
         } else {
             console.log("Player would have died, but debug mode is active");
         }
     }
 
     //call this method when the play has reached the exit door
-    winGame() {
-        console.log("winGame called");
+    async winGame() {
+        // Prevent multiple win triggers
+        if (this.win) {
+            console.log("Win already triggered, ignoring duplicate call");
+            return;
+        }
+
         if (!this.game.options.debugging) {
             this.win = true;
+
+            // Play level complete sound if audio manager exists
+            if (window.AUDIO_MANAGER) {
+                // Create a temporary audio element for the win sound
+                const winSound = new Audio('./sounds/temp-win-game.mp3');
+
+                // Set volume based on current audio manager settings
+                winSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+
+                // Play the sound
+                winSound.play().catch(error => {
+                    console.error("Error playing level complete sound:", error);
+                });
+            }
+
+            // show level win UI
             if (this.game.levelUI) {
                 console.log("Showing level complete");
-                this.game.levelUI.showLevelComplete();
 
-                // Stop the timer
+                // Stop the timer first
                 if (this.game.timer) {
                     console.log("Timer exists, about to call stop");
                     console.log("Timer isRunning before stop:", this.game.timer.isRunning);
                     this.game.timer.stop();
-                    const currentTime = this.game.timer.getDisplayTime();
-                    const currentLevel = this.game.levelConfig.currentLevel;
-
-                    // Check if it's a new best time
-                    const isNewBest = this.game.levelTimesManager.updateBestTime(currentLevel, currentTime);
-
-                    // You can use this to show a "New Best Time!" message
-                    if (isNewBest) {
-                        this.game.levelUI.showNewBestTime(
-                            this.game.levelTimesManager.formatTime(currentTime)
-                        );
-                    }
                 }
+
+                // Make sure best time cache is updated before showing the complete screen
+                await this.game.levelUI.updateBestTimeCache();
+
+                // Now show the level complete screen
+                await this.game.levelUI.showLevelComplete();
             }
         } else {
             console.log("Player win, but debug mode is active");
@@ -535,57 +686,144 @@ class Player {
 
     // Renders the player character
     draw(ctx) {
-
         // check if the player is dead first
         if (this.dead) {
-            // Draw death screen
-            //this.game.timer.stop(); // future peter decide if I want to stop the time when dead
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            // Draw death animation if it exists
+            if (this.deathAnimation) {
+                this.deathAnimation.update(this.game.clockTick);
+                this.deathAnimation.draw(ctx);
 
-            ctx.font = '48px monospace';
-            ctx.fillStyle = 'red';
-            ctx.textAlign = 'center';
-            ctx.fillText('YOU DIED', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                // Check if animation is finished to show death screen
+                if (this.deathAnimation.finished) {
+                    // Draw elevator-themed death screen
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-            ctx.font = '24px monospace';
-            ctx.fillStyle = 'white';
-            ctx.fillText('Press ENTER to restart', ctx.canvas.width / 2, ctx.canvas.height / 2 + 50);
+                    const centerX = ctx.canvas.width / 2;
+                    const centerY = ctx.canvas.height / 2;
+
+                    // Draw red emergency panel
+                    const panelWidth = 400;
+                    const panelHeight = 300;
+                    const panelX = centerX - panelWidth/2;
+                    const panelY = centerY - panelHeight/2;
+
+                    // Red emergency panel background
+                    ctx.fillStyle = '#d00';
+                    ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+
+                    // Panel border
+                    ctx.strokeStyle = '#800';
+                    ctx.lineWidth = 5;
+                    ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
+
+                    // Warning stripes at top
+                    const stripeHeight = 30;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(panelX, panelY, panelWidth, stripeHeight);
+
+                    // Warning text
+                    ctx.font = 'bold 18px monospace';
+                    ctx.fillStyle = '#fff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('EMERGENCY STOP', centerX, panelY + 20);
+
+                    // Error display
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(panelX + 50, panelY + 60, panelWidth - 100, 60);
+
+                    ctx.font = 'bold 36px monospace';
+                    ctx.fillStyle = '#f00';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('ELEVATOR FAULT', centerX, panelY + 100);
+
+                    // Instructions
+                    ctx.font = '20px monospace';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText('Press ENTER to restart floor', centerX, panelY + 150);
+
+                    // Warning icon
+                    ctx.fillStyle = '#ff0';
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, panelY + 190);
+                    ctx.lineTo(centerX - 25, panelY + 230);
+                    ctx.lineTo(centerX + 25, panelY + 230);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 24px Arial';
+                    ctx.fillText('!', centerX, panelY + 220);
+
+                    // Flashing emergency light effect
+                    if (Math.floor(Date.now() / 300) % 2 === 0) {
+                        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    }
+                }
+            }
             return;
         }
 
-
         if (!ctx) return;
 
-        // Adjust vertical position when sliding
-        let adjustedY = this.y;
-        if (this.state === 5) {
-            adjustedY = this.y + this.height/4; // Move down for sliding
+        // grab current animation based on state
+        const animation = this.animations[this.state];
+
+        if (animation) {
+            ctx.save();
+
+            let adjustedY = this.y;
+            if (this.state === this.STATES.SLIDING || this.state === this.STATES.CROUCHING) {
+                adjustedY = this.y + this.height/4;
+            }
+
+            if (this.facing === 0) { // left facing
+                // Additional offset for sliding animation when facing left
+                let xOffset = -this.x - this.width - 37;
+
+                // Apply special offset for sliding to left
+                if (this.state === this.STATES.SLIDING) {
+                    xOffset -= 40; // Adjust this value to align the sprite correctly
+                }
+
+                // Flip the context horizontally
+                ctx.scale(-1, 1);
+                animation.drawFrame(
+                    this.game.clockTick,
+                    ctx,
+                    xOffset,
+                    adjustedY,
+                    0.5
+                );
+            } else { // right facing
+                animation.drawFrame(
+                    this.game.clockTick,
+                    ctx,
+                    this.x - 37,
+                    adjustedY,
+                    0.5
+                );
+            }
+
+            ctx.restore();
         }
 
-        // Draw the appropriate animation based on state and facing direction
-        if (this.animations[this.state] && 
-            this.animations[this.state][0] && 
-            this.animations[this.state][0][this.facing]) {
-            
-            this.animations[this.state][0][this.facing].drawFrame(
-                this.game.clockTick,
-                ctx,
-                this.x - 37,
-                adjustedY,
-                0.5
-            );
-        }
-
-        // Draw debug box
+        // Draw debug box if debugging is enabled
         if (this.game.options.debugging) {
-            if (this.state === 5) {
-                ctx.strokeStyle = 'red';
+            // Set debug box based on state
+            ctx.strokeStyle = 'red';
+            if (this.state === this.STATES.SLIDING) {
                 ctx.strokeRect(this.x, this.y + this.height / 1.5, this.width * 3, this.height / 3);
+            } else if (this.state === this.STATES.CROUCHING) {
+                ctx.strokeRect(this.x, this.y + this.height / 2, this.width, this.height / 2);
             } else {
-                ctx.strokeStyle = 'red';
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
             }
+
+            // Display current state for debugging
+            ctx.fillStyle = 'black';
+            ctx.fillText(`State: ${this.state}, Facing: ${this.facing}`, this.x, this.y - 10);
         }
     }
 }

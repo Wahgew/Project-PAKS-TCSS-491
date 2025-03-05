@@ -3,19 +3,25 @@ class Lever {
         this.game = gameEngine;
         Object.assign(this, {x, y, speed, moving, direction, reverseTime});
 
-        this.height = 50;
-        this.width = 50;
+        this.height = 53;
+        this.width = 23;
         this.time = 0;
         this.reverse = false;
         this.collected = false;
 
         // Load spritesheet
-        this.spritesheet = ASSET_MANAGER.getAsset("./sprites/lever_uncollected.png");
-        this.spritesheet2 = ASSET_MANAGER.getAsset("./sprites/lever_collected.png")
+        //this.spritesheet = ASSET_MANAGER.getAsset("./sprites/lever_uncollected.png");
+        //this.spritesheet2 = ASSET_MANAGER.getAsset("./sprites/lever_collected.png");
+        this.spritesheet = ASSET_MANAGER.getAsset("./sprites/leverOn.png");
+        this.spritesheet2 = ASSET_MANAGER.getAsset("./sprites/leverOff.png")
+
+        // Create animator with the actual image dimensions
+        const imageWidth = this.spritesheet.width;   // Use actual image width
+        const imageHeight = this.spritesheet.height; // Use actual image height
 
         // Create animator with full sprite dimensions
-        this.animatorUn = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
-        this.animatorCol = new Animator(this.spritesheet2, 0, 0, this.width, this.height, 1, 0.1);
+        this.animatorUn = new Animator(this.spritesheet, 0, 0, imageWidth, imageHeight, 1, 0.1);
+        this.animatorCol = new Animator(this.spritesheet2, 0, 0, imageWidth, imageHeight, 1, 0.1);
 
         this.velocity = {x: 0, y: 0};
         this.updateBB();
@@ -39,9 +45,9 @@ class Lever {
 
         // Draw the sprite
         if (!this.collected) {
-            this.animatorUn.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
+            this.animatorUn.drawFrame(this.game.clockTick, ctx, this.x, this.y, 0.5);
         } else {
-            this.animatorCol.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
+            this.animatorCol.drawFrame(this.game.clockTick, ctx, this.x, this.y, 0.5);
         }
     }
 }
