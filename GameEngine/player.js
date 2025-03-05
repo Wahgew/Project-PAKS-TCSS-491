@@ -180,15 +180,18 @@ class Player {
         const MAX_FALL = 2000;
         const MAX_JUMP = 850;
 
-        // check for death state and restart game
-        if (this.dead) {
-            console.log(this.game.entities);
-            if (this.game.keys['enter']) {
-                this.restartGame();
-                console.log(this.game.entities);
-            }
-            return; // don't process other updates when dead
-        }
+        // might be removed -peter
+        // if (this.dead) {
+        //     // Don't process enter key if a death screen is pending
+        //     if (this.game.levelUI && this.game.levelUI.pendingDeathScreen) {
+        //         return; // Skip all processing including enter key
+        //     }
+        //
+        //     if (this.game.keys['enter']) {
+        //         this.restartGame();
+        //     }
+        //     return; // don't process other updates when dead
+        // }
         // Update input buffer timers
         if (this.jumpBufferTimer > 0) {
             this.jumpBufferTimer -= TICK;
@@ -561,47 +564,54 @@ class Player {
 
     // resets the game
     restartGame() {
+        console.log("Player restart game called");
         this.deathAnimation = null;
-        // loads the new level
-        this.game.levelConfig.loadLevel(this.game.levelConfig.currentLevel);
 
-        // Reset timer if it exists
-        if (this.game.timer) {
-            this.game.timer.reset();
-        }
-
-        // Clear any game keys that might be held
-        for (let key in this.game.keys) {
-            this.game.keys[key] = false;
-        }
-        this.levers = 0; // reset levers collected;
+        // Reset player state
+        this.levers = 0;
         this.dead = false;
+
+        // The level loading and other resets will happen in GameEngine
     }
 
     // call this method if you want to kill the player from an entity
     kill() {
         if (!this.game.options.debugging) {
-            this.dead = true;
+            // Only set death state if not already dead
+            if (!this.dead) {
+                console.log("Player killed");
+                this.dead = true;
 
-            // Play death sound if audio manager exists
-            if (window.AUDIO_MANAGER) {
-                // Create a temporary audio element for the death sound
-                const deathSound = new Audio('./sounds/death_sound.mp3');
+                // Play death sound if audio manager exists
+                if (window.AUDIO_MANAGER) {
+                    const deathSound = new Audio('./sounds/death_sound.mp3');
+                    deathSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+                    deathSound.play().catch(error => {
+                        console.error("Error playing death sound:", error);
+                    });
+                }
 
-                // Set volume based on current audio manager settings
-                deathSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+                // Create death animation at player's center position
+                this.deathAnimation = new DeathAnimation(
+                    this.x + this.width / 2,
+                    this.y + this.height / 2
+                );
 
-                // Play the sound
-                deathSound.play().catch(error => {
-                    console.error("Error playing death sound:", error);
-                });
+                // Stop the timer
+                if (this.game.timer) {
+                    this.game.timer.stop();
+                }
+
+                // Show death screen after a shorter delay (500ms instead of 1000ms)
+                setTimeout(() => {
+                    if (this.game.levelUI) {
+                        // Clear any existing UI state first
+                        this.game.levelUI.isDisplayingComplete = false;
+                        this.game.levelUI.isDisplayingDeath = true;
+                        console.log("Death screen displayed");
+                    }
+                }, 500); // Reduced to 500ms
             }
-
-            // Create death animation at player's center position
-            this.deathAnimation = new DeathAnimation(
-                this.x + this.width / 2,
-                this.y + this.height / 2
-            );
         } else {
             console.log("Player would have died, but debug mode is active");
         }
@@ -615,18 +625,13 @@ class Player {
             return;
         }
 
-        if (!this.game.options.debugging) {
+        if (!this.game.options.debugging && !this.dead) { // Add !this.dead check
             this.win = true;
 
             // Play level complete sound if audio manager exists
             if (window.AUDIO_MANAGER) {
-                // Create a temporary audio element for the win sound
                 const winSound = new Audio('./sounds/temp-win-game.mp3');
-
-                // Set volume based on current audio manager settings
                 winSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
-
-                // Play the sound
                 winSound.play().catch(error => {
                     console.error("Error playing level complete sound:", error);
                 });
@@ -646,11 +651,13 @@ class Player {
                 // Make sure best time cache is updated before showing the complete screen
                 await this.game.levelUI.updateBestTimeCache();
 
+                // Explicitly set UI states - clear death screen if it's showing
+                this.game.levelUI.isDisplayingDeath = false;
                 // Now show the level complete screen
                 await this.game.levelUI.showLevelComplete();
             }
         } else {
-            console.log("Player win, but debug mode is active");
+            console.log("Player win, but debug mode is active or player is dead");
         }
     }
 
@@ -692,75 +699,6 @@ class Player {
             if (this.deathAnimation) {
                 this.deathAnimation.update(this.game.clockTick);
                 this.deathAnimation.draw(ctx);
-
-                // Check if animation is finished to show death screen
-                if (this.deathAnimation.finished) {
-                    // Draw elevator-themed death screen
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-                    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-                    const centerX = ctx.canvas.width / 2;
-                    const centerY = ctx.canvas.height / 2;
-
-                    // Draw red emergency panel
-                    const panelWidth = 400;
-                    const panelHeight = 300;
-                    const panelX = centerX - panelWidth/2;
-                    const panelY = centerY - panelHeight/2;
-
-                    // Red emergency panel background
-                    ctx.fillStyle = '#d00';
-                    ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
-
-                    // Panel border
-                    ctx.strokeStyle = '#800';
-                    ctx.lineWidth = 5;
-                    ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
-
-                    // Warning stripes at top
-                    const stripeHeight = 30;
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(panelX, panelY, panelWidth, stripeHeight);
-
-                    // Warning text
-                    ctx.font = 'bold 18px monospace';
-                    ctx.fillStyle = '#fff';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('EMERGENCY STOP', centerX, panelY + 20);
-
-                    // Error display
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(panelX + 50, panelY + 60, panelWidth - 100, 60);
-
-                    ctx.font = 'bold 36px monospace';
-                    ctx.fillStyle = '#f00';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('ELEVATOR FAULT', centerX, panelY + 100);
-
-                    // Instructions
-                    ctx.font = '20px monospace';
-                    ctx.fillStyle = '#fff';
-                    ctx.fillText('Press ENTER to restart floor', centerX, panelY + 150);
-
-                    // Warning icon
-                    ctx.fillStyle = '#ff0';
-                    ctx.beginPath();
-                    ctx.moveTo(centerX, panelY + 190);
-                    ctx.lineTo(centerX - 25, panelY + 230);
-                    ctx.lineTo(centerX + 25, panelY + 230);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    ctx.fillStyle = '#000';
-                    ctx.font = 'bold 24px Arial';
-                    ctx.fillText('!', centerX, panelY + 220);
-
-                    // Flashing emergency light effect
-                    if (Math.floor(Date.now() / 300) % 2 === 0) {
-                        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                    }
-                }
             }
             return;
         }
