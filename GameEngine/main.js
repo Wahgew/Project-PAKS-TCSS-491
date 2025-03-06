@@ -20,6 +20,7 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/wall-slide.png");
     ASSET_MANAGER.queueDownload("./sprites/crouch.png");
     ASSET_MANAGER.queueDownload("./sprites/fall.png");
+    ASSET_MANAGER.queueDownload("./sprites/menu.png");
 
     // hazard assets
     ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
@@ -44,6 +45,11 @@ function startGame() {
         await gameEngine.init(ctx);
         gameEngine.levelConfig = new LevelConfig(gameEngine);
         gameEngine.levelConfig.loadLevel(1);
+        
+        if (!window.GAME_MENU) {
+            window.GAME_MENU = new GameMenu(gameEngine);
+        }
+        window.GAME_MENU.show();
 
         // Switch from menu music to game music
         if (window.AUDIO_MANAGER) {
@@ -57,7 +63,19 @@ function startGame() {
         // gameEngine.levelTimesManager.debugPrintAllTimes();
     });
 }
+
 function showLevels() {
+    // Hide game menu if it exists
+    if (window.GAME_MENU) {
+        window.GAME_MENU.hide();
+    }
+    
+    // Hide game canvas
+    const gameCanvas = document.getElementById('gameWorld');
+    if (gameCanvas) {
+        gameCanvas.style.display = 'none';
+    }
+    
     const levelsScreen = new LevelsScreen();
     levelsScreen.show();
 }
