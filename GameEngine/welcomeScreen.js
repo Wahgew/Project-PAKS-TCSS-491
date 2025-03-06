@@ -93,10 +93,9 @@ class WelcomeScreen {
             <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
                 <img src="./sprites/AboutUsNewSmall.gif" alt="Profile" style="width: 300px; border-radius: 8px; margin-bottom: 20px;">
                 
-                <p style="margin: 0; line-height: 1.6;">
+                <p style="margin: 0; line-height: 1.6; font-family: 'Molot', sans-serif; font-weight: normal; font-size: 20px; color: white; text-align: center;">
                     Hello, Welcome to P.A.K.S
                 </p>
-
             </div>
         `;
     }
