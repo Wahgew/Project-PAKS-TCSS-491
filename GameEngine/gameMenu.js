@@ -81,8 +81,8 @@ class GameMenu {
         
         // Add menu options
         const menuOptions = [
-            { text: 'Resume', action: () => this.resumeGame() },
             { text: 'Pause', action: () => this.pauseGame() },
+            { text: 'Resume', action: () => this.resumeGame() },
             { text: 'Levels', action: () => this.showLevels() },
             { text: 'Exit', action: () => this.exitGame() }
         ];
