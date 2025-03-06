@@ -81,8 +81,8 @@ class GameMenu {
         
         // Add menu options
         const menuOptions = [
-            { text: 'Resume', action: () => this.resumeGame() },
             { text: 'Pause', action: () => this.pauseGame() },
+            { text: 'Resume', action: () => this.resumeGame() },
             { text: 'Levels', action: () => this.showLevels() },
             { text: 'Exit', action: () => this.exitGame() }
         ];
@@ -211,7 +211,7 @@ class GameMenu {
         this.hideMenu();
     }
     
-    // Updated showMenu method to also pause the timer when menu is shown
+    // Updated showMenu method
     showMenu() {
         this.menuPanel.style.display = 'flex';
         this.visible = true;
@@ -237,13 +237,11 @@ class GameMenu {
                 this.gameEngine.ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
         }
-        
         // Play menu music instead of game music
         if (window.AUDIO_MANAGER) {
             window.AUDIO_MANAGER.stopGameMusic();
             window.AUDIO_MANAGER.playMenuMusic();
         }
-        
         // Now show the levels screen
         const levelsScreen = new LevelsScreen();
         levelsScreen.show();
