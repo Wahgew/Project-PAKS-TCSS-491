@@ -182,32 +182,39 @@ class GameMenu {
     }
     
     // Menu actions
-    resumeGame() {
-        if (this.gameEngine) {
-            // Resume the game engine
-            this.gameEngine.isPaused = false;
-            
-            // Resume the timer if it exists
-            if (this.gameEngine.timer && !this.gameEngine.timer.isRunning) {
-                this.gameEngine.timer.isRunning = true;
-                console.log("Timer resumed");
-            }
-        }
-        this.hideMenu();
-    }
-    
     pauseGame() {
         if (this.gameEngine) {
             // Pause the game engine
             this.gameEngine.isPaused = true;
             
-            // Pause the timer if it exists
+            // Pause the timer if it exists by calling its stop method
             if (this.gameEngine.timer && this.gameEngine.timer.isRunning) {
-                this.gameEngine.timer.isRunning = false;
-                console.log("Timer paused");
+                this.gameEngine.timer.stop();
+                console.log("Timer paused at:", this.gameEngine.timer.getDisplayTime().toFixed(2));
             }
         }
         this.hideMenu();
+    }
+    
+    // Updated resumeGame method to properly restart the timer
+    resumeGame() {
+        if (this.gameEngine) {
+            // Resume the game engine
+            this.gameEngine.isPaused = false;
+            
+            // Resume the timer if it exists by calling its start method
+            if (this.gameEngine.timer && !this.gameEngine.timer.isRunning) {
+                this.gameEngine.timer.start();
+                console.log("Timer resumed from:", this.gameEngine.timer.getDisplayTime().toFixed(2));
+            }
+        }
+        this.hideMenu();
+    }
+    
+    // Updated showMenu method to also pause the timer when menu is shown
+    showMenu() {
+        this.menuPanel.style.display = 'flex';
+        this.visible = true;
     }
     
     showLevels() {
