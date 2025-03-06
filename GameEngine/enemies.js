@@ -195,6 +195,7 @@ class Spike {
         this.width = 40;
         this.time = 0;
         this.reverse = false;
+        this.spin = 0;
 
         // Load spritesheet
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/spike_small.png");
@@ -300,6 +301,8 @@ class Spike {
                 }
             }
         });
+        this.spin += 360 * this.game.clockTick;
+        if (this.spin >= 720) this.spin = 0;
         this.updateBB();
     }
 
@@ -311,7 +314,7 @@ class Spike {
         }
 
         // Draw the sprite
-        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
+        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, this.spin);
     }
 }
 
