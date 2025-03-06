@@ -47,22 +47,29 @@ class LevelUI {
     handleButtonAction(action) {
         switch(action) {
             case 'menu':
+                // First hide the current UI
                 this.hideLevelComplete();
+
+                // Clean up game state
+                this.cleanupGameState();
+
                 // Get welcome screen and show it
                 const welcomeScreen = document.getElementById("welcomeScreen");
                 if (welcomeScreen) {
                     welcomeScreen.style.display = "flex";
                 } else {
-                    new WelcomeScreen();
-                }
-                if (window.AUDIO_MANAGER) {
-                    window.AUDIO_MANAGER.stopGameMusic();
-                    window.AUDIO_MANAGER.playMenuMusic();
+                    new WelcomeScreen(startGame, showLevels);
                 }
                 break;
 
             case 'levels':
+                // First hide the current UI
                 this.hideLevelComplete();
+
+                // Clean up game state
+                this.cleanupGameState();
+
+                // Show levels screen
                 const levelsScreen = new LevelsScreen();
                 levelsScreen.show();
                 break;
@@ -85,6 +92,46 @@ class LevelUI {
                     }
                 }
                 break;
+        }
+    }
+
+    // Helper method to clean up game state before transitioning
+    cleanupGameState() {
+        // Stop the game engine
+        if (this.gameEngine) {
+            // Pause the game
+            this.gameEngine.isPaused = true;
+
+            // Clear all entities and reset the game state
+            this.gameEngine.entities = [];
+
+            // Stop the timer if it exists
+            if (this.gameEngine.timer) {
+                this.gameEngine.timer.stop();
+            }
+
+            // Clear the canvas
+            if (this.gameEngine.ctx) {
+                const canvas = this.gameEngine.ctx.canvas;
+                this.gameEngine.ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Hide the game canvas
+            const gameCanvas = document.getElementById('gameWorld');
+            if (gameCanvas) {
+                gameCanvas.style.display = 'none';
+            }
+        }
+
+        // Stop game music and play menu music
+        if (window.AUDIO_MANAGER) {
+            window.AUDIO_MANAGER.stopGameMusic();
+            window.AUDIO_MANAGER.playMenuMusic();
+        }
+
+        // Hide game menu if it exists
+        if (window.GAME_MENU) {
+            window.GAME_MENU.hide();
         }
     }
 
@@ -443,27 +490,32 @@ class LevelUI {
             this.buttonStates.levels.hover = this.isPointInButton(mouse, centerButtonX, buttonY, buttonSize);
             this.buttonStates.continue.hover = this.isPointInButton(mouse, rightButtonX, buttonY, buttonSize);
 
-            // Add click handler if not already added
-            if (!this.clickHandlerAdded) {
-                this.gameEngine.ctx.canvas.addEventListener('click', (e) => {
-                    // Only process clicks if either death or level complete is showing
-                    if (!this.isDisplayingComplete && !this.isDisplayingDeath) return;
-
-                    const rect = this.gameEngine.ctx.canvas.getBoundingClientRect();
-                    const clickX = e.clientX - rect.left;
-                    const clickY = e.clientY - rect.top;
-                    const clickPoint = { x: clickX, y: clickY };
-
-                    if (this.isPointInButton(clickPoint, leftButtonX, buttonY, buttonSize)) {
-                        this.handleButtonAction('menu');
-                    } else if (this.isPointInButton(clickPoint, centerButtonX, buttonY, buttonSize)) {
-                        this.handleButtonAction('levels');
-                    } else if (this.isPointInButton(clickPoint, rightButtonX, buttonY, buttonSize)) {
-                        this.handleButtonAction('continue');
-                    }
-                });
-                this.clickHandlerAdded = true;
+            // CHANGED: Remove the previous click handler if it exists
+            if (this.clickHandler) {
+                this.gameEngine.ctx.canvas.removeEventListener('click', this.clickHandler);
             }
+
+            // CHANGED: Create a new click handler with the current button positions
+            this.clickHandler = (e) => {
+                // Only process clicks if either death or level complete is showing
+                if (!this.isDisplayingComplete && !this.isDisplayingDeath) return;
+
+                const rect = this.gameEngine.ctx.canvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+                const clickPoint = { x: clickX, y: clickY };
+
+                if (this.isPointInButton(clickPoint, leftButtonX, buttonY, buttonSize)) {
+                    this.handleButtonAction('menu');
+                } else if (this.isPointInButton(clickPoint, centerButtonX, buttonY, buttonSize)) {
+                    this.handleButtonAction('levels');
+                } else if (this.isPointInButton(clickPoint, rightButtonX, buttonY, buttonSize)) {
+                    this.handleButtonAction('continue');
+                }
+            };
+
+            // CHANGED: Add the new click handler
+            this.gameEngine.ctx.canvas.addEventListener('click', this.clickHandler);
         }
 
         // Set button colors based on screen type
@@ -668,5 +720,30 @@ class LevelUI {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         return distance <= size/2;
+    }
+
+    // resets the ui when loading a new level
+    resetUIState() {
+        // Reset UI flags
+        this.isDisplayingComplete = false;
+        this.isDisplayingDeath = false;
+        this.showBestTimeMsg = false;
+        this.newBestTimeMsg = '';
+
+        // Reset button states
+        this.buttonStates = {
+            menu: { hover: false },
+            levels: { hover: false },
+            continue: { hover: false }
+        };
+
+        // Reset click handler flag so it will be reattached when needed
+        this.clickHandlerAdded = false;
+
+        // If we have a stored click handler, remove it
+        if (this.clickHandler && this.gameEngine && this.gameEngine.ctx) {
+            this.gameEngine.ctx.canvas.removeEventListener('click', this.clickHandler);
+            this.clickHandler = null;
+        }
     }
 }
