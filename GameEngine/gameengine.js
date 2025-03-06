@@ -201,29 +201,20 @@ class GameEngine {
             this.rightclick = getXandY(e);
         });
 
-        // test timer reset and stop
-        // test level completion display
+        // enter handler for level restart and complete
         window.addEventListener("keydown", event => {
             this.keys[event.key.toLowerCase()] = true;
 
             if (event.key.toLowerCase() === 'enter') {
-                // Handle level complete screen
-                if (this.levelUI.isDisplayingComplete && !this.Player.dead) {
-                    console.log("Enter pressed on level complete screen");
+                console.log("Enter key pressed, checking UI state");
 
-                    // First hide the level complete UI
-                    this.levelUI.hideLevelComplete();
-
-                    // Add a small delay before loading the next level
-                    // This prevents accidental double-presses from carrying over
-                    setTimeout(() => {
-                        this.levelConfig.loadNextLevel();
-                    }, 100);
-                }
-                // Handle death screen (death screen state)
-                else if (this.Player && this.Player.dead) {
-                    this.levelUI.hideLevelComplete();
-                    this.levelConfig.loadLevel(this.levelConfig.currentLevel); // Reload current level
+                // Only handle UI navigation if a UI screen is showing
+                if (this.levelUI) {
+                    // Just call the same handler as buttons use
+                    if (this.levelUI.isDisplayingDeath || this.levelUI.isDisplayingComplete) {
+                        console.log("UI screen is showing, handling Enter key");
+                        this.levelUI.handleButtonAction('continue');
+                    }
                 }
             }
         });

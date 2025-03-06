@@ -173,6 +173,7 @@ class LevelConfig {
         // Make sure any level completion UI is hidden first
         if (this.game.levelUI) {
             this.game.levelUI.hideLevelComplete();
+            this.game.levelUI.resetUIState();
         }
 
         // clear existing entities and player reference
