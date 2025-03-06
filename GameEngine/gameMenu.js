@@ -17,14 +17,13 @@ class GameMenu {
     }
     
     createMenuButton() {
-        // Create a simple button element
         this.menuButton = document.createElement('button');
         this.menuButton.id = 'gameMenuButton';
         this.menuButton.style.position = 'fixed';
-        this.menuButton.style.top = '20px';
+        this.menuButton.style.top = '22px';
         this.menuButton.style.right = '80px';
-        this.menuButton.style.width = '40px';
-        this.menuButton.style.height = '40px';
+        this.menuButton.style.width = '32px';
+        this.menuButton.style.height = '32px';
         this.menuButton.style.border = 'none';
         this.menuButton.style.borderRadius = '5px';
         this.menuButton.style.padding = '0';
@@ -34,11 +33,30 @@ class GameMenu {
         this.menuButton.style.backgroundSize = 'contain';
         this.menuButton.style.backgroundPosition = 'center';
         this.menuButton.style.backgroundRepeat = 'no-repeat';
-        this.menuButton.style.display = 'none'; // Hidden by default
+        this.menuButton.style.display = 'block'; // Ensure it's visible
         
-        // Add click handler
-        this.menuButton.onclick = () => this.toggleMenu();
-        
+        // Add smooth animation
+        this.menuButton.style.transition = 'transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out';
+    
+        // Hover effect (Add shadow)
+        this.menuButton.onmouseover = () => {
+            this.menuButton.style.boxShadow = '0px 0px 15px rgba(211, 211, 211, 0.5)'; 
+        };
+    
+        // Remove shadow on mouse leave
+        this.menuButton.onmouseout = () => {
+            this.menuButton.style.boxShadow = 'none'; // Remove shadow
+        };
+    
+        // Click animation and menu toggle
+        this.menuButton.onclick = () => {
+            this.menuButton.style.transform = 'scale(0.9)'; 
+            setTimeout(() => {
+                this.menuButton.style.transform = 'scale(1)';
+            }, 100);
+            this.toggleMenu();
+        };
+    
         // Add to document
         document.body.appendChild(this.menuButton);
     }
