@@ -1,3 +1,5 @@
+// gameMenu.js - Full implementation with fixes for screen transitions
+
 class GameMenu {
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
@@ -181,15 +183,29 @@ class GameMenu {
     
     // Menu actions
     resumeGame() {
-        if (this.gameEngine && this.gameEngine.isPaused) {
+        if (this.gameEngine) {
+            // Resume the game engine
             this.gameEngine.isPaused = false;
+            
+            // Resume the timer if it exists
+            if (this.gameEngine.timer && !this.gameEngine.timer.isRunning) {
+                this.gameEngine.timer.isRunning = true;
+                console.log("Timer resumed");
+            }
         }
         this.hideMenu();
     }
     
     pauseGame() {
-        if (this.gameEngine && !this.gameEngine.isPaused) {
+        if (this.gameEngine) {
+            // Pause the game engine
             this.gameEngine.isPaused = true;
+            
+            // Pause the timer if it exists
+            if (this.gameEngine.timer && this.gameEngine.timer.isRunning) {
+                this.gameEngine.timer.isRunning = false;
+                console.log("Timer paused");
+            }
         }
         this.hideMenu();
     }
@@ -227,35 +243,29 @@ class GameMenu {
     }
     
     exitGame() {
-        this.hide(); // Hide menu first
-        
-        // Stop the game engine
+        this.hide(); 
+    
+        // Ensure the game engine is stopped
         if (this.gameEngine) {
-            this.gameEngine.stop();
-            
-            // Hide the game canvas
-            const gameCanvas = document.getElementById('gameWorld');
-            if (gameCanvas) {
-                gameCanvas.style.display = 'none';
-            }
-            
-            // Clear the canvas
-            if (this.gameEngine.ctx) {
-                const canvas = this.gameEngine.ctx.canvas;
-                this.gameEngine.ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
+            this.gameEngine.running = false; // Stop the game loop
+            this.gameEngine.entities = []; // Clear all entities
+            this.gameEngine.ctx.clearRect(0, 0, this.gameEngine.ctx.canvas.width, this.gameEngine.ctx.canvas.height);
         }
-        
         // Stop game music and play menu music
         if (window.AUDIO_MANAGER) {
             window.AUDIO_MANAGER.stopGameMusic();
             window.AUDIO_MANAGER.playMenuMusic();
         }
-        
-        // Return to welcome screen
-        new WelcomeScreen(startGame, showLevels);
+        // Hide game canvas
+        const gameCanvas = document.getElementById('gameWorld');
+        if (gameCanvas) {
+            gameCanvas.style.display = 'none';
+        }
+        // Play elevator door sequence before showing the welcome screen
+        new ElevatorDoorSequence(() => {
+            new WelcomeScreen(startGame, showLevels);
+        });
     }
 }
 
-// Create a global reference for easy access
-let GAME_MENU;
+let GAME_MENU; // Create a global reference for easy access
