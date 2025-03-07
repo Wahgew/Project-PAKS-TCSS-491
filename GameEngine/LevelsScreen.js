@@ -392,6 +392,8 @@ class LevelsScreen {
         
         // If a game is already running, just return to it
         if (window.gameEngine) {
+            // No need to do anything; hiding the level screen will reveal the game
+            // Make sure the canvas is visible
             const gameCanvas = document.getElementById("gameWorld");
             if (gameCanvas) {
                 gameCanvas.style.display = "block";
