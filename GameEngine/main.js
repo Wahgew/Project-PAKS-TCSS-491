@@ -51,6 +51,17 @@ function startGame() {
         }
         window.GAME_MENU.show();
 
+        // Check if a specific level was requested from LevelsScreen
+        // I replaced the hardcoded set to level 1
+        if (window.targetLevelToLoad !== undefined) {
+            // Load the level that was requested from LevelsScreen
+            gameEngine.levelConfig.currentLevel = window.targetLevelToLoad;
+            gameEngine.levelConfig.loadLevel(window.targetLevelToLoad);
+        } else {
+            // Default to level 1 if no specific level was requested
+            gameEngine.levelConfig.loadLevel(1);
+        }
+
         // Switch from menu music to game music
         if (window.AUDIO_MANAGER) {
             window.AUDIO_MANAGER.stopMenuMusic();

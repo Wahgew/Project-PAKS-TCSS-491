@@ -21,7 +21,7 @@ class LevelsScreen {
         this.levelsContainer.style.display = "none"; 
         this.levelsContainer.style.zIndex = "3";
 
-        // Manually create 10 level buttons
+        // Manually create 12 level buttons
         this.createLevel1Button();
         this.createLevel2Button();
         this.createLevel3Button();
@@ -77,6 +77,7 @@ class LevelsScreen {
         button.addEventListener("click", clickHandler);
 
         this.levelsContainer.appendChild(button);
+        return button;
     }
 
     createInstructionsButton(x, y, level, clickHandler) {
@@ -110,10 +111,10 @@ class LevelsScreen {
         button.addEventListener("click", clickHandler);
     
         this.levelsContainer.appendChild(button);
+        return button;
     }
     
-
-    // Individual methods for each button
+    // Individual methods for each level button - properly referencing specific level numbers
     createLevel1Button() {
         this.createButton(115, 244, 1, () => this.goToLevel1());
     }
@@ -208,7 +209,6 @@ class LevelsScreen {
         instructionsPanel.style.zIndex = "10";
         instructionsPanel.style.background = "transparent"; // Set background to transparent
         
-        // Create the image element with the elevator instructions
         const instructionsImage = document.createElement("img");
         instructionsImage.src = "./sprites/instructionsUI.png"; // Path to your instruction image
         instructionsImage.style.width = "100%";
@@ -246,71 +246,161 @@ class LevelsScreen {
         document.body.appendChild(instructionsPanel);
     }
 
-    // Methods for handling level clicks
+    // Modified level loading approach that ensures game is initialized properly
+    loadLevel(levelNum) {
+        console.log(`Loading level ${levelNum}`);
+        this.hide(); // Hide the levels screen
+        
+        // Store target level in a global variable to be used after initialization
+        window.targetLevelToLoad = levelNum;
+        
+        // If game engine doesn't exist yet, we need to initialize it
+        if (!window.gameEngine) {
+            console.log("Game engine not found, starting game initialization...");
+            
+            // Define a custom observer function to wait for game engine availability
+            if (!window.checkGameEngineInterval) {
+                window.checkGameEngineInterval = setInterval(() => {
+                    console.log("Checking for game engine initialization...");
+                    if (window.gameEngine && window.gameEngine.levelConfig) {
+                        console.log("Game engine found! Loading requested level:", window.targetLevelToLoad);
+                        
+                        // Update current level and load it
+                        window.gameEngine.levelConfig.currentLevel = window.targetLevelToLoad;
+                        window.gameEngine.levelConfig.loadLevel(window.targetLevelToLoad);
+                        
+                        // Make sure game canvas is visible
+                        const gameCanvas = document.getElementById("gameWorld");
+                        if (gameCanvas) {
+                            gameCanvas.style.display = "block";
+                        }
+                        
+                        // Switch music if needed
+                        if (window.AUDIO_MANAGER) {
+                            window.AUDIO_MANAGER.stopMenuMusic();
+                            window.AUDIO_MANAGER.playGameMusic();
+                        }
+                        
+                        // Clean up the interval
+                        clearInterval(window.checkGameEngineInterval);
+                        window.checkGameEngineInterval = null;
+                    }
+                }, 200); // Check every 200ms
+            }
+            
+            // Start the game (this is the function from paste-3.txt)
+            startGame();
+
+        } else {
+            // Game already exists, directly load level
+            console.log(`Game engine exists, loading level ${levelNum}`);
+            if (window.gameEngine.levelConfig) {
+                // Set the current level before loading it
+                window.gameEngine.levelConfig.currentLevel = levelNum;
+                window.gameEngine.levelConfig.loadLevel(levelNum);
+                
+                // Ensure the game canvas is visible
+                const gameCanvas = document.getElementById("gameWorld");
+                if (gameCanvas) {
+                    gameCanvas.style.display = "block";
+                }
+                
+                // Switch music if needed
+                if (window.AUDIO_MANAGER) {
+                    window.AUDIO_MANAGER.stopMenuMusic();
+                    window.AUDIO_MANAGER.playGameMusic();
+                }
+            } else {
+                console.error("Game engine exists but levelConfig is missing");
+            }
+        }
+    }
+    
+    // Methods for handling level clicks - each loads the correct level number
     goToLevel1() {
-        console.log("Navigating to Level 1...");
-        alert("Loading Level 1...");
+        console.log("Loading level 1");
+        this.loadLevel(1);
     }
 
     goToLevel2() {
-        console.log("Navigating to Level 2...");
-        alert("Loading Level 2...");
+        console.log("Loading level 2");
+        this.loadLevel(2);
     }
 
     goToLevel3() {
-        console.log("Navigating to Level 3...");
-        alert("Loading Level 3...");
+        console.log("Loading level 3");
+        this.loadLevel(3);
     }
 
     goToLevel4() {
-        console.log("Navigating to Level 4...");
-        alert("Loading Level 4...");
+        console.log("Loading level 0 (test level)");
+        this.loadLevel(0);
     }
 
+    // For levels 5-12, 
     goToLevel5() {
-        console.log("Navigating to Level 5...");
-        alert("Loading Level 5...");
+        console.log("Level 5 - Coming Soon");
+        alert("Level 5 coming soon!");
+        
     }
 
     goToLevel6() {
-        console.log("Navigating to Level 6...");
-        alert("Loading Level 6...");
+        console.log("Level 6 - Coming Soon");
+        alert("Level 6 coming soon!");
+        
     }
 
     goToLevel7() {
-        console.log("Navigating to Level 7...");
-        alert("Loading Level 7...");
+        console.log("Level 7 - Coming Soon");
+        alert("Level 7 coming soon!");
+        
     }
 
     goToLevel8() {
-        console.log("Navigating to Level 8...");
-        alert("Loading Level 8...");
+        console.log("Level 8 - Coming Soon");
+        alert("Level 8 coming soon!");
+        
     }
 
     goToLevel9() {
-        console.log("Navigating to Level 9...");
-        alert("Loading Level 9...");
+        console.log("Level 9 - Coming Soon");
+        alert("Level 9 coming soon!");
+        
     }
 
     goToLevel10() {
-        console.log("Navigating to Level 10...");
-        alert("Loading Level 10...");
+        console.log("Level 10 - Coming Soon");
+        alert("Level 10 coming soon!");
+        
     }
 
     goToLevel11() {
-        console.log("Navigating to Level 11...");
-        alert("Loading Level 11...");
+        console.log("Level 11 - Coming Soon");
+        alert("Level 11 coming soon!");
+        
     }
 
     goToLevel12() {
-        console.log("Navigating to Level 12...");
-        alert("Loading Level 12...");
+        console.log("Level 12 - Coming Soon");
+        alert("Level 12 coming soon!");
+        
     }
 
     goTogame() {
-        console.log("Navigating to game...");
-        alert("Loading game...");
+        console.log("Going back to current game...");
+        this.hide(); // Hide the levels screen
+        
+        // If a game is already running, just return to it
+        if (window.gameEngine) {
+            // No need to do anything; hiding the level screen will reveal the game
+            // Make sure the canvas is visible
+            const gameCanvas = document.getElementById("gameWorld");
+            if (gameCanvas) {
+                gameCanvas.style.display = "block";
+            }
+        } else {
+            // If no game is running, start one at level 1
+            this.loadLevel(1);
+        }
     }
-
 }
-
