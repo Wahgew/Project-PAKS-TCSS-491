@@ -62,48 +62,52 @@ class LevelsScreen {
 
     // Modified createButton method to add lock overlay when locked
     createButton(x, y, level, clickHandler) {
+        // Create a container div to hold both button and lock
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "level-button-container";
+        buttonContainer.style.position = "absolute";
+        buttonContainer.style.width = "16px";
+        buttonContainer.style.height = "16px";
+        buttonContainer.style.left = `${x}px`;
+        buttonContainer.style.top = `${y}px`;
+        
+        // Create the button image
         const button = document.createElement("img");
-        button.src = "./sprites/buttons.png"; // Use your original button image
+        button.src = "./sprites/buttons.png";
         button.alt = `Level ${level}`;
-        button.dataset.level = level; // Store level number for reference
+        button.dataset.level = level;
         button.style.position = "absolute";
-        button.style.width = "16px"; // Keep your original size 
-        button.style.height = "16px";
+        button.style.width = "100%";
+        button.style.height = "100%";
         button.style.cursor = "pointer";
         button.style.transition = "0.3s ease-in-out";
-        button.style.left = `${x}px`;
-        button.style.top = `${y}px`;
-
-        // Add a lock overlay for locked levels
-        const lockOverlay = document.createElement("div");
+        button.style.zIndex = "1"; // Button below lock
+        
+        // Create the lock overlay
+        const lockOverlay = document.createElement("img");
+        lockOverlay.src = "./sprites/lock.png";
         lockOverlay.className = "lock-overlay";
         lockOverlay.style.position = "absolute";
-        lockOverlay.style.width = "100%";
-        lockOverlay.style.height = "100%";
-        lockOverlay.style.top = "0";
-        lockOverlay.style.left = "0";
-        lockOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.6)"; // Semi-transparent overlay
-        lockOverlay.style.borderRadius = "50%";
-        lockOverlay.style.display = "flex";
-        lockOverlay.style.justifyContent = "center";
-        lockOverlay.style.alignItems = "center";
+        lockOverlay.style.width = "24px";
+        lockOverlay.style.height = "24px";
+        lockOverlay.style.top = "-4px"; // Center over button
+        lockOverlay.style.left = "-4px"; // Center over button
+        lockOverlay.style.zIndex = "2"; // Lock above button
         lockOverlay.style.display = "none"; // Initially hidden
+        lockOverlay.style.pointerEvents = "none"; // Make lock non-interactive so clicks go to button
         
-        // Small lock icon
-        const lockIcon = document.createElement("div");
-        lockIcon.innerHTML = "🔒";
-        lockIcon.style.fontSize = "10px";
-        lockOverlay.appendChild(lockIcon);
-        button.appendChild(lockOverlay);
-
-        // Store reference to the button
+        // Add button and lock to the container
+        buttonContainer.appendChild(button);
+        buttonContainer.appendChild(lockOverlay);
+        
+        // Store reference to button and lock in array
         this.levelButtons.push({
             element: button,
             level: level,
             lockOverlay: lockOverlay
         });
-
-        // Add hover effects - these will check lock status when triggered
+        
+        // Add hover effects to the button
         button.addEventListener("mouseover", async () => {
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
@@ -111,7 +115,7 @@ class LevelsScreen {
                 button.style.filter = "drop-shadow(0 0 7px black)";
             }
         });
-
+        
         button.addEventListener("mouseout", async () => {
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
@@ -119,8 +123,8 @@ class LevelsScreen {
                 button.style.filter = "none";
             }
         });
-
-        // Attach click handler with level unlock check
+        
+        // Add click handler with level unlock check
         button.addEventListener("click", async () => {
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
@@ -129,8 +133,8 @@ class LevelsScreen {
                 this.showLockedLevelMessage(level);
             }
         });
-
-        this.levelsContainer.appendChild(button);
+        
+        this.levelsContainer.appendChild(buttonContainer);
         return button;
     }
 
@@ -147,18 +151,20 @@ class LevelsScreen {
             messageEl.style.transform = 'translateX(-50%)';
             messageEl.style.padding = '15px';
             messageEl.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            messageEl.style.color = '#ffcc00';
+            messageEl.style.color = '#ff3333';
             messageEl.style.fontFamily = "'Molot', sans-serif";
             messageEl.style.borderRadius = '8px';
             messageEl.style.textAlign = 'center';
             messageEl.style.zIndex = '10';
             messageEl.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+            messageEl.style.top = '72%';        
+            messageEl.style.marginTop = '50px';
             this.levelsContainer.appendChild(messageEl);
         }
 
         // Update message content
-        messageEl.textContent = `Floor ${level} is locked! Complete previous floors first.`;
-        
+        messageEl.textContent = `🔒Floor ${level} is locked! Complete previous floors first.`;
+        messageEl.style.textTransform = 'uppercase';
         // Show message with animation
         messageEl.style.animation = 'none';
         void messageEl.offsetWidth; // Trigger reflow
@@ -193,6 +199,11 @@ class LevelsScreen {
                 button.style.opacity = "1";
                 button.style.filter = "none";
                 button.style.cursor = "pointer";
+                
+                // Ensure lock is hidden for navigation buttons
+                if (lockOverlay) {
+                    lockOverlay.style.display = "none";
+                }
                 continue;
             }
             
@@ -200,24 +211,25 @@ class LevelsScreen {
             const isCompleted = await window.LEVEL_PROGRESS.isLevelCompleted(level);
             
             if (isUnlocked) {
-                // Unlocked level
+                // Unlocked level styling
                 button.style.opacity = "1";
                 button.style.cursor = "pointer";
                 button.style.filter = isCompleted ? "brightness(1.2) sepia(0.3)" : "none";
                 
-                // Hide lock overlay
+                // Hide lock overlay for unlocked levels
                 if (lockOverlay) {
                     lockOverlay.style.display = "none";
                 }
             } else {
-                // Locked level appearance
+                // Locked level styling
                 button.style.opacity = "0.7";
                 button.style.filter = "grayscale(100%)";
                 button.style.cursor = "not-allowed";
                 
-                // Show lock overlay
+                // Show lock overlay for locked levels with animation
                 if (lockOverlay) {
-                    lockOverlay.style.display = "flex";
+                    lockOverlay.style.display = "block";
+                    lockOverlay.style.animation = "lockPulse 2s infinite alternate";
                 }
             }
         }
