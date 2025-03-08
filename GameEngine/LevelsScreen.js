@@ -44,6 +44,7 @@ class LevelsScreen {
         this.createbackButton();
         
         this.createInstructionButton();
+        this.createResetLevelButton();
         
         // Append levels screen to body
         document.body.appendChild(this.levelsContainer);
@@ -236,8 +237,8 @@ class LevelsScreen {
     
         // Add hover effects
         button.addEventListener("mouseover", () => {
-            button.style.transform = "scale(1.1) rotate(0.1deg)";
-            button.style.filter = "drop-shadow(0 0 7px black)";
+            button.style.transform = "scale(1.05) rotate(0.1deg)";
+            button.style.filter = "drop-shadow(0 0 5px black)";
         });
     
         button.addEventListener("mouseout", () => {
@@ -250,6 +251,36 @@ class LevelsScreen {
         this.levelsContainer.appendChild(button);
         return button;
     }
+
+    createResetLevelButtonElement(x, y, level, clickHandler) {
+        const button = document.createElement("img");
+        button.src = "./sprites/resetLevel.png";
+        button.alt = `Reset Levels`;
+        button.style.position = "absolute";
+        button.style.width = "215px"; 
+        button.style.height = "54px";
+        button.style.cursor = "pointer";
+        button.style.transition = "0.3s ease-in-out";
+        button.style.left = `${x}px`;
+        button.style.top = `${y}px`;
+        
+        // Add hover effects
+        button.addEventListener("mouseover", () => {
+            button.style.transform = "scale(1.05) rotate(0.1deg)";
+            button.style.filter = "drop-shadow(0 0 5px black)";
+        });
+        
+        button.addEventListener("mouseout", () => {
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
+        });
+        
+        button.addEventListener("click", clickHandler);
+        
+        this.levelsContainer.appendChild(button);
+        return button;
+    }
+
     
     // Individual methods for each level button
     createLevel1Button() {
@@ -316,6 +347,23 @@ class LevelsScreen {
 
     createInstructionButton() {
         this.createInstructionsButton(75, 135, 15, () => this.showInstructions());
+    }
+
+    createResetLevelButton() {
+        this.createResetLevelButtonElement(75, 535, 16, () => this.resetLevels());
+    }
+
+    resetLevels() {
+        window.resetLevelProgress()
+        .then(() => {
+            console.log("Level progress reset successfully");
+            this.updateLevelButtonStates();
+            // Ensure the player can only access level 1 now
+            this.currentLevel = 1;
+        })
+        .catch(error => {
+            console.error("Error resetting levels:", error);
+        });
     }
 
     showInstructions() {
