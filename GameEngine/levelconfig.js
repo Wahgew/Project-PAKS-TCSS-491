@@ -86,18 +86,16 @@ class LevelConfig {
                 // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 25, 700),
-                exitDoor: () => new exitDoor(this.game, 1305, 320),
+                exitDoor: () => new exitDoor(this.game, 1800, 43),
                 hazards: () => [
-                    new Spike({gameEngine: this.game, x: 420, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 440, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 735, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 755, y: 470, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                     new Spike({gameEngine: this.game, x: 650, y: 430, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                     new Spike({gameEngine: this.game, x: 980, y: 573, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new BigBlock(this.game, 25, 25, 1375, 240),
-                    new BigBlock(this.game, 225, 625, 1375, 775),
+                    new BigBlock(this.game, 800, 624, 1875, 875),
                 ]
             },
 
-            3: {
+            5: {
                 map: () => new drawMap(this.TILE_SIZE, this.game),
                 player: () => new Player(this.game, 170, 130), // Starting position near top left
                 exitDoor: () => new exitDoor(this.game, 1805, 119,1), // Exit door near top right
@@ -151,6 +149,7 @@ class LevelConfig {
                     // Levers that need to be collected
                     new Lever({gameEngine: this.game, x: 150, y: 490, speed: 0, moving: false, direction: null, reverseTime: 0}),
                 ]
+
             }
 
             // add more levels below
