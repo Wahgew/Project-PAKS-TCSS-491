@@ -44,7 +44,6 @@ function startGame() {
 
         await gameEngine.init(ctx);
         gameEngine.levelConfig = new LevelConfig(gameEngine);
-        gameEngine.levelConfig.loadLevel(1);
         
         if (!window.GAME_MENU) {
             window.GAME_MENU = new GameMenu(gameEngine);
