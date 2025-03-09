@@ -10,6 +10,14 @@ class Player {
         this.intialY = this.y;
         this.teleportHandler = null;
 
+        // wall jump
+        this.wallJumpInputsAllowed = true;           // Whether a new wall jump input is allowed
+        this.jumpButtonPreviouslyPressed = false;    // If jump button was pressed in previous frame
+        this.jumpButtonJustPressed = false;          // If jump button was just pressed this frame
+        this.wallJumpTime = 0;                       // Time window after wall jump for enhanced air control
+        this.wallJumpControlWindow = 0.3;            // Duration of enhanced air control in seconds
+        this.wallJumpDirection = null;               // Direction player jumped during wall jump
+
         // First check if player instance exists first
         if (this.game) {
             this.game.Player = this;
@@ -41,8 +49,6 @@ class Player {
             wall_slide: ASSET_MANAGER.getAsset("./sprites/wall-slide.png"),
             crouch: ASSET_MANAGER.getAsset("./sprites/crouch.png"),
             fall: ASSET_MANAGER.getAsset("./sprites/fall.png"),
-            // Add crouch spritesheet when available
-            // crouch: ASSET_MANAGER.getAsset("./sprites/crouch.png")
         };
 
         this.facing = 1; // 0 = left, 1 = right
@@ -180,18 +186,11 @@ class Player {
         const MAX_FALL = 2000;
         const MAX_JUMP = 850;
 
-        // might be removed -peter
-        // if (this.dead) {
-        //     // Don't process enter key if a death screen is pending
-        //     if (this.game.levelUI && this.game.levelUI.pendingDeathScreen) {
-        //         return; // Skip all processing including enter key
-        //     }
-        //
-        //     if (this.game.keys['enter']) {
-        //         this.restartGame();
-        //     }
-        //     return; // don't process other updates when dead
-        // }
+        // Track jump button state changes (put this near the top of update)
+        const jumpButtonPressed = this.game.keys[' '] || this.game.keys['w'];
+        this.jumpButtonJustPressed = jumpButtonPressed && !this.jumpButtonPreviouslyPressed;
+        this.jumpButtonPreviouslyPressed = jumpButtonPressed;
+
         // Update input buffer timers
         if (this.jumpBufferTimer > 0) {
             this.jumpBufferTimer -= TICK;
@@ -202,25 +201,6 @@ class Player {
             this.jumpInputConsumed = false;
         }
         this.previousJumpButtonState = jumpKeyPressed;
-
-
-        // if (this.win) {
-        //     console.log(this.game.entities);
-        //     if (this.game.keys['enter']) {
-        //         this.restartGame();
-        //         console.log(this.game.entities);
-        //     }
-        //     return;
-        // }
-
-        // find the map if not already found
-        // if (!this.map) {
-        //     this.map = this.game.entities.find(entity => entity instanceof testMap);
-        //     if (!this.map) {
-        //         console.error("Map not found in update");
-        //         return; // Skip update if map not found
-        //     }
-        // }
 
         // Update BoundingBoxes
         this.updateLastBB();
@@ -249,19 +229,41 @@ class Player {
                     that.winGame();
                 }
                 //console.log("Player has collided with exit");
-            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) { 
-                if (that.lastBB.bottom <= entity.BB.top + 10 && that.velocity.y > 0) {
-                    // This is a top collision - set grounded but don't call handleWallSlide
+            } else if (entity.BB && entity instanceof BigBlock && that.BB.collide(entity.BB)) {
+                // Determine which side of the BigBlock we're colliding with
+                const overlapLeft = (that.BB.right) - entity.BB.left;
+                const overlapRight = entity.BB.right - (that.BB.left);
+                const overlapTop = (that.BB.bottom) - entity.BB.top;
+                const overlapBottom = entity.BB.bottom - (that.BB.top);
+
+                // Find the smallest overlap to determine collision direction
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                if (minOverlap === overlapTop && that.velocity.y > 0) {
+                    // Top collision - landed on top of block
                     that.velocity.y = 0;
                     that.isGrounded = true;
                     that.y = entity.y - that.height;
-                } else if (that.lastBB.top >= entity.BB.bottom - 10 && that.velocity.y < 0) {
-                    // Bottom collision - player hits their head
-                    that.velocity.y = 0; // Stop upward movement
-                    that.y = entity.BB.bottom; // Prevent clipping into the block
-                } else if (that.velocity.x !== 0) {
-                    // This is a side collision - handle wall slide
-                    that.handleWallSlide(true, null, entity.x, entity.y, entity.width);
+
+                    // Reset wall sliding state when landing
+                    that.isWallSliding = false;
+                    that.wallSticking = false;
+                }
+                else if (minOverlap === overlapBottom && that.velocity.y < 0) {
+                    // Bottom collision - hit head on block
+                    that.velocity.y = 0;
+                    that.y = entity.BB.bottom;
+                }
+                else {
+                    // Side collision - handle wall slide/stick
+                    if (minOverlap === overlapLeft && that.velocity.x > 0) {
+                        // Right side of player hit left side of block
+                        that.handleWallSlide(true, null, entity.x, entity.y, entity.width);
+                    }
+                    else if (minOverlap === overlapRight && that.velocity.x < 0) {
+                        // Left side of player hit right side of block
+                        that.handleWallSlide(true, null, entity.x, entity.y, entity.width);
+                    }
                 }
             }
         });
@@ -281,14 +283,95 @@ class Player {
             this.jumpInputConsumed = true; // Mark this input as consumed
         }
 
-        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'] )) {
-            this.velocity.y = this.velocity.y / 2; // velocity cut when jump key released
-            this.jumpRelease = true;
-            this.canWallJump = false;
+        // wall jump
+        if (this.wallSticking && !this.isGrounded) {
+            // Wall jump only happens on button press, not hold
+            if (this.jumpButtonJustPressed && this.wallJumpInputsAllowed) {
+                // Determine direction based on which wall we're on
+                if (this.wallStickDirection === 'left') {
+                    // Jumping off left wall (going right)
+                    this.velocity.y = -850; // MAX_JUMP
+                    this.velocity.x = 450;  // WALL_JUMP_BOOST
+                    this.lastWallJumpDirection = 'right';
+                    this.wallJumpDirection = 'right';
+
+                    // Update state
+                    this.state = this.STATES.JUMPING;
+                    this.isWallSliding = false;
+                    this.wallSticking = false;
+                    this.jumpRelease = false;
+                    this.wallJumpInputsAllowed = false; // Prevent another wall jump until landing or timeout
+
+                    // Set air control window
+                    this.wallJumpTime = this.wallJumpControlWindow;
+
+                    // Reset jump buffer
+                    this.jumpBufferTimer = 0;
+                    this.jumpInputConsumed = true;
+
+                    console.log("Wall jump performed from left wall to right");
+
+                    // Re-enable wall jumping after a short delay
+                    setTimeout(() => {
+                        this.wallJumpInputsAllowed = true;
+                    }, 200);
+                }
+                else if (this.wallStickDirection === 'right') {
+                    // Jumping off right wall (going left)
+                    this.velocity.y = -850; // MAX_JUMP
+                    this.velocity.x = -450; // WALL_JUMP_BOOST
+                    this.lastWallJumpDirection = 'left';
+                    this.wallJumpDirection = 'left';
+
+                    // Update state
+                    this.state = this.STATES.JUMPING;
+                    this.isWallSliding = false;
+                    this.wallSticking = false;
+                    this.jumpRelease = false;
+                    this.wallJumpInputsAllowed = false; // Prevent another wall jump until landing or timeout
+
+                    // Set air control window
+                    this.wallJumpTime = this.wallJumpControlWindow;
+
+                    // Reset jump buffer
+                    this.jumpBufferTimer = 0;
+                    this.jumpInputConsumed = true;
+
+                    console.log("Wall jump performed from right wall to left");
+
+                    // Re-enable wall jumping after a short delay
+                    setTimeout(() => {
+                        this.wallJumpInputsAllowed = true;
+                    }, 200);
+                }
+            }
         }
-        // if (this.velocity.y < -300 && (this.game.keys[' '] || this.game.keys['w'])) {
-        //     this.velocity.y -= 850 * TICK;
-        // }
+
+        // Reset wall jump inputs when landing
+        if (this.isGrounded) {
+            this.wallJumpInputsAllowed = true;
+        }
+
+        // variable jump height
+        if (this.velocity.y < 0 && this.jumpRelease === false && (!this.game.keys[' '] && !this.game.keys['w'])) {
+            // Super Meat Boy style - cut velocity by 50% when releasing jump button
+            this.velocity.y = this.velocity.y * 0.5;
+            this.jumpRelease = true;
+        }
+
+        // air control
+        if (this.wallJumpTime > 0) {
+            this.wallJumpTime -= TICK;
+
+            // Enhanced air control after wall jump
+            if (this.wallJumpDirection === 'right' && this.game.keys['a'] && !this.game.keys['d']) {
+                // Player is trying to go back left after jumping right from wall
+                this.velocity.x -= 1200 * TICK; // Stronger control to go back to wall
+            } else if (this.wallJumpDirection === 'left' && this.game.keys['d'] && !this.game.keys['a']) {
+                // Player is trying to go back right after jumping left from wall
+                this.velocity.x += 1200 * TICK; // Stronger control to go back to wall
+            }
+        }
 
         if (!jumpKeyPressed) {
             this.jumpInputConsumed = false;
@@ -296,6 +379,9 @@ class Player {
         
         // Update state based on movement and keys
         this.updateState();
+
+        // Check if we're still touching a wall when wall sticking
+        this.checkWallStickingState();
 
         // Apply gravity
         this.velocity.y += this.gravity * TICK;
@@ -436,11 +522,17 @@ class Player {
 
     // Applies maximum velocity limits to both horizontal and vertical movement
     applyMaxVelocities(MAX_WALK, MAX_RUN, MAX_FALL) {
+        // Allow slightly higher horizontal speed right after a wall jump
+        const horizontalBoost = this.recentlyWallJumped ? 1.2 : 1.0; // 20% boost after wall jump
+
+        // Apply horizontal speed limits based on running vs walking
         if (this.game.keys['shift']) {
-            this.velocity.x = Math.min(Math.max(this.velocity.x, -MAX_RUN), MAX_RUN);
+            this.velocity.x = Math.min(Math.max(this.velocity.x, -MAX_RUN * horizontalBoost), MAX_RUN * horizontalBoost);
         } else {
-            this.velocity.x = Math.min(Math.max(this.velocity.x, -MAX_WALK), MAX_WALK);
+            this.velocity.x = Math.min(Math.max(this.velocity.x, -MAX_WALK * horizontalBoost), MAX_WALK * horizontalBoost);
         }
+
+        // Apply fall speed limit - ensure we always respect the max fall speed
         this.velocity.y = Math.min(this.velocity.y, MAX_FALL);
     }
 
@@ -449,6 +541,19 @@ class Player {
         // Calculate next position
         let nextX = this.x + this.velocity.x * TICK;
         let nextY = this.y + this.velocity.y * TICK;
+
+        // If sticking to a wall, enforce position
+        if (this.wallSticking && !this.isGrounded) {
+            if (this.wallStickDirection === 'left') {
+                // Stick to left wall
+                nextX = this.lastWallX;
+                this.velocity.x = 0;
+            } else if (this.wallStickDirection === 'right') {
+                // Stick to right wall
+                nextX = this.lastWallX - this.width;
+                this.velocity.x = 0;
+            }
+        }
 
         // Get map dimensions
         const mapWidth = this.map.map[0].length * this.map.drawSize;
@@ -467,6 +572,9 @@ class Player {
 
         // Update bounding box
         this.updateBB();
+
+        // Check wall sticking status
+        this.checkWallSticking();
     }
 
     // Handles horizontal collision detection and response : boundingbox for horizontal movement
@@ -483,58 +591,73 @@ class Player {
             this.handleWallSlide(false, collision);
         } else {
             this.x = nextX;
+
+            // If we're moving away from a wall, stop sticking
+            if (this.wallSticking) {
+                if ((this.wallStickDirection === 'left' && this.velocity.x > 0) ||
+                    (this.wallStickDirection === 'right' && this.velocity.x < 0)) {
+                    this.wallSticking = false;
+                }
+            }
         }
     }
-    handleWallSlide(bigBlock, collision = null , x = 0, y = 0, width = 0) {
+    handleWallSlide(bigBlock, collision = null, x = 0, y = 0, width = 0) {
         const MAX_WALLSLIDE = 175;
         const MAX_JUMP = 850;
-        var jump = false;
+        const WALL_JUMP_BOOST = 450;
 
+        let jump = false;
 
-        if ((!this.isGrounded)) { // WALL SLIDE CHECK
+        // Determine wall direction
+        let wallDirection = '';
+        if (bigBlock) {
+            wallDirection = this.velocity.x > 0 ? 'right' : 'left';
+            this.isWallSlidingBigBlock = true;
+        } else if (collision) {
+            wallDirection = this.velocity.x > 0 ? 'right' : 'left';
+            this.isWallSlidingBigBlock = false;
+        }
+
+        if (!this.isGrounded) {
+            // Enable wall sliding state
             this.state = this.STATES.WALL_SLIDING;
             this.isWallSliding = true;
+            this.wallSticking = true;
+            this.wallStickDirection = wallDirection;
+
+            // Store wall position for sticking
+            if (bigBlock) {
+                this.lastWallX = wallDirection === 'right' ? x : x + width;
+            } else if (collision) {
+                this.lastWallX = wallDirection === 'right' ? collision.tileX : collision.tileX + this.map.drawSize;
+            }
+
+            // Limit fall speed while wall sliding
             if (this.velocity.y > MAX_WALLSLIDE) {
                 this.velocity.y = MAX_WALLSLIDE;
             }
-            if ((this.game.keys['a'] ) // holding left
-                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) {
-                this.velocity.y = -MAX_JUMP;
-                this.velocity.x = 200;
-                this.state = this.STATES.JUMPING;
-                jump = true;
-                this.canWallJump = false;
-                this.isWallSliding = false;
-            }
-            if ((this.game.keys['d'] || this.wallJumpDirection === 'right' ) // holding right
-                && (this.game.keys['w'] || this.game.keys[' ']) && this.canWallJump) { 
-                this.velocity.y = -MAX_JUMP;
-                this.velocity.x = -200;
-                this.state = this.STATES.JUMPING;
-                jump = true;
-                this.canWallJump = false;
-                this.isWallSliding = false;
-            }
+
+            // Wall jump happens in the update method, not here
+            // We only setup the wall sliding state here
         }
-        if (!bigBlock) { // check if collision is tile or bigblock based.
-            if (this.velocity.x > 0 && !jump) { 
+
+        // Handle collision with wall (no jumping here)
+        if (!bigBlock) {
+            if (this.velocity.x > 0) {
                 this.x = collision.tileX - this.width;
-            } else if (this.velocity.x < 0 && !jump) {
-                this.x = collision.tileX + this.map.drawSize; // how does this work???
-            } 
+            } else if (this.velocity.x < 0) {
+                this.x = collision.tileX + this.map.drawSize;
+            }
         } else {
-            if (this.velocity.x > 0 && !jump ) { // right
-                this.x = x- this.width;
-            } else if (this.velocity.x < 0 && !jump ) { // left
+            if (this.velocity.x > 0) {
+                this.x = x - this.width;
+            } else if (this.velocity.x < 0) {
                 this.x = (x + width);
-            } 
+            }
         }
-        if (!this.game.keys['w'] && !this.game.keys[' ']) {
-            this.canWallJump = true;
-        }
-        if (!jump) {
-            this.velocity.x = 0;
-        }
+
+        // Stop horizontal momentum when against wall
+        this.velocity.x = 0;
     }
 
     // Handles vertical collision detection and response
@@ -552,15 +675,105 @@ class Player {
                 this.y = collision.tileY - this.height;
                 this.isGrounded = true;
                 this.velocity.y = 0;
+                this.wallSticking = false; // Stop wall sticking when grounded
+                this.isWallSliding = false;
             } else if (this.velocity.y < 0) {
                 this.y = collision.tileY + this.map.drawSize;
                 this.velocity.y = 0;
             }
         } else {
             this.y = nextY;
+            const wasGrounded = this.isGrounded;
             this.isGrounded = this.y + this.height >= mapHeight;
+
+            // If just landed, stop wall sticking
+            if (!wasGrounded && this.isGrounded) {
+                this.wallSticking = false;
+                this.isWallSliding = false;
+            }
         }
     }
+
+    checkWallSticking() {
+        // Only process if we're wall sticking and not on the ground
+        if (this.wallSticking && !this.isGrounded) {
+            // Check if player is pushing away from wall (detach)
+            if ((this.wallStickDirection === 'left' && this.game.keys['d']) ||
+                (this.wallStickDirection === 'right' && this.game.keys['a'])) {
+                this.wallSticking = false;
+                this.isWallSliding = false;
+            }
+            // Otherwise maintain wall sliding state
+            else {
+                this.isWallSliding = true;
+                this.state = this.STATES.WALL_SLIDING;
+
+                // Limit fall speed while sticking
+                if (this.velocity.y > 175) {
+                    this.velocity.y = 175;
+                }
+            }
+        }
+
+        // If not wall sliding, reset
+        if (!this.isWallSliding) {
+            this.wallSticking = false;
+        }
+    }
+
+    checkWallStickingState() {
+        // If we're currently sticking to a wall, validate that we're actually touching the wall
+        if (this.wallSticking && !this.isGrounded) {
+            let stillTouchingWall = false;
+
+            // First check regular map tiles
+            // Create a test bounding box slightly wider than the player to check wall contact
+            const testBB = new BoundingBox(
+                this.wallStickDirection === 'left' ? this.x - 2 : this.x,
+                this.y,
+                this.width + 2,
+                this.height
+            );
+
+            // Check if we're still touching a wall tile
+            const collision = this.map.checkCollisions({
+                BB: testBB,
+                x: this.wallStickDirection === 'left' ? this.x - 2 : this.x,
+                y: this.y,
+                width: this.width + 2,
+                height: this.height
+            });
+
+            if (collision.collides) {
+                stillTouchingWall = true;
+            }
+
+            // Then check BigBlock entities
+            if (!stillTouchingWall) {
+                // Extend bounding box in direction of wall by a small amount
+                const bigBlockTestBB = new BoundingBox(
+                    this.wallStickDirection === 'left' ? this.x - 5 : this.x,
+                    this.y,
+                    this.width + 5,
+                    this.height
+                );
+
+                // Check collision with all BigBlock entities
+                this.game.entities.forEach(entity => {
+                    if (entity instanceof BigBlock && bigBlockTestBB.collide(entity.BB)) {
+                        stillTouchingWall = true;
+                    }
+                });
+            }
+
+            // If we're not touching any wall, stop sticking
+            if (!stillTouchingWall) {
+                this.wallSticking = false;
+                this.isWallSliding = false;
+            }
+        }
+    }
+
 
     // resets the game
     restartGame() {
