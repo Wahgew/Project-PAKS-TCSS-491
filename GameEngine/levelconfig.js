@@ -214,7 +214,86 @@ class LevelConfig {
                     new Lever({gameEngine: this.game, x: 150, y: 490, speed: 0, moving: false, direction: null, reverseTime: 0}),
                 ]
 
-            }
+            },
+
+            6: {
+                // replace with real second map
+                map: () => new drawMap(this.TILE_SIZE,this.game),
+                player: () => new Player(this.game, 975, 870),
+                exitDoor: () => new exitDoor(this.game, 928, 793, 2),
+                hazards: () => [
+                    //new BigBlock(this.game, 26, 870, 100, 100),
+                    // new BigBlock(this.game, 800, 624, 1875, 875),
+                    //new Spike({gameEngine: this.game, x: 650, y: 430, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    //new Spike({gameEngine: this.game, x: 980, y: 573, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    // moving spikes
+                    new Spike({gameEngine: this.game, x: 180, y: 30, speed: 100, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 1680, y: 30, speed: 100, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+
+                    new Spike({gameEngine: this.game, x: 380, y: 400, speed: 120, moving: true, direction: 'LEFT', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 1475, y: 400, speed: 120, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 3}),
+
+                    // mon moving spikes
+                    new Spike({gameEngine: this.game, x: 26, y: 26, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 433, y: 26, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 1835, y: 26, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1426, y: 26, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 55, y: 540, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1805, y: 540, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 26, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1834, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 475, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 520, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 565, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 610, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 655, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 700, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 745, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 790, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 835, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 1051, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1096, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1141, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1186, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1231, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1276, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1321, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1366, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+
+                    // Levers that need to be collected
+                    new Lever({gameEngine: this.game, x: 23, y: 120, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1853, y: 120, speed: 0, moving: false, direction: 'LEFT', reverseTime: 0}),
+
+
+                    new Platform({
+                        gameEngine: this.game, x: 225, y: 250, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game, x: 1450, y: 250, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game, x: 125, y: 540, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game, x: 1551, y: 540, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+
+                    new BigBlock(this.game, 475, 25, 1425, 400),
+                    //new BigBlock(this.game, 25, 875, 500, 700),
+                    new BigBlock(this.game, 25, 700, 475, 875),
+                    new BigBlock(this.game, 1425, 700, 1875, 875),
+                ]
+            },
 
             // add more levels below
         };
@@ -230,6 +309,7 @@ class LevelConfig {
      * @returns {boolean} True if the level was loaded successfully, false otherwise.
      */
     loadLevel(levelNumber) {
+        this.currentLevel = levelNumber;
         const levelConfig = this.getLevelEntities(levelNumber);
         if (!levelConfig) return false;
 
