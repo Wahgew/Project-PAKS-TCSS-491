@@ -621,7 +621,7 @@ class Player {
     async winGame() {
         // Prevent multiple win triggers
         if (this.win) {
-            console.log("Win already triggered, ignoring duplicate call");
+            //console.log("Win already triggered, ignoring duplicate call");
             return;
         }
 
