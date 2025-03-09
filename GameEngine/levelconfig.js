@@ -258,13 +258,14 @@ class LevelConfig {
                     new Spike({gameEngine: this.game, x: 835, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
 
                     new Spike({gameEngine: this.game, x: 1051, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1096, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1141, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1186, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1231, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1276, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1321, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1366, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1093, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1135, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1177, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1219, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1260, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1300, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1340, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1380, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
 
 
                     // Levers that need to be collected
