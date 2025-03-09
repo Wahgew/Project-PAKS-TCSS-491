@@ -1,5 +1,4 @@
-// gameMenu.js - Full implementation with fixes for screen transitions
-
+// GameMenu implementation with level tracking
 class GameMenu {
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
@@ -211,14 +210,20 @@ class GameMenu {
         this.hideMenu();
     }
     
-    // Updated showMenu method to also pause the timer when menu is shown
-    showMenu() {
-        this.menuPanel.style.display = 'flex';
-        this.visible = true;
-    }
-    
+    // Modified showLevels method to pass current level information
     showLevels() {
         this.hide(); // Hide menu first
+        
+        // Get the current level from the game engine
+        let currentLevel = 1;
+        
+        if (this.gameEngine && this.gameEngine.levelConfig) {
+            currentLevel = this.gameEngine.levelConfig.currentLevel;
+            console.log("GameMenu: Current level before showing levels screen:", currentLevel);
+            
+            // Make sure global current level is up to date
+            window.CURRENT_GAME_LEVEL = currentLevel;
+        }
         
         // Stop the game engine
         if (this.gameEngine) {
@@ -244,8 +249,8 @@ class GameMenu {
             window.AUDIO_MANAGER.playMenuMusic();
         }
         
-        // Now show the levels screen
-        const levelsScreen = new LevelsScreen();
+        // Now show the levels screen with the current level
+        const levelsScreen = new LevelsScreen(currentLevel);
         levelsScreen.show();
     }
     
@@ -275,4 +280,5 @@ class GameMenu {
     }
 }
 
-let GAME_MENU; // Create a global reference for easy access
+// Create a global reference for easy access
+let GAME_MENU;

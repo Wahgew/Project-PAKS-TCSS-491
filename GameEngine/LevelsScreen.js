@@ -1,10 +1,18 @@
+// Global variable to track current level across game states
+window.CURRENT_GAME_LEVEL = 1;
+
 class LevelsScreen {
-    constructor() {
-        this.currentLevel = 1;
+    constructor(currentLevel) {
+        // Use the provided current level or get it from the global variable if available
+        this.currentLevel = currentLevel || window.CURRENT_GAME_LEVEL || 1;
         this.levelButtons = []; // Store references to level buttons
         
-        // Create progress manager instance
-        window.LEVEL_PROGRESS = new LevelProgressManager();
+        // Create progress manager instance if it doesn't exist yet
+        if (!window.LEVEL_PROGRESS) {
+            window.LEVEL_PROGRESS = new LevelProgressManager();
+        }
+        
+        console.log("LevelsScreen initialized with level:", this.currentLevel);
         
         this.createLevelsScreen();
     }
@@ -109,6 +117,13 @@ class LevelsScreen {
         
         // Add hover effects to the button
         button.addEventListener("mouseover", async () => {
+            // Special handling for navigation buttons (level 13+)
+            if (level >= 13) {
+                button.style.transform = "scale(1.1) rotate(5deg)";
+                button.style.filter = "drop-shadow(0 0 7px black)";
+                return;
+            }
+            
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
                 button.style.transform = "scale(1.1) rotate(5deg)";
@@ -117,6 +132,13 @@ class LevelsScreen {
         });
         
         button.addEventListener("mouseout", async () => {
+            // Special handling for navigation buttons (level 13+)
+            if (level >= 13) {
+                button.style.transform = "scale(1)";
+                button.style.filter = "none";
+                return;
+            }
+            
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
                 button.style.transform = "scale(1)";
@@ -126,6 +148,12 @@ class LevelsScreen {
         
         // Add click handler with level unlock check
         button.addEventListener("click", async () => {
+            // Special handling for navigation buttons (level 13+)
+            if (level >= 13) {
+                clickHandler();
+                return;
+            }
+            
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
                 clickHandler();
@@ -195,7 +223,7 @@ class LevelsScreen {
             
             // Special handling for navigation buttons (level 13+)
             if (level >= 13) {
-                // These are always unlocked
+                // Navigation buttons are always unlocked
                 button.style.opacity = "1";
                 button.style.filter = "none";
                 button.style.cursor = "pointer";
@@ -204,6 +232,8 @@ class LevelsScreen {
                 if (lockOverlay) {
                     lockOverlay.style.display = "none";
                 }
+                
+                // Skip the rest of the loop iteration for navigation buttons
                 continue;
             }
             
@@ -372,6 +402,7 @@ class LevelsScreen {
             this.updateLevelButtonStates();
             // Ensure the player can only access level 1 now
             this.currentLevel = 1;
+            window.CURRENT_GAME_LEVEL = 1;
         })
         .catch(error => {
             console.error("Error resetting levels:", error);
@@ -443,46 +474,43 @@ class LevelsScreen {
                 this.showLockedLevelMessage(levelNum);
                 return;
             }
-            
+    
+            // Update global and instance level tracking
+            window.CURRENT_GAME_LEVEL = levelNum;
             this.currentLevel = levelNum;
+            console.log("Updated CURRENT_GAME_LEVEL to:", levelNum);
+    
             this.hide();
-            
             window.targetLevelToLoad = levelNum;
-            
+    
             if (!window.gameEngine) {
                 if (!window.checkGameEngineInterval) {
                     window.checkGameEngineInterval = setInterval(() => {
                         if (window.gameEngine && window.gameEngine.levelConfig) {
                             window.gameEngine.levelConfig.currentLevel = window.targetLevelToLoad;
                             window.gameEngine.levelConfig.loadLevel(window.targetLevelToLoad);
-                            
                             const gameCanvas = document.getElementById("gameWorld");
                             if (gameCanvas) {
                                 gameCanvas.style.display = "block";
                             }
-                            
                             if (window.AUDIO_MANAGER) {
                                 window.AUDIO_MANAGER.stopMenuMusic();
                                 window.AUDIO_MANAGER.playGameMusic();
                             }
-                            
                             clearInterval(window.checkGameEngineInterval);
                             window.checkGameEngineInterval = null;
                         }
                     }, 200);
                 }
-                
                 startGame();
             } else {
                 if (window.gameEngine.levelConfig) {
                     window.gameEngine.levelConfig.currentLevel = levelNum;
                     window.gameEngine.levelConfig.loadLevel(levelNum);
-                    
                     const gameCanvas = document.getElementById("gameWorld");
                     if (gameCanvas) {
                         gameCanvas.style.display = "block";
                     }
-                    
                     if (window.AUDIO_MANAGER) {
                         window.AUDIO_MANAGER.stopMenuMusic();
                         window.AUDIO_MANAGER.playGameMusic();
@@ -508,7 +536,7 @@ class LevelsScreen {
     }
 
     async goToLevel4() {
-        await this.loadLevel(0);
+        await this.loadLevel(4); // Fixed from 0 to 4
     }
 
     async goToLevel5() {
@@ -546,93 +574,32 @@ class LevelsScreen {
     async goTogame() {
         this.hide();
     
-        if (window.gameEngine && window.gameEngine.levelConfig) {
-            this.currentLevel = window.gameEngine.levelConfig.currentLevel;
-        }
-        
+        // Ensure the correct level is resumed
+        let levelToLoad = window.CURRENT_GAME_LEVEL || 1; 
+        console.log("Returning to level:", levelToLoad);
+    
         if (window.gameEngine) {
+            // Ensure the game canvas is visible
             const gameCanvas = document.getElementById("gameWorld");
             if (gameCanvas) {
                 gameCanvas.style.display = "block";
             }
-            
+    
+            // Resume the game with the most recent level
             if (window.gameEngine.levelConfig) {
-                window.gameEngine.levelConfig.currentLevel = this.currentLevel;
-                window.gameEngine.levelConfig.loadLevel(this.currentLevel);
+                window.gameEngine.levelConfig.currentLevel = levelToLoad;
+                window.gameEngine.levelConfig.loadLevel(levelToLoad);
+                
+                // Switch music back to game music
+                if (window.AUDIO_MANAGER) {
+                    window.AUDIO_MANAGER.stopMenuMusic();
+                    window.AUDIO_MANAGER.playGameMusic();
+                }
             }
         } else {
-            await this.loadLevel(this.currentLevel);
+            // If game engine isn't initialized yet, load the level
+            console.log("Game engine not found, loading level:", levelToLoad);
+            await this.loadLevel(levelToLoad);
         }
     }
 }
-
-// Hook into level completion in LevelConfig
-const hookLevelCompletion = () => {
-    if (typeof LevelConfig !== 'undefined') {
-        const originalLoadNextLevel = LevelConfig.prototype.loadNextLevel;
-        LevelConfig.prototype.loadNextLevel = function() {
-            const completedLevel = this.currentLevel;
-            
-            if (originalLoadNextLevel) {
-                originalLoadNextLevel.call(this);
-            } else {
-                if (this.currentLevel < 12) {
-                    this.currentLevel += 1;
-                    this.loadLevel(this.currentLevel);
-                }
-            }
-            
-            if (window.LEVEL_PROGRESS) {
-                window.LEVEL_PROGRESS.completeLevel(completedLevel)
-                    .catch(err => console.error('Error completing level:', err));
-            }
-        };
-    }
-};
-
-// Helper functions for debugging
-window.unlockAllLevels = async function() {
-    if (window.LEVEL_PROGRESS) {
-        try {
-            for (let i = 1; i <= 12; i++) {
-                await window.LEVEL_PROGRESS.unlockLevel(i);
-            }
-            
-            const levelsScreen = document.getElementById("levelsScreen");
-            if (levelsScreen && levelsScreen.style.display !== "none") {
-                for (let key in window) {
-                    if (window[key] instanceof LevelsScreen) {
-                        await window[key].updateLevelButtonStates();
-                        break;
-                    }
-                }
-            }
-        } catch (error) {
-            console.error("Error unlocking levels:", error);
-        }
-    }
-};
-
-window.resetLevelProgress = async function() {
-    if (window.LEVEL_PROGRESS) {
-        try {
-            await window.LEVEL_PROGRESS.resetProgress();
-            
-            const levelsScreen = document.getElementById("levelsScreen");
-            if (levelsScreen && levelsScreen.style.display !== "none") {
-                for (let key in window) {
-                    if (window[key] instanceof LevelsScreen) {
-                        await window[key].updateLevelButtonStates();
-                        break;
-                    }
-                }
-            }
-        } catch (error) {
-            console.error("Error resetting progress:", error);
-        }
-    }
-};
-
-// Initialize hook when DOM loads or with delay
-document.addEventListener('DOMContentLoaded', hookLevelCompletion);
-setTimeout(hookLevelCompletion, 1000);

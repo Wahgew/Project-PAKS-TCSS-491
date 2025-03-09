@@ -6,6 +6,12 @@ class LevelProgressManager {
         this.NUMBER_OF_LEVELS = 12;
         this.dbReady = this.initializeDB();
         
+        // Initialize global level tracker if it doesn't exist
+        if (typeof window.CURRENT_GAME_LEVEL === 'undefined') {
+            window.CURRENT_GAME_LEVEL = 1;
+            console.log("Initialized CURRENT_GAME_LEVEL to 1");
+        }
+        
         // Initialize hooks when instance is created
         this.setupLevelCompletionHook();
     }
@@ -152,6 +158,9 @@ class LevelProgressManager {
 
         await this.saveProgress(defaultProgress);
         
+        // Reset global current level
+        window.CURRENT_GAME_LEVEL = 1;
+        
         // Update the levels screen if it's visible
         this.updateLevelsScreenIfVisible();
     }
@@ -183,11 +192,18 @@ class LevelProgressManager {
         }
     }
     
-    // Setup the hook to detect level completion in the game
+    // Setup hooks to detect level changes in the game
     setupLevelCompletionHook() {
-        // Initialize hook when DOM loads or with delay
-        document.addEventListener('DOMContentLoaded', () => this.hookLevelCompletion());
-        setTimeout(() => this.hookLevelCompletion(), 1000);
+        // Initialize hooks when DOM loads or with delay
+        document.addEventListener('DOMContentLoaded', () => {
+            this.hookLevelCompletion();
+            this.hookLevelLoading();
+        });
+        
+        setTimeout(() => {
+            this.hookLevelCompletion();
+            this.hookLevelLoading();
+        }, 1000);
     }
     
     // Hook into level completion in LevelConfig
@@ -206,6 +222,10 @@ class LevelProgressManager {
                     }
                 }
                 
+                // Update the global current level to the NEW level after completion
+                window.CURRENT_GAME_LEVEL = this.currentLevel;
+                console.log("Level completed. New CURRENT_GAME_LEVEL:", window.CURRENT_GAME_LEVEL);
+                
                 if (window.LEVEL_PROGRESS) {
                     window.LEVEL_PROGRESS.completeLevel(completedLevel)
                         .catch(err => console.error('Error completing level:', err));
@@ -214,17 +234,68 @@ class LevelProgressManager {
             console.log("Level completion hook installed");
         }
     }
+    
+    // Hook into direct level loading
+    hookLevelLoading() {
+        if (typeof LevelConfig !== 'undefined') {
+            const originalLoadLevel = LevelConfig.prototype.loadLevel;
+            if (originalLoadLevel) {
+                LevelConfig.prototype.loadLevel = function(level) {
+                    // Call the original method
+                    originalLoadLevel.call(this, level);
+                    
+                    // Update global current level whenever any level is loaded
+                    window.CURRENT_GAME_LEVEL = level;
+                    console.log("Level loaded directly. CURRENT_GAME_LEVEL updated to:", window.CURRENT_GAME_LEVEL);
+                };
+                console.log("Level loading hook installed");
+            }
+        }
+    }
 }
 
 // Add global debug functions
 window.unlockAllLevels = async function() {
     if (window.LEVEL_PROGRESS) {
-        await window.LEVEL_PROGRESS.unlockAllLevels();
+        try {
+            for (let i = 1; i <= 12; i++) {
+                await window.LEVEL_PROGRESS.unlockLevel(i);
+            }
+            
+            const levelsScreen = document.getElementById("levelsScreen");
+            if (levelsScreen && levelsScreen.style.display !== "none") {
+                for (let key in window) {
+                    if (window[key] instanceof LevelsScreen) {
+                        await window[key].updateLevelButtonStates();
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error unlocking levels:", error);
+        }
     }
 };
 
 window.resetLevelProgress = async function() {
     if (window.LEVEL_PROGRESS) {
-        await window.LEVEL_PROGRESS.resetProgress();
+        try {
+            await window.LEVEL_PROGRESS.resetProgress();
+            
+            // Reset global level tracking
+            window.CURRENT_GAME_LEVEL = 1;
+            
+            const levelsScreen = document.getElementById("levelsScreen");
+            if (levelsScreen && levelsScreen.style.display !== "none") {
+                for (let key in window) {
+                    if (window[key] instanceof LevelsScreen) {
+                        await window[key].updateLevelButtonStates();
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error resetting progress:", error);
+        }
     }
 };
