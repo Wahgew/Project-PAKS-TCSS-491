@@ -88,10 +88,74 @@ class LevelConfig {
                 player: () => new Player(this.game, 25, 700),
                 exitDoor: () => new exitDoor(this.game, 1800, 43),
                 hazards: () => [
-                     new Spike({gameEngine: this.game, x: 650, y: 430, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                     new Spike({gameEngine: this.game, x: 980, y: 573, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 650, y: 430, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 980, y: 573, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new BigBlock(this.game, 25, 25, 1375, 240),
                     new BigBlock(this.game, 800, 624, 1875, 875),
+                ]
+            },
+
+            3: {
+                // replace with real second map
+                map: () => new drawMap(this.TILE_SIZE,this.game),
+                player: () => new Player(this.game, 925, 700),
+                exitDoor: () => new exitDoor(this.game, 1190, 69, 1),
+                hazards: () => [
+                    new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+                    new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 100,
+                        shotdirec: "DOWN"}),
+                    new Lever({gameEngine: this.game, x: 140, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+                ]
+            },
+
+            4: {
+                map: () => new drawMap(this.TILE_SIZE,this.game),
+                player: () => new Player(this.game, 90, 840),
+                exitDoor: () => new exitDoor(this.game, 1800, 117),
+                hazards: () => [
+                    //Beginning Spikes
+                    new Spike({gameEngine: this.game, x: 60, y: 310, speed: 120, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 60, y: 645, speed: 120, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+
+                    //Corridor Spikes
+                    new Spike({gameEngine: this.game, x: 890, y: 690, speed: 120, moving: true, direction: 'UP', tracking: false, reverseTime: 1}),
+                    new Spike({gameEngine: this.game, x: 1175, y: 690, speed: 120, moving: true, direction: 'UP', tracking: false, reverseTime: 1}),
+                    new Spike({gameEngine: this.game, x: 1480, y: 690, speed: 120, moving: true, direction: 'UP', tracking: false, reverseTime: 1}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1830, y: 300,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 10,
+                        projspd: 50,
+                        shotdirec: "LEFT"}),
+
+
+                    new BigBlock(this.game, 25, 25, 425, 100),
+
+
+                    //Beginning platfrom
+                    new Platform({
+                        gameEngine: this.game, x: 90, y: 410, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+                    new Platform({
+                        gameEngine: this.game, x: 90, y: 720, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+                    new Platform({
+                        gameEngine: this.game, x: 90, y: 555, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+
+                    //Ending platform
+                    new Platform({
+                        gameEngine: this.game, x: 1050, y: 330, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    })
                 ]
             },
 
