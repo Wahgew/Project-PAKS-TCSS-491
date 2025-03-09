@@ -9,9 +9,10 @@ class Lever {
         this.reverse = false;
         this.collected = false;
 
+        // Initialize flip state based on direction
+        this.isFlipped = (this.direction === 'LEFT');
+
         // Load spritesheet
-        //this.spritesheet = ASSET_MANAGER.getAsset("./sprites/lever_uncollected.png");
-        //this.spritesheet2 = ASSET_MANAGER.getAsset("./sprites/lever_collected.png");
         this.spritesheet = ASSET_MANAGER.getAsset("./sprites/leverOn.png");
         this.spritesheet2 = ASSET_MANAGER.getAsset("./sprites/leverOff.png")
 
@@ -32,7 +33,11 @@ class Lever {
     };
 
     update() {
-        if (this.moving) updateMovement();
+        if (this.moving) updateMovement(this.game, this);
+
+        // Determine flip state based on direction parameter
+        this.isFlipped = (this.direction === 'LEFT');
+
         this.updateBB();
     }
 
@@ -43,19 +48,32 @@ class Lever {
             ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
 
+        // Save the current context state
+        ctx.save();
+
+        if (this.isFlipped) {
+            // Set up horizontal flipping transformation
+            ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+            ctx.scale(-1, 1);
+            ctx.translate(-(this.x + this.width / 2), -(this.y + this.height / 2));
+        }
+
         // Draw the sprite
         if (!this.collected) {
             this.animatorUn.drawFrame(this.game.clockTick, ctx, this.x, this.y, 0.5);
         } else {
             this.animatorCol.drawFrame(this.game.clockTick, ctx, this.x, this.y, 0.5);
         }
+
+        // Restore the context to its original state
+        ctx.restore();
     }
 }
 
 /**
  * Update movement for if enemy entity is moving but !tracking.
- * @param {gameEngine} game 
- * @param {enemies} object 
+ * @param {gameEngine} game
+ * @param {enemies} object
  */
 function updateMovement(game, object) { // consider option to make reverse coord based, so spikes can move in same location but staggered start.
     if (object.moving && !object.tracking) { // make option for based on distance from starting, i.e. move until x is like -50 from start coord.
@@ -98,4 +116,4 @@ function updateMovement(game, object) { // consider option to make reverse coord
                 break;
         }
     }
-}   
+}
