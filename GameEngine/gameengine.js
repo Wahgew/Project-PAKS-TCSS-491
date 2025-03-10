@@ -352,6 +352,7 @@ class GameEngine {
             this.ctx.font = "12px Arial";
             this.ctx.fillStyle = "red";
 
+            // ADJUST THE PIXEL DISPLAY CURSOR
             let offsetX = 35; // Adjust to prevent overlap with cursor
             let offsetY = 30;
 

@@ -211,7 +211,7 @@ class Player {
             if (entity.BB && entity instanceof Projectile && that.BB.collide(entity.BB)) {
                 entity.removeFromWorld = true;
                 that.kill();
-            } else if (entity.BB && (entity instanceof Spike || entity instanceof Laser) && that.BB.collide(entity.BB)) {
+            } else if (entity.BB && (entity instanceof Spike || entity instanceof GlowingLaser) && that.BB.collide(entity.BB)) {
                 that.kill();
             } else if (entity.BB && entity instanceof Platform && that.BB.collide(entity.BB) && that.velocity.y > 0 && (that.lastBB.bottom) <= entity.BB.top + 5) {
                 that.isGrounded = true;

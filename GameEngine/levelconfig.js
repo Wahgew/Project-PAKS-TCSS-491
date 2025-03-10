@@ -12,7 +12,7 @@ class LevelConfig {
      */
     constructor(gameEngine) {
         this.game = gameEngine;
-        this.currentLevel = 1; // sets the current level
+        this.currentLevel = 7; // sets the current level
         this.TILE_SIZE = 25;
     }
 
@@ -32,6 +32,18 @@ class LevelConfig {
                 player: () => new Player(this.game, 85, 400),
                 exitDoor: () => new exitDoor(this.game, 1075, 175, 2),
                 hazards: () => [
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 400,
+                        y: 300, // More visible mid-screen position
+                        direction: 'RIGHT',
+                        length: 400, // Longer
+                        color: 'red',
+                        glowColor: 'rgba(255, 0, 0, 0.5)',
+                        width: 10, // Thicker
+                        glowWidth: 30 // Larger glow
+                    }),
+
                     new Spike({gameEngine: this.game, x: 100, y: 50, speed: 25, moving: true, direction: null, tracking: true, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 500, y: 265, speed: 150, moving: true, direction: "RIGHT", tracking: false, reverseTime: 3}),
                     new Spike({gameEngine: this.game, x: 350, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
@@ -290,12 +302,155 @@ class LevelConfig {
                     }),
 
                     new BigBlock(this.game, 475, 25, 1425, 400),
-                    //new BigBlock(this.game, 25, 875, 500, 700),
                     new BigBlock(this.game, 25, 700, 475, 875),
                     new BigBlock(this.game, 1425, 700, 1875, 875),
                 ]
             },
 
+            7: {
+                map: () => new drawMap(this.TILE_SIZE, this.game),
+                player: () => new Player(this.game, 945, 450), // Player starts in center
+                exitDoor: () => new exitDoor(this.game, 915, 480, 4), // Exit door in center, requiring 4 levers
+                hazards: () => [
+                    // Four quadrant blocks
+                    // Top-Left Block
+                    new BigBlock(this.game, 100, 150, 799, 337),
+
+                    // Top-Right Block
+                    new BigBlock(this.game, 1100, 150, 1799, 337),
+
+                    // Bottom-Left Block
+                    new BigBlock(this.game, 100, 587, 799, 774),
+
+                    // Bottom-Right Block
+                    new BigBlock(this.game, 1100, 587, 1799, 774),
+
+                    // Platforms for additional challenge
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 835,
+                        y: 560,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 835,
+                        y: 390,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 835,
+                        y: 220,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    // Levers that need to be collected
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 100,
+                        y: 75,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 100,
+                        y: 800,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 1778,
+                        y: 75,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 1778,
+                        y: 800,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    // Projectile launchers for additional challenge
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1818,
+                        y: 50,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 550,
+                        shotdirec: "LEFT"
+                    }),
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 25,
+                        y: 820,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 550,
+                        shotdirec: "RIGHT"
+                    }),
+
+                    new Spike({gameEngine: this.game, x: 100, y: 546, speed: 120, moving: true, direction: "RIGHT", tracking: false, reverseTime: 5.5}),
+                    new Spike({gameEngine: this.game, x: 770, y: 546, speed: 120, moving: true, direction: "LEFT", tracking: false, reverseTime: 5.5}),
+                    new Spike({gameEngine: this.game, x: 100, y: 340, speed: 120, moving: true, direction: "RIGHT", tracking: false, reverseTime: 5.5}),
+                    new Spike({gameEngine: this.game, x: 770, y: 340, speed: 120, moving: true, direction: "LEFT", tracking: false, reverseTime: 5.5}),
+
+                    new Spike({gameEngine: this.game, x: 1100, y: 546, speed: 120, moving: true, direction: "RIGHT", tracking: false, reverseTime: 5.5}),
+                    new Spike({gameEngine: this.game, x: 1775, y: 546, speed: 120, moving: true, direction: "LEFT", tracking: false, reverseTime: 5.5}),
+                    new Spike({gameEngine: this.game, x: 1100, y: 340, speed: 120, moving: true, direction: "RIGHT", tracking: false, reverseTime: 5.5}),
+                    new Spike({gameEngine: this.game, x: 1775, y: 340, speed: 120, moving: true, direction: "LEFT", tracking: false, reverseTime: 5.5}),
+
+                    //new Laser({gameEngine: this.game, x: 811, y: 760, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0, length: 300}),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 800,
+                        y: 770,
+                        direction: 'HORIZONTAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 300,
+                        color: 'red',
+                        glowColor: 'rgba(255, 0, 0, 0.7)', // More opaque for visibility
+                        width: 8,               // Increased width
+                        glowWidth: 12           // Increased glow for visibility
+                    })
+                ]
+            },
             // add more levels below
         };
 

@@ -379,6 +379,320 @@ class Laser {
 }
 
 /**
+ * Enhanced Laser class that renders a glowing laser effect using HTML5 Canvas
+ *
+ * @param {object} options - Configuration options for the laser
+ * @param {object} options.gameEngine - The game engine instance
+ * @param {number} options.x - Starting X position
+ * @param {number} options.y - Starting Y position
+ * @param {string} options.direction - Orientation of the laser: 'HORIZONTAL' or 'VERTICAL'
+ * @param {string} options.flow - Direction of beam: 'LEFT', 'RIGHT', 'UP', 'DOWN' (affects animation)
+ * @param {number} options.length - Length of the laser beam
+ * @param {string} options.color - Main color of the laser (default: 'red')
+ * @param {string} options.glowColor - Color of the glow effect (default: 'rgba(255, 0, 0, 0.5)')
+ * @param {number} options.width - Width of the central laser beam (default: 4)
+ * @param {number} options.glowWidth - Width of the glow effect (default: 12)
+ */
+class GlowingLaser {
+    constructor(options) {
+        // Required parameters
+        this.game = options.gameEngine;
+        this.x = options.x;
+        this.y = options.y;
+
+        // Direction handling - simplified to HORIZONTAL or VERTICAL
+        if (options.direction === 'HORIZONTAL' || options.direction === 'VERTICAL') {
+            this.orientation = options.direction;
+        } else if (options.direction === 'LEFT' || options.direction === 'RIGHT') {
+            this.orientation = 'HORIZONTAL';
+        } else if (options.direction === 'UP' || options.direction === 'DOWN') {
+            this.orientation = 'VERTICAL';
+        } else {
+            this.orientation = 'HORIZONTAL'; // Default
+            console.warn("Invalid direction for GlowingLaser. Using HORIZONTAL as default.");
+        }
+
+        // Flow direction (for animation)
+        this.flow = options.flow || options.direction || 'RIGHT';
+        this.length = options.length || 500;
+
+        // Visual customization
+        this.color = options.color || 'red';
+        this.glowColor = options.glowColor || 'rgba(255, 0, 0, 0.5)';
+        this.width = options.width || 8;  // Increased default width for visibility
+        this.glowWidth = options.glowWidth || 20;  // Increased default glow width
+
+        // Set endpoints based on orientation
+        this.setEndpoints();
+
+        // Create the bounding box for collision detection
+        this.createBoundingBox();
+
+        // Animation properties
+        this.pulseRate = 0.005; // Controls how fast the laser pulses
+        this.pulseAmount = 0.2;  // Controls how much the laser intensity changes
+        this.pulseOffset = Math.random() * Math.PI * 2; // Random starting offset for animation
+        this.particleTime = 0;
+
+        // Particles for enhanced effect
+        this.particles = [];
+
+        // Debug info
+        console.log(`Created GlowingLaser at (${this.x}, ${this.y}) with orientation ${this.orientation}`);
+        console.log(`Endpoints: (${this.endX}, ${this.endY}), Length: ${this.length}`);
+    }
+
+    setEndpoints() {
+        // Calculate the end point based on orientation and length
+        if (this.orientation === 'HORIZONTAL') {
+            if (this.flow === 'LEFT') {
+                this.endX = this.x - this.length;
+                this.endY = this.y;
+            } else {
+                this.endX = this.x + this.length;
+                this.endY = this.y;
+            }
+        } else { // VERTICAL
+            if (this.flow === 'UP') {
+                this.endX = this.x;
+                this.endY = this.y - this.length;
+            } else {
+                this.endX = this.x;
+                this.endY = this.y + this.length;
+            }
+        }
+    }
+
+    createBoundingBox() {
+        let x, y, width, height;
+
+        // Set dimensions and position based on orientation
+        if (this.orientation === 'HORIZONTAL') {
+            const startX = Math.min(this.x, this.endX);
+            const endX = Math.max(this.x, this.endX);
+            x = startX;
+            y = this.y - this.width/2; // Center the beam vertically
+            width = endX - startX;
+            height = this.width;
+        } else { // VERTICAL
+            const startY = Math.min(this.y, this.endY);
+            const endY = Math.max(this.y, this.endY);
+            x = this.x - this.width/2; // Center the beam horizontally
+            y = startY;
+            width = this.width;
+            height = endY - startY;
+        }
+
+        this.BB = new BoundingBox(x, y, width, height);
+    }
+
+    update() {
+        // Get the time increment from game engine
+        const TICK = this.game.clockTick;
+        if (!TICK) return; // Safety check
+
+        // Update pulsing animation
+        this.pulseOffset += this.pulseRate * 1000 * TICK;
+
+        // Update particles
+        this.particleTime += TICK;
+        if (this.particleTime > 0.05) {
+            // Add new particles occasionally
+            this.addParticles();
+            this.particleTime = 0;
+        }
+
+        // Update existing particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const particle = this.particles[i];
+            particle.life -= TICK;
+
+            if (particle.life <= 0) {
+                this.particles.splice(i, 1);
+            } else {
+                particle.alpha = particle.life / particle.maxLife;
+
+                // Move particles slightly based on flow direction
+                switch (this.flow) {
+                    case 'RIGHT':
+                        particle.x += particle.speed * TICK;
+                        break;
+                    case 'LEFT':
+                        particle.x -= particle.speed * TICK;
+                        break;
+                    case 'DOWN':
+                        particle.y += particle.speed * TICK;
+                        break;
+                    case 'UP':
+                        particle.y -= particle.speed * TICK;
+                        break;
+                }
+            }
+        }
+    }
+
+    addParticles() {
+        // Add particles along the laser beam
+        const particlesCount = 2; // Increased for more visual effect
+
+        for (let i = 0; i < particlesCount; i++) {
+            // Position particles randomly along the beam
+            let randomPos = Math.random();
+            let px, py;
+
+            if (this.orientation === 'HORIZONTAL') {
+                px = this.x + (this.endX - this.x) * randomPos;
+                py = this.y + (Math.random() * 2 - 1) * (this.width / 2);
+            } else {
+                px = this.x + (Math.random() * 2 - 1) * (this.width / 2);
+                py = this.y + (this.endY - this.y) * randomPos;
+            }
+
+            // Create particle
+            this.particles.push({
+                x: px,
+                y: py,
+                size: 2 + Math.random() * 4, // Increased size for visibility
+                speed: 10 + Math.random() * 20,
+                life: 0.2 + Math.random() * 0.3,
+                maxLife: 0.2 + Math.random() * 0.3,
+                alpha: 1
+            });
+        }
+    }
+
+    draw(ctx) {
+        // Safety check for context
+        if (!ctx) {
+            console.error("GlowingLaser.draw called without context");
+            return;
+        }
+
+        // Debug visualization
+        if (this.game && this.game.options && this.game.options.debugging) {
+            // Draw debug info
+            console.log("Drawing GlowingLaser from", this.x, this.y, "to", this.endX, this.endY);
+
+            // Draw very obvious debug shapes at start and end points
+            ctx.fillStyle = 'magenta';
+            ctx.fillRect(this.x - 10, this.y - 10, 20, 20); // Start point
+            ctx.fillRect(this.endX - 10, this.endY - 10, 20, 20); // End point
+
+            // Draw bounding box
+            if (this.BB) {
+                ctx.strokeStyle = 'yellow';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.BB.left, this.BB.top, this.BB.width, this.BB.height);
+            }
+
+            // Add orientation text
+            ctx.font = '12px Arial';
+            ctx.fillStyle = 'white';
+            ctx.fillText(`Laser: ${this.orientation} (${this.x},${this.y}) to (${this.endX},${this.endY})`,
+                this.x, this.y - 15);
+        }
+
+        // LASER BEAM RENDERING
+        // --------------------
+        // Pulse effect value between 0.8 and 1.2
+        const pulseValue = 1 + Math.sin(this.pulseOffset) * this.pulseAmount;
+
+        // Save the context state
+        ctx.save();
+
+        try {
+            // Draw glow effect (outer layer)
+            ctx.beginPath();
+            ctx.lineWidth = this.glowWidth * pulseValue;
+            ctx.strokeStyle = this.glowColor;
+            ctx.lineCap = 'round';
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.endX, this.endY);
+            ctx.stroke();
+
+            // Draw secondary glow (middle layer)
+            ctx.beginPath();
+            ctx.lineWidth = (this.glowWidth / 2) * pulseValue;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.endX, this.endY);
+            ctx.stroke();
+
+            // Draw core beam (inner layer)
+            ctx.beginPath();
+            ctx.lineWidth = this.width * pulseValue;
+            ctx.strokeStyle = this.color;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.endX, this.endY);
+            ctx.stroke();
+
+            // Draw bright white center
+            ctx.beginPath();
+            ctx.lineWidth = (this.width / 2) * pulseValue;
+            ctx.strokeStyle = 'white';
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.endX, this.endY);
+            ctx.stroke();
+
+            // Draw endpoints (bright spots)
+            this.drawEndpoint(ctx, this.x, this.y, pulseValue);
+            this.drawEndpoint(ctx, this.endX, this.endY, pulseValue);
+
+            // Draw particles
+            this.drawParticles(ctx);
+        } catch (e) {
+            console.error("Error drawing laser:", e);
+        }
+
+        // Restore the context state
+        ctx.restore();
+    }
+
+    drawEndpoint(ctx, x, y, pulseValue) {
+        try {
+            // Draw a bright glow at the endpoints
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, this.glowWidth * pulseValue);
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(0.3, this.color);
+            gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, this.glowWidth * pulseValue, 0, Math.PI * 2);
+            ctx.fill();
+        } catch (e) {
+            console.error("Error drawing laser endpoint:", e);
+        }
+    }
+
+    drawParticles(ctx) {
+        try {
+            // Draw all particles
+            for (const particle of this.particles) {
+                ctx.globalAlpha = particle.alpha;
+
+                const gradient = ctx.createRadialGradient(
+                    particle.x, particle.y, 0,
+                    particle.x, particle.y, particle.size
+                );
+                gradient.addColorStop(0, 'white');
+                gradient.addColorStop(0.5, this.color);
+                gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.globalAlpha = 1;
+        } catch (e) {
+            console.error("Error drawing laser particles:", e);
+        }
+    }
+}
+
+/**
  * Update movement for if enemy entity is moving but !tracking.
  * @param {gameEngine} game 
  * @param {enemies} object 

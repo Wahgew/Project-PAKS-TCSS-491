@@ -26,6 +26,7 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
     ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
     ASSET_MANAGER.queueDownload("./sprites/laser_test.png");
+    ASSET_MANAGER.queueDownload("./sprites/tempproj3.png")
     // level assets
     ASSET_MANAGER.queueDownload("./sprites/plat_wide.png");
     ASSET_MANAGER.queueDownload("./sprites/plat_short.png");
@@ -58,7 +59,7 @@ function startGame() {
             gameEngine.levelConfig.loadLevel(window.targetLevelToLoad);
         } else {
             // Default to level 1 if no specific level was requested
-            gameEngine.levelConfig.loadLevel(1);
+            gameEngine.levelConfig.loadLevel(7);
         }
 
         // Switch from menu music to game music
