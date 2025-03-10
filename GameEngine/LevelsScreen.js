@@ -437,28 +437,41 @@ class LevelsScreen {
 
     createClickLevelsButton() {
         const button = document.createElement("img");
-        button.src = "./sprites/level.png"; // Make sure to save the image with this name
+        button.src = "./sprites/level.png"; 
         button.alt = "Click Levels Here";
         button.style.position = "absolute";
         button.style.width = "276px"; 
         button.style.height = "51px";
         button.style.cursor = "pointer";
-        button.style.transition = "0.3s ease-in-out";
-        button.style.left = "50px";  // Adjust position as needed
-        button.style.top = "135px";   // Adjust position as needed
+        button.style.left = "50px";
+        button.style.top = "135px";
         
-        // Add hover effects with lighter glow
-        button.addEventListener("mouseover", () => {
-            button.style.transform = "scale(1.05) rotate(0.1deg)";
-            // Use a lighter shadow color - changed from black to a light blue/gray
-            button.style.filter = "drop-shadow(0 0 5px rgba(177, 177, 177, 0.8))";
-            // You can also add brightness to make the whole button lighter
-            button.style.filter += " brightness(1.1)";
-        });
-
+        // Create CSS animation for pulsing/popping effect using Javascript
+        if (!document.querySelector('#buttonAnimationStyle')) {
+            const style = document.createElement('style');
+            style.id = 'buttonAnimationStyle';
+            style.textContent = `
+                @keyframes buttonPulse {
+                    0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(177, 177, 177, 0.5)) brightness(1); }
+                    50% { transform: scale(1.05) rotate(0.1deg); filter: drop-shadow(0 0 5px rgba(177, 177, 177, 0.8)) brightness(1.1); }
+                    100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(177, 177, 177, 0.5)) brightness(1); }
+                }
+                
+                .pulsing-button {
+                    animation: buttonPulse 2s ease-in-out infinite;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Apply the animation class
+        button.classList.add('pulsing-button');
+    
         button.addEventListener("mouseout", () => {
-            button.style.transform = "scale(1)";
-            button.style.filter = "none";
+            // Resume animation when not hovering
+            button.style.animation = "";
+            button.style.transform = "";
+            button.style.filter = "";
         });
         
         this.levelsContainer.appendChild(button);
