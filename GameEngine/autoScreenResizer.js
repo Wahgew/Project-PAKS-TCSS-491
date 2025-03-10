@@ -1,8 +1,24 @@
+/**
+ * AutoScreenResizer
+ *
+ * A unified screen resizing utility that handles automatic scaling of the game canvas
+ * based on the user's screen size. This combines functionality from both original
+ * autoScreenResizer.js and autoScaler.js implementations.
+ *
+ * @author Andrew D Hwang
+ * @edited by Peter - Merged duplicate implementations to resolve conflicts
+ */
 class AutoScreenResizer {
+    /**
+     * Creates a new instance of the AutoScreenResizer
+     * @param {HTMLCanvasElement} canvas - The game canvas element to resize
+     */
     constructor(canvas) {
         this.canvas = canvas;
+        this.originalWidth = canvas.width;
+        this.originalHeight = canvas.height;
 
-        // Ensure DOM is fully loaded
+        // Ensure DOM is fully loaded before initializing
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initializeResizer());
         } else {
@@ -10,14 +26,17 @@ class AutoScreenResizer {
         }
     }
 
+    /**
+     * Initialize the screen resizing system
+     */
     initializeResizer() {
-        // Reset body and html styles
+        // Reset body and html styles for consistent behavior
         document.documentElement.style.margin = '0';
         document.documentElement.style.padding = '0';
         document.body.style.margin = '0';
         document.body.style.padding = '0';
         document.body.style.overflow = 'hidden';
-        document.body.style.backgroundColor = '#333';
+        document.body.style.backgroundColor = '#000'; // Changed to pure black as requested
 
         // Create main container
         const container = document.createElement('div');
@@ -39,6 +58,9 @@ class AutoScreenResizer {
         innerWrapper.style.alignItems = 'center';
         innerWrapper.id = 'game-inner-wrapper';
 
+        // Remove the focus outline from canvas
+        this.canvas.style.outline = 'none';
+
         // Move canvas into inner wrapper
         this.canvas.parentNode.insertBefore(container, this.canvas);
         container.appendChild(innerWrapper);
@@ -54,6 +76,9 @@ class AutoScreenResizer {
         window.addEventListener('resize', () => this.applyScaling());
     }
 
+    /**
+     * Positions debug controls and ensures they work correctly
+     */
     positionDebugControls() {
         // Find existing debug checkbox
         const debugCheckbox = document.getElementById('debug');
@@ -90,17 +115,14 @@ class AutoScreenResizer {
             controlsContainer.appendChild(debugCheckbox);
             controlsContainer.appendChild(label);
 
-            // Check if reset times button exists before adding it (it shouldn't anymore)
-            const resetTimesButton = document.getElementById('resetTimes');
-            if (resetTimesButton) {
-                controlsContainer.appendChild(resetTimesButton);
-            }
-
             // Add to body
             document.body.appendChild(controlsContainer);
         }
     }
 
+    /**
+     * Apply scaling to the canvas based on screen size
+     */
     applyScaling() {
         const screenWidth = window.screen.availWidth;
         const screenHeight = window.screen.availHeight;
@@ -118,7 +140,7 @@ class AutoScreenResizer {
             scaleFactor = 0.5; // Reduce to 50% of original size
         }
 
-        // Apply scaling to canvas
+        // Apply scaling to canvas through the inner wrapper
         const innerWrapper = document.getElementById('game-inner-wrapper');
         if (innerWrapper) {
             innerWrapper.style.transform = `scale(${scaleFactor})`;
