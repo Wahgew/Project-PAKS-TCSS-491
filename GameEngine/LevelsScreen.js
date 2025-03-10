@@ -54,6 +54,7 @@ class LevelsScreen {
         this.createInstructionButton();
         this.createResetLevelButton();
         this.createHomeLevelButton();
+        this.createClickLevelsButton();
         // Append levels screen to body
         document.body.appendChild(this.levelsContainer);
     }
@@ -277,12 +278,14 @@ class LevelsScreen {
         button.style.left = `${x}px`;
         button.style.top = `${y}px`;
     
-        // Add hover effects
+        // Add hover effects with lighter glow
         button.addEventListener("mouseover", () => {
             button.style.transform = "scale(1.05) rotate(0.1deg)";
-            button.style.filter = "drop-shadow(0 0 5px black)";
+            button.style.filter = "drop-shadow(0 0 5px rgba(177, 177, 177, 0.8))";
+            // You can also add brightness to make the whole button lighter
+            button.style.filter += " brightness(1.2)";
         });
-    
+
         button.addEventListener("mouseout", () => {
             button.style.transform = "scale(1)";
             button.style.filter = "none";
@@ -306,12 +309,14 @@ class LevelsScreen {
         button.style.left = `${x}px`;
         button.style.top = `${y}px`;
         
-        // Add hover effects
+        // Add hover effects with lighter glow
         button.addEventListener("mouseover", () => {
             button.style.transform = "scale(1.05) rotate(0.1deg)";
-            button.style.filter = "drop-shadow(0 0 5px black)";
+            button.style.filter = "drop-shadow(0 0 5px rgba(177, 177, 177, 0.8))";
+            // You can also add brightness to make the whole button lighter
+            button.style.filter += " brightness(1.2)";
         });
-        
+
         button.addEventListener("mouseout", () => {
             button.style.transform = "scale(1)";
             button.style.filter = "none";
@@ -336,12 +341,14 @@ class LevelsScreen {
         button.style.left = `${x}px`;
         button.style.top = `${y}px`;
         
-        // Add hover effects
+        // Add hover effects with lighter glow
         button.addEventListener("mouseover", () => {
             button.style.transform = "scale(1.05) rotate(0.1deg)";
-            button.style.filter = "drop-shadow(0 0 5px black)";
+            button.style.filter = "drop-shadow(0 0 5px rgba(177, 177, 177, 0.8))";
+            // You can also add brightness to make the whole button lighter
+            button.style.filter += " brightness(1.2)";
         });
-        
+
         button.addEventListener("mouseout", () => {
             button.style.transform = "scale(1)";
             button.style.filter = "none";
@@ -417,28 +424,54 @@ class LevelsScreen {
     }
 
     createInstructionButton() {
-        this.createInstructionsButton(75, 135, 15, () => this.showInstructions());
+        this.createInstructionsButton(610, 582, 15, () => this.showInstructions());
     }
 
     createResetLevelButton() {
-        this.createResetLevelButtonElement(75, 535, 16, () => this.resetLevels());
+        this.createResetLevelButtonElement(200, 580, 16, () => this.resetLevels());
     }
 
     createHomeLevelButton() {
-        this.createHomeButtonElement(120, 535, 17, () => this.goToWelcomeScreen());
+        this.createHomeButtonElement(440, 582, 17, () => this.goToWelcomeScreen());
+    }
+
+    createClickLevelsButton() {
+        const button = document.createElement("img");
+        button.src = "./sprites/level.png"; // Make sure to save the image with this name
+        button.alt = "Click Levels Here";
+        button.style.position = "absolute";
+        button.style.width = "276px"; 
+        button.style.height = "51px";
+        button.style.cursor = "pointer";
+        button.style.transition = "0.3s ease-in-out";
+        button.style.left = "50px";  // Adjust position as needed
+        button.style.top = "135px";   // Adjust position as needed
+        
+        // Add hover effects with lighter glow
+        button.addEventListener("mouseover", () => {
+            button.style.transform = "scale(1.05) rotate(0.1deg)";
+            // Use a lighter shadow color - changed from black to a light blue/gray
+            button.style.filter = "drop-shadow(0 0 5px rgba(177, 177, 177, 0.8))";
+            // You can also add brightness to make the whole button lighter
+            button.style.filter += " brightness(1.1)";
+        });
+
+        button.addEventListener("mouseout", () => {
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
+        });
+        
+        this.levelsContainer.appendChild(button);
+        return button;
     }
 
     goToWelcomeScreen() {
         // Hide the levels screen
         this.hide();
-        
-        // Find the welcome screen and show it
         const welcomeScreen = document.getElementById("welcomeScreen");
         if (welcomeScreen) {
             welcomeScreen.style.display = "flex";
         }
-        
-        // Switch to menu music if audio manager exists
         if (window.AUDIO_MANAGER) {
             window.AUDIO_MANAGER.stopGameMusic();
             window.AUDIO_MANAGER.playMenuMusic();
