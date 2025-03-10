@@ -4,9 +4,18 @@ class drawMap {
                 this.game = gameEngine;
                 this.block = ASSET_MANAGER.getAsset("./sprites/block.png");
                 console.log("DrawMap initialized with size:", drawSize);
-                this.blocks = [ASSET_MANAGER.getAsset("./sprites/block.png"), ASSET_MANAGER.getAsset("./sprites/block2.png"), 
-                        ASSET_MANAGER.getAsset("./sprites/block3.png"), ASSET_MANAGER.getAsset("./sprites/block4.png")];
-                this.colors = ["pink",
+                this.blocks = [
+                        ASSET_MANAGER.getAsset("./sprites/block.png"),
+                        ASSET_MANAGER.getAsset("./sprites/block2.png"),
+                        ASSET_MANAGER.getAsset("./sprites/block3.png"),
+                        ASSET_MANAGER.getAsset("./sprites/block4.png"),
+                        ASSET_MANAGER.getAsset("./sprites/block5_forestgreen.png"),
+                        ASSET_MANAGER.getAsset("./sprites/block6_amber.png"),
+                        ASSET_MANAGER.getAsset("./sprites/block7_ocean.png"),
+                        ASSET_MANAGER.getAsset("./sprites/block8_burgundy.png")];
+                this.colors = [
+                        // Original 9 colors
+                        "pink",
                         "peachpuff",
                         "lightgoldenrodyellow",
                         "lavender",
@@ -14,10 +23,90 @@ class drawMap {
                         "lightsteelblue",
                         "thistle",
                         "lightsalmon",
-                        "lavenderblush"]
-                this.random = Math.floor(Math.random() * 9)
-                this.random2 = Math.floor(Math.random() * 3)
+                        "lavenderblush",
+
+                        // New coordinated theme backgrounds
+                        "#D4E6CB",  // Light sage (pairs with forest green)
+                        "#FFF8DC",  // Cornsilk (Amber/Gold theme)
+                        "#E0F7FA",  // Very light cyan (Ocean Blue theme)
+                        "#F5E9EB"]   // Lavender blush (Burgundy theme)
+
+                // Theme selection logic (30% coordinated, 70% random)
+                const useCoordinatedTheme = Math.random() < 0.3;
+
+                if (useCoordinatedTheme) {
+                        // Select one of the 4 coordinated themes
+                        const themeIndex = Math.floor(Math.random() * 4);
+                        this.random = 9 + themeIndex;  // Coordinated background
+                        this.random2 = 4 + themeIndex; // Coordinated block
+                        console.log(`Using coordinated theme #${themeIndex + 1}`);
+                } else {
+                        // Completely random selection from all options
+                        this.random = Math.floor(Math.random() * this.colors.length);
+                        this.random2 = Math.floor(Math.random() * this.blocks.length);
+                        console.log("Using random color combination");
+                }
                 gameEngine.currentColor = this.random2;
+/*
+ * NEW BLOCK COLOR REFERENCE
+ * -------------------------
+ * This is a reference guide for the colors to use when creating
+ * the new block PNG images. Each block should use the specified
+ * color scheme and size of 314x313.
+ */
+
+// BLOCK 5: FOREST GREEN THEME
+// ---------------------------
+// Main block color: #3C9A66 (slightly brighter than the BigBlock color)
+// BigBlock color for reference: #2E8B57
+// Background color that pairs with this: #D4E6CB (light sage)
+
+// BLOCK 6: AMBER/GOLD THEME
+// -------------------------
+// Main block color: #B87333 (slightly darker copper-gold)
+// BigBlock color for reference: #CD853F
+// Background color that pairs with this: #FFF8DC (cornsilk)
+
+// BLOCK 7: OCEAN BLUE THEME
+// -------------------------
+// Main block color: #3D85C6 (medium bright blue)
+// BigBlock color for reference: #20639B
+// Background color that pairs with this: #E0F7FA (very light cyan)
+
+// BLOCK 8: BURGUNDY THEME
+// ----------------------
+// Main block color: #96223F (rich wine red)
+// BigBlock color for reference: #820933
+// Background color that pairs with this: #F5E9EB (very light pink)
+
+                /*
+                 * HOW TO CREATE THE BLOCK PNGs
+                 * ---------------------------
+                 * 1. Use the exact same dimensions as your existing blocks (314x313)
+                 * 2. Use the color codes specified above
+                 * 3. Maintain the same style/shading pattern as your existing blocks
+                 * 4. Save in PNG format with the specified filenames
+                 *
+                 * Filename convention:
+                 * - block5_forestgreen.png
+                 * - block6_amber.png
+                 * - block7_oceanblue.png
+                 * - block8_burgundy.png
+                 */
+
+// COLOR COMBINATIONS QUICK REFERENCE
+// ----------------------------------
+// Theme 1: Forest Green
+// BigBlock: #2E8B57 | TileBlock: #3C9A66 | Background: #D4E6CB
+
+// Theme 2: Amber/Gold
+// BigBlock: #CD853F | TileBlock: #B87333 | Background: #FFF8DC
+
+// Theme 3: Ocean Blue
+// BigBlock: #20639B | TileBlock: #3D85C6 | Background: #E0F7FA
+
+// Theme 4: Burgundy
+// BigBlock: #820933 | TileBlock: #96223F | Background: #F5E9EB
         }
 
         // 0 map used for test purpose ONLY won't be used in really game just keep it for now DON'T COMMENT IT OUT - peter

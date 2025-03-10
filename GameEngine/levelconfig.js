@@ -12,7 +12,7 @@ class LevelConfig {
      */
     constructor(gameEngine) {
         this.game = gameEngine;
-        this.currentLevel = 7; // sets the current level
+        this.currentLevel = 1; // sets the current level
         this.TILE_SIZE = 25;
     }
 
@@ -409,7 +409,7 @@ class LevelConfig {
                         direction: null,
                         reverseTime: 0,
                         atkspd: 2,
-                        projspd: 550,
+                        projspd: 650,
                         shotdirec: "LEFT"
                     }),
                     new ProjectileLauncher({
@@ -421,7 +421,7 @@ class LevelConfig {
                         direction: null,
                         reverseTime: 0,
                         atkspd: 2,
-                        projspd: 550,
+                        projspd: 650,
                         shotdirec: "RIGHT"
                     }),
 

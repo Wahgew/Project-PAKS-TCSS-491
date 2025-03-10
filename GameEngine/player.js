@@ -215,7 +215,7 @@ class Player {
                 that.kill();
             } else if (entity.BB && entity instanceof Platform && that.BB.collide(entity.BB) && that.velocity.y > 0 && (that.lastBB.bottom) <= entity.BB.top + 5) {
                 that.isGrounded = true;
-                if (!that.game.keys['w'] && !that.game.keys[' '] && !that.game.keys['s']) { // allow player to jump off
+                if (!that.game.keys['s']) { // allow player to jump off
                     that.velocity.y = 0;
                     that.BB.bottom = entity.BB.top; // lock bounding box position
                     that.y = entity.BB.top - that.BB.height;

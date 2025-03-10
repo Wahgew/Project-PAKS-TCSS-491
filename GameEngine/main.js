@@ -9,6 +9,10 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/block2.png");
     ASSET_MANAGER.queueDownload("./sprites/block3.png");
     ASSET_MANAGER.queueDownload("./sprites/block4.png");
+    ASSET_MANAGER.queueDownload("./sprites/block5_forestgreen.png")
+    ASSET_MANAGER.queueDownload("./sprites/block6_amber.png")
+    ASSET_MANAGER.queueDownload("./sprites/block7_ocean.png")
+    ASSET_MANAGER.queueDownload("./sprites/block8_burgundy.png")
     // player assets
     ASSET_MANAGER.queueDownload("./sprites/bigblock.png");
     ASSET_MANAGER.queueDownload("./sprites/idle.png");
@@ -59,7 +63,7 @@ function startGame() {
             gameEngine.levelConfig.loadLevel(window.targetLevelToLoad);
         } else {
             // Default to level 1 if no specific level was requested
-            gameEngine.levelConfig.loadLevel(7);
+            gameEngine.levelConfig.loadLevel(1);
         }
 
         // Switch from menu music to game music

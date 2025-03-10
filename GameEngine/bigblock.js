@@ -4,7 +4,16 @@ class BigBlock {
         this.width = x2 - x;
         this.height = y2 - y;
         this.BB = new BoundingBox(this.x, this.y, this.width, this.height);
-        this.colors = ["maroon", 'teal', 'plum', 'darkslategray'] // actual colors are black, "darkcyan", "darkslateblue", 'slategray'
+        this.colors = [
+            "maroon",// actual colors are black, "darkcyan", "darkslateblue", 'slategray'
+            'teal',
+            'plum',
+            'darkslategray',
+            "#2E8B57",  // Forest Green
+            "#CD853F",  // amber
+            "#20639B",  // ocean
+            "#820933"   // burgundy
+        ]
     }
     update() {
         ;
