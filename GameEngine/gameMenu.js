@@ -83,6 +83,7 @@ class GameMenu {
             { text: 'Pause', action: () => this.pauseGame() },
             { text: 'Resume', action: () => this.resumeGame() },
             { text: 'Levels', action: () => this.showLevels() },
+            { text: 'Reset Times', action: () => this.showResetTimesConfirmation() },
             { text: 'Exit', action: () => this.exitGame() }
         ];
         
@@ -253,7 +254,225 @@ class GameMenu {
         const levelsScreen = new LevelsScreen(currentLevel);
         levelsScreen.show();
     }
-    
+
+    showResetTimesConfirmation() {
+        // First hide the menu
+        this.hideMenu();
+
+        // Create the confirmation dialog overlay
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        overlay.style.zIndex = '2000';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+
+        // Create the confirmation dialog panel with elevator aesthetic
+        const panel = document.createElement('div');
+        panel.style.width = '400px';
+        panel.style.backgroundColor = '#333';
+        panel.style.borderRadius = '10px';
+        panel.style.border = '4px solid #555';
+        panel.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.6)';
+        panel.style.padding = '20px';
+        panel.style.display = 'flex';
+        panel.style.flexDirection = 'column';
+        panel.style.alignItems = 'center';
+
+        // Add elevator-style header
+        const header = document.createElement('div');
+        header.style.width = '100%';
+        header.style.backgroundColor = '#222';
+        header.style.color = '#ffcc00';
+        header.style.padding = '10px';
+        header.style.marginBottom = '20px';
+        header.style.borderRadius = '5px';
+        header.style.textAlign = 'center';
+        header.style.fontFamily = "'Molot', sans-serif";
+        header.style.fontSize = '18px';
+        header.style.fontWeight = 'bold';
+        header.textContent = 'DATA RESET CONFIRMATION';
+        panel.appendChild(header);
+
+        // Add warning icon (circle with exclamation)
+        const warningIcon = document.createElement('div');
+        warningIcon.style.width = '50px';
+        warningIcon.style.height = '50px';
+        warningIcon.style.borderRadius = '50%';
+        warningIcon.style.backgroundColor = '#ffcc00';
+        warningIcon.style.color = '#333';
+        warningIcon.style.display = 'flex';
+        warningIcon.style.justifyContent = 'center';
+        warningIcon.style.alignItems = 'center';
+        warningIcon.style.fontSize = '30px';
+        warningIcon.style.fontWeight = 'bold';
+        warningIcon.style.marginBottom = '20px';
+        warningIcon.textContent = '!';
+        panel.appendChild(warningIcon);
+
+        // Add message text
+        const message = document.createElement('div');
+        message.style.width = '100%';
+        message.style.color = '#fff';
+        message.style.textAlign = 'center';
+        message.style.marginBottom = '20px';
+        message.style.fontFamily = "'Molot', sans-serif";
+        message.style.fontSize = '16px';
+        message.innerHTML = 'Are you sure you want to reset all level times?<br><br>This action cannot be undone.';
+        panel.appendChild(message);
+
+        // Add button container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'space-between';
+        buttonContainer.style.width = '80%';
+
+        // Add cancel button
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'CANCEL';
+        cancelButton.style.padding = '10px 20px';
+        cancelButton.style.backgroundColor = '#444';
+        cancelButton.style.color = '#fff';
+        cancelButton.style.border = '2px solid #555';
+        cancelButton.style.borderRadius = '5px';
+        cancelButton.style.cursor = 'pointer';
+        cancelButton.style.fontFamily = "'Molot', sans-serif";
+        cancelButton.style.fontSize = '14px';
+        cancelButton.style.width = '45%';
+
+        cancelButton.onmouseover = function() {
+            this.style.backgroundColor = '#555';
+        };
+
+        cancelButton.onmouseout = function() {
+            this.style.backgroundColor = '#444';
+        };
+
+        cancelButton.onclick = function() {
+            document.body.removeChild(overlay);
+        };
+
+        buttonContainer.appendChild(cancelButton);
+
+        // Add confirm button
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = 'RESET TIMES';
+        confirmButton.style.padding = '10px 20px';
+        confirmButton.style.backgroundColor = '#aa3333';
+        confirmButton.style.color = '#fff';
+        confirmButton.style.border = '2px solid #cc4444';
+        confirmButton.style.borderRadius = '5px';
+        confirmButton.style.cursor = 'pointer';
+        confirmButton.style.fontFamily = "'Molot', sans-serif";
+        confirmButton.style.fontSize = '14px';
+        confirmButton.style.width = '45%';
+
+        confirmButton.onmouseover = function() {
+            this.style.backgroundColor = '#cc3333';
+        };
+
+        confirmButton.onmouseout = function() {
+            this.style.backgroundColor = '#aa3333';
+        };
+
+        confirmButton.onclick = () => {
+            // Reset all times
+            if (this.gameEngine && this.gameEngine.levelTimesManager) {
+                this.gameEngine.levelTimesManager.resetAllTimes();
+
+                // Show a confirmation message
+                message.innerHTML = 'All level times have been reset.';
+                message.style.color = '#33ff33'; // Green success message
+
+                buttonContainer.innerHTML = ''; // Remove both buttons
+
+                // Add OK button
+                const okButton = document.createElement('button');
+                okButton.textContent = 'OK';
+                okButton.style.padding = '10px 20px';
+                okButton.style.backgroundColor = '#444';
+                okButton.style.color = '#fff';
+                okButton.style.border = '2px solid #555';
+                okButton.style.borderRadius = '5px';
+                okButton.style.cursor = 'pointer';
+                okButton.style.fontFamily = "'Molot', sans-serif";
+                okButton.style.fontSize = '14px';
+                okButton.style.width = '50%';
+
+                okButton.onmouseover = function() {
+                    this.style.backgroundColor = '#555';
+                };
+
+                okButton.onmouseout = function() {
+                    this.style.backgroundColor = '#444';
+                };
+
+                okButton.onclick = function() {
+                    document.body.removeChild(overlay);
+                };
+
+                buttonContainer.appendChild(okButton);
+                buttonContainer.style.justifyContent = 'center';
+            } else {
+                document.body.removeChild(overlay);
+            }
+        };
+
+        buttonContainer.appendChild(confirmButton);
+        panel.appendChild(buttonContainer);
+
+        // Add elevator lights effect (decorative)
+        const lightsContainer = document.createElement('div');
+        lightsContainer.style.display = 'flex';
+        lightsContainer.style.justifyContent = 'space-between';
+        lightsContainer.style.width = '70%';
+        lightsContainer.style.marginTop = '20px';
+
+        // Create 5 small LED lights
+        for (let i = 0; i < 5; i++) {
+            const light = document.createElement('div');
+            light.style.width = '8px';
+            light.style.height = '8px';
+            light.style.borderRadius = '50%';
+            light.style.backgroundColor = '#33ff33'; // Green LEDs
+            light.style.boxShadow = '0 0 5px #33ff33';
+
+            // Animate the lights with different timings
+            light.style.animation = `blink ${1 + i * 0.2}s infinite`;
+            lightsContainer.appendChild(light);
+        }
+
+        // Add the keyframe animation for blinking
+        const style = document.createElement('style');
+        style.innerHTML = `
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+    `;
+        document.head.appendChild(style);
+
+        panel.appendChild(lightsContainer);
+
+        // Add panel to overlay and overlay to document
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        // Add keyboard listener for Escape key
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                document.body.removeChild(overlay);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+
     exitGame() {
         this.hide(); 
     

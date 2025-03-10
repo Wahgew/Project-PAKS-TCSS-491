@@ -13,6 +13,9 @@
             transform: translate(-50%, -50%);
             z-index: 1;
         }
+        #gameWorld:focus {
+            outline: none;
+        }
         @font-face {
             font-family: 'Molot';
             src: url('./sprites/Molot.otf') format('opentype');
@@ -137,15 +140,10 @@
         console.log(window.screen.availHeight);
     </script>
 </head>
-<body style="background: #333;">
+<body style="background: #000;">
 <canvas id="gameWorld" width="1024" height="768" tabindex="0" autofocus></canvas>
 <div>
     <label for="debug"></label><input type="checkbox" id="debug"> Debug 🛠️
-
-    <button id="resetTimes" style="background: #ff4444; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">
-        Reset All Times ⏱️
-    </button>
-
 </div>
 </body>
 </html>

@@ -4,7 +4,7 @@ class LevelTimesManager {
         this.storeName = 'levelTimes';
         this.db = null;
         this.DEFAULT_TIME = 9000000000;
-        this.NUMBER_OF_LEVELS = 10;
+        this.NUMBER_OF_LEVELS = 12;
         this.dbReady = this.initializeDB();
     }
 
@@ -30,7 +30,7 @@ class LevelTimesManager {
                     const store = db.createObjectStore(this.storeName, { keyPath: 'levelNumber' });
 
                     // Initialize default times for all levels
-                    for (let i = 0; i < this.NUMBER_OF_LEVELS; i++) {
+                    for (let i = 0; i <= this.NUMBER_OF_LEVELS; i++) {
                         store.put({ levelNumber: i, time: this.DEFAULT_TIME });
                     }
                     console.log('Object store created and initialized with default times');
@@ -147,7 +147,7 @@ class LevelTimesManager {
                 // Add default times for all levels
                 let completed = 0;
 
-                for (let i = 0; i < this.NUMBER_OF_LEVELS; i++) {
+                for (let i = 0; i <= this.NUMBER_OF_LEVELS; i++) {
                     const request = store.put({ levelNumber: i, time: this.DEFAULT_TIME });
 
                     request.onsuccess = () => {

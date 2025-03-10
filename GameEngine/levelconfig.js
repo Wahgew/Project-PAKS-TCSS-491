@@ -518,7 +518,7 @@ class LevelConfig {
     }
 
     loadNextLevel() {
-        if (this.currentLevel < 10) {
+        if (this.currentLevel < 13) {
             // Make sure any level completion UI is hidden before loading next level
             if (this.game.levelUI) {
                 this.game.levelUI.hideLevelComplete();

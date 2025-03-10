@@ -134,17 +134,6 @@ class GameEngine {
                     this.levelConfig.currentLevel = level;
                 }
             });
-
-            // Initialize reset times button
-            const resetButton = document.getElementById('resetTimes');
-            if (resetButton) {
-                resetButton.addEventListener('click', () => {
-                    if (confirm('Are you sure you want to reset all level times?')) {
-                        this.levelTimesManager.resetAllTimes();
-                    }
-                });
-            }
-
             // Set initial value and display state
             levelSelect.value = this.levelConfig ? this.levelConfig.currentLevel : 1;
             debugMenu.style.display = this.options.debugging ? "block" : "none";

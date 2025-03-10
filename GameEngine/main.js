@@ -14,7 +14,6 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/block7_ocean.png")
     ASSET_MANAGER.queueDownload("./sprites/block8_burgundy.png")
     // player assets
-    ASSET_MANAGER.queueDownload("./sprites/bigblock.png");
     ASSET_MANAGER.queueDownload("./sprites/idle.png");
     ASSET_MANAGER.queueDownload("./sprites/walk.png");
     ASSET_MANAGER.queueDownload("./sprites/run.png");
