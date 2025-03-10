@@ -440,10 +440,10 @@ class LevelsScreen {
         button.src = "./sprites/level.png"; 
         button.alt = "Click Levels Here";
         button.style.position = "absolute";
-        button.style.width = "276px"; 
-        button.style.height = "51px";
+        button.style.width = "298px"; 
+        button.style.height = "54px";
         button.style.cursor = "pointer";
-        button.style.left = "50px";
+        button.style.left = "38px";
         button.style.top = "135px";
         
         // Create CSS animation for pulsing/popping effect using Javascript
