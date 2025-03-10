@@ -88,7 +88,16 @@ class GameEngine {
                 { value: 0, label: "Floor 0 (Test)" },
                 { value: 1, label: "Floor 1" },
                 { value: 2, label: "Floor 2" },
-                { value: 3, label: "Floor 3" }
+                { value: 3, label: "Floor 3" },
+                { value: 4, label: "Floor 4" },
+                { value: 5, label: "Floor 5" },
+                { value: 6, label: "Floor 6" },
+                { value: 7, label: "Floor 7" },
+                { value: 8, label: "Floor 8" },
+                { value: 9, label: "Floor 9" },
+                { value: 10, label: "Floor 10" },
+                { value: 11, label: "Floor 11" },
+                { value: 12, label: "Floor 12" }
             ];
 
             levels.forEach(level => {
@@ -125,17 +134,6 @@ class GameEngine {
                     this.levelConfig.currentLevel = level;
                 }
             });
-
-            // Initialize reset times button
-            const resetButton = document.getElementById('resetTimes');
-            if (resetButton) {
-                resetButton.addEventListener('click', () => {
-                    if (confirm('Are you sure you want to reset all level times?')) {
-                        this.levelTimesManager.resetAllTimes();
-                    }
-                });
-            }
-
             // Set initial value and display state
             levelSelect.value = this.levelConfig ? this.levelConfig.currentLevel : 1;
             debugMenu.style.display = this.options.debugging ? "block" : "none";
@@ -201,29 +199,20 @@ class GameEngine {
             this.rightclick = getXandY(e);
         });
 
-        // test timer reset and stop
-        // test level completion display
+        // enter handler for level restart and complete
         window.addEventListener("keydown", event => {
             this.keys[event.key.toLowerCase()] = true;
 
             if (event.key.toLowerCase() === 'enter') {
-                // Handle level complete screen
-                if (this.levelUI.isDisplayingComplete && !this.Player.dead) {
-                    console.log("Enter pressed on level complete screen");
+                console.log("Enter key pressed, checking UI state");
 
-                    // First hide the level complete UI
-                    this.levelUI.hideLevelComplete();
-
-                    // Add a small delay before loading the next level
-                    // This prevents accidental double-presses from carrying over
-                    setTimeout(() => {
-                        this.levelConfig.loadNextLevel();
-                    }, 100);
-                }
-                // Handle death screen (death screen state)
-                else if (this.Player && this.Player.dead) {
-                    this.levelUI.hideLevelComplete();
-                    this.levelConfig.loadLevel(this.levelConfig.currentLevel); // Reload current level
+                // Only handle UI navigation if a UI screen is showing
+                if (this.levelUI) {
+                    // Just call the same handler as buttons use
+                    if (this.levelUI.isDisplayingDeath || this.levelUI.isDisplayingComplete) {
+                        console.log("UI screen is showing, handling Enter key");
+                        this.levelUI.handleButtonAction('continue');
+                    }
                 }
             }
         });
@@ -352,6 +341,7 @@ class GameEngine {
             this.ctx.font = "12px Arial";
             this.ctx.fillStyle = "red";
 
+            // ADJUST THE PIXEL DISPLAY CURSOR
             let offsetX = 35; // Adjust to prevent overlap with cursor
             let offsetY = 30;
 

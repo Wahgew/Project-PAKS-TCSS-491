@@ -9,8 +9,11 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/block2.png");
     ASSET_MANAGER.queueDownload("./sprites/block3.png");
     ASSET_MANAGER.queueDownload("./sprites/block4.png");
+    ASSET_MANAGER.queueDownload("./sprites/block5_forestgreen.png")
+    ASSET_MANAGER.queueDownload("./sprites/block6_amber.png")
+    ASSET_MANAGER.queueDownload("./sprites/block7_ocean.png")
+    ASSET_MANAGER.queueDownload("./sprites/block8_burgundy.png")
     // player assets
-    ASSET_MANAGER.queueDownload("./sprites/bigblock.png");
     ASSET_MANAGER.queueDownload("./sprites/idle.png");
     ASSET_MANAGER.queueDownload("./sprites/walk.png");
     ASSET_MANAGER.queueDownload("./sprites/run.png");
@@ -20,11 +23,13 @@ function startGame() {
     ASSET_MANAGER.queueDownload("./sprites/wall-slide.png");
     ASSET_MANAGER.queueDownload("./sprites/crouch.png");
     ASSET_MANAGER.queueDownload("./sprites/fall.png");
+    ASSET_MANAGER.queueDownload("./sprites/menu.png");
 
     // hazard assets
     ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
     ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
     ASSET_MANAGER.queueDownload("./sprites/laser_test.png");
+    ASSET_MANAGER.queueDownload("./sprites/tempproj3.png")
     // level assets
     ASSET_MANAGER.queueDownload("./sprites/plat_wide.png");
     ASSET_MANAGER.queueDownload("./sprites/plat_short.png");
@@ -43,7 +48,22 @@ function startGame() {
 
         await gameEngine.init(ctx);
         gameEngine.levelConfig = new LevelConfig(gameEngine);
-        gameEngine.levelConfig.loadLevel(1);
+        
+        if (!window.GAME_MENU) {
+            window.GAME_MENU = new GameMenu(gameEngine);
+        }
+        window.GAME_MENU.show();
+
+        // Check if a specific level was requested from LevelsScreen
+        // I replaced the hardcoded set to level 1
+        if (window.targetLevelToLoad !== undefined) {
+            // Load the level that was requested from LevelsScreen
+            gameEngine.levelConfig.currentLevel = window.targetLevelToLoad;
+            gameEngine.levelConfig.loadLevel(window.targetLevelToLoad);
+        } else {
+            // Default to level 1 if no specific level was requested
+            gameEngine.levelConfig.loadLevel(1);
+        }
 
         // Switch from menu music to game music
         if (window.AUDIO_MANAGER) {
@@ -57,7 +77,19 @@ function startGame() {
         // gameEngine.levelTimesManager.debugPrintAllTimes();
     });
 }
+
 function showLevels() {
+    // Hide game menu if it exists
+    if (window.GAME_MENU) {
+        window.GAME_MENU.hide();
+    }
+    
+    // Hide game canvas
+    const gameCanvas = document.getElementById('gameWorld');
+    if (gameCanvas) {
+        gameCanvas.style.display = 'none';
+    }
+    
     const levelsScreen = new LevelsScreen();
     levelsScreen.show();
 }

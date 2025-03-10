@@ -55,15 +55,14 @@ class AutoScreenResizer {
     }
 
     positionDebugControls() {
-        // Find existing debug elements
+        // Find existing debug checkbox
         const debugCheckbox = document.getElementById('debug');
-        const resetTimesButton = document.getElementById('resetTimes');
 
         // Remove any existing debug containers
         const existingDebugContainers = document.querySelectorAll('[data-debug-container]');
         existingDebugContainers.forEach(el => el.remove());
 
-        if (debugCheckbox && resetTimesButton) {
+        if (debugCheckbox) {
             // Create a new container for debug controls
             const controlsContainer = document.createElement('div');
             controlsContainer.style.position = 'fixed';
@@ -79,6 +78,8 @@ class AutoScreenResizer {
             const label = document.createElement('label');
             label.setAttribute('for', 'debug');
             label.textContent = 'Debug 🛠️';
+            label.style.color = '#fff'; // Make text visible
+            label.style.cursor = 'pointer'; // Show it's clickable
 
             // Clear any existing text nodes or duplicates
             while (debugCheckbox.nextSibling) {
@@ -88,7 +89,12 @@ class AutoScreenResizer {
             // Append elements
             controlsContainer.appendChild(debugCheckbox);
             controlsContainer.appendChild(label);
-            controlsContainer.appendChild(resetTimesButton);
+
+            // Check if reset times button exists before adding it (it shouldn't anymore)
+            const resetTimesButton = document.getElementById('resetTimes');
+            if (resetTimesButton) {
+                controlsContainer.appendChild(resetTimesButton);
+            }
 
             // Add to body
             document.body.appendChild(controlsContainer);
