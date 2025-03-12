@@ -226,8 +226,8 @@ class LevelsScreen {
             messageEl.style.textAlign = 'center';
             messageEl.style.zIndex = '10';
             messageEl.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-            messageEl.style.top = '72%';        
-            messageEl.style.marginTop = '50px';
+            messageEl.style.top = '65%';  // Moves it higher
+            messageEl.style.marginTop = '20px'; // Reduce extra spacing
             this.levelsContainer.appendChild(messageEl);
         }
 
