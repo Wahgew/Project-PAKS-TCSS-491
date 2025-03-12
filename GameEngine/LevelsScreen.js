@@ -35,7 +35,20 @@ class LevelsScreen {
         this.levelsContainer.style.display = "none"; 
         this.levelsContainer.style.zIndex = "3";
 
-        // Manually create 12 level buttons
+        // Create animation style for lock pulse if doesn't exist
+        if (!document.querySelector('#lockAnimationStyle')) {
+            const style = document.createElement('style');
+            style.id = 'lockAnimationStyle';
+            style.textContent = `
+                @keyframes lockPulse {
+                    0% { transform: scale(1); opacity: 0.9; }
+                    100% { transform: scale(1.15); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Manually create level buttons
         this.createLevel1Button();
         this.createLevel2Button();
         this.createLevel3Button();
@@ -48,13 +61,23 @@ class LevelsScreen {
         this.createLevel10Button();
         this.createLevel11Button();
         this.createLevel12Button();
+
+        // Create special levels 13-16
+        this.createLevel13Button();
+        this.createLevel14Button();
+        this.createLevel15Button();
+        this.createLevel16Button();
+
+        // Create navigation buttons
         this.createnextButton();
         this.createbackButton();
         
+        // Create utility buttons
         this.createInstructionButton();
         this.createResetLevelButton();
         this.createHomeLevelButton();
         this.createClickLevelsButton();
+        
         // Append levels screen to body
         document.body.appendChild(this.levelsContainer);
     }
@@ -69,7 +92,6 @@ class LevelsScreen {
         this.levelsContainer.style.display = "none";
     }
 
-    // Modified createButton method to add lock overlay when locked
     createButton(x, y, level, clickHandler) {
         // Create a container div to hold both button and lock
         const buttonContainer = document.createElement("div");
@@ -92,7 +114,7 @@ class LevelsScreen {
         button.style.transition = "0.3s ease-in-out";
         button.style.zIndex = "1"; // Button below lock
         
-        // Create the lock overlay
+        // Create the lock overlay - only for levels 1-12
         const lockOverlay = document.createElement("img");
         lockOverlay.src = "./sprites/lock.png";
         lockOverlay.className = "lock-overlay";
@@ -105,26 +127,41 @@ class LevelsScreen {
         lockOverlay.style.display = "none"; // Initially hidden
         lockOverlay.style.pointerEvents = "none"; // Make lock non-interactive so clicks go to button
         
-        // Add button and lock to the container
+        // Add button to the container
         buttonContainer.appendChild(button);
-        buttonContainer.appendChild(lockOverlay);
+        
+        // Only add lock overlay for levels 1-12
+        if (level <= 12) {
+            buttonContainer.appendChild(lockOverlay);
+        }
         
         // Store reference to button and lock in array
         this.levelButtons.push({
             element: button,
             level: level,
-            lockOverlay: lockOverlay
+            lockOverlay: level <= 12 ? lockOverlay : null // No lock overlay for levels 13+
         });
         
         // Add hover effects to the button
         button.addEventListener("mouseover", async () => {
-            // Special handling for navigation buttons (level 13+)
-            if (level >= 13) {
+            // Navigation buttons (level 17+)
+            if (level >= 17) {
                 button.style.transform = "scale(1.1) rotate(5deg)";
                 button.style.filter = "drop-shadow(0 0 7px black)";
                 return;
             }
             
+            // Special levels 13-16
+            if (level >= 13 && level <= 16) {
+                const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+                if (isLevel12Completed) {
+                    button.style.transform = "scale(1.1) rotate(5deg)";
+                    button.style.filter = "drop-shadow(0 0 7px black)";
+                }
+                return;
+            }
+            
+            // Regular levels 1-12
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
                 button.style.transform = "scale(1.1) rotate(5deg)";
@@ -132,29 +169,32 @@ class LevelsScreen {
             }
         });
         
-        button.addEventListener("mouseout", async () => {
-            // Special handling for navigation buttons (level 13+)
-            if (level >= 13) {
-                button.style.transform = "scale(1)";
-                button.style.filter = "none";
-                return;
-            }
-            
-            const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
-            if (isUnlocked) {
-                button.style.transform = "scale(1)";
-                button.style.filter = "none";
-            }
+        button.addEventListener("mouseout", () => {
+            // Reset effects for all buttons
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
         });
         
         // Add click handler with level unlock check
         button.addEventListener("click", async () => {
-            // Special handling for navigation buttons (level 13+)
-            if (level >= 13) {
+            // Navigation buttons (level 17+)
+            if (level >= 17) {
                 clickHandler();
                 return;
             }
             
+            // Special levels 13-16
+            if (level >= 13 && level <= 16) {
+                const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+                if (isLevel12Completed) {
+                    clickHandler();
+                } else {
+                    this.showLockedLevelMessage(level);
+                }
+                return;
+            }
+            
+            // Regular levels 1-12
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             if (isUnlocked) {
                 clickHandler();
@@ -191,9 +231,18 @@ class LevelsScreen {
             this.levelsContainer.appendChild(messageEl);
         }
 
+        // Different message for levels 13-16
+        let message;
+        if (level >= 13 && level <= 16) {
+            message = `🔒Floor ${level} is locked! Complete Floor 12 first to unlock!`;
+        } else {
+            message = `🔒Floor ${level} is locked! Complete previous floors first.`;
+        }
+
         // Update message content
-        messageEl.textContent = `🔒Floor ${level} is locked! Complete previous floors first.`;
+        messageEl.textContent = message;
         messageEl.style.textTransform = 'uppercase';
+        
         // Show message with animation
         messageEl.style.animation = 'none';
         void messageEl.offsetWidth; // Trigger reflow
@@ -215,29 +264,43 @@ class LevelsScreen {
         }
     }
 
-    // Update the visual state of all level buttons - now async
+    // Update the visual state of all level buttons
     async updateLevelButtonStates() {
+        // Check if level 12 is completed for special levels (13-16)
+        const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+        
         for (const buttonObj of this.levelButtons) {
             const button = buttonObj.element;
             const level = buttonObj.level;
             const lockOverlay = buttonObj.lockOverlay;
             
-            // Special handling for navigation buttons (level 13+)
-            if (level >= 13) {
-                // Navigation buttons are always unlocked
+            // Navigation buttons (level 17+)
+            if (level >= 17) {
+                // Always unlocked
                 button.style.opacity = "1";
                 button.style.filter = "none";
                 button.style.cursor = "pointer";
-                
-                // Ensure lock is hidden for navigation buttons
-                if (lockOverlay) {
-                    lockOverlay.style.display = "none";
-                }
-                
-                // Skip the rest of the loop iteration for navigation buttons
                 continue;
             }
             
+            // Special levels (13-16)
+            if (level >= 13 && level <= 16) {
+                if (isLevel12Completed) {
+                    // Unlocked if level 12 is completed
+                    button.style.opacity = "1";
+                    button.style.filter = "none";
+                    button.style.cursor = "pointer";
+                } else {
+                    // Locked if level 12 is not completed
+                    button.style.opacity = "0.7";
+                    button.style.filter = "grayscale(100%)";
+                    button.style.cursor = "not-allowed";
+                    // No lock icon by design
+                }
+                continue;
+            }
+            
+            // Regular levels (1-12)
             const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(level);
             const isCompleted = await window.LEVEL_PROGRESS.isLevelCompleted(level);
             
@@ -247,7 +310,7 @@ class LevelsScreen {
                 button.style.cursor = "pointer";
                 button.style.filter = isCompleted ? "brightness(1.2) sepia(0.3)" : "none";
                 
-                // Hide lock overlay for unlocked levels
+                // Hide lock overlay
                 if (lockOverlay) {
                     lockOverlay.style.display = "none";
                 }
@@ -257,7 +320,7 @@ class LevelsScreen {
                 button.style.filter = "grayscale(100%)";
                 button.style.cursor = "not-allowed";
                 
-                // Show lock overlay for locked levels with animation
+                // Show lock overlay with animation
                 if (lockOverlay) {
                     lockOverlay.style.display = "block";
                     lockOverlay.style.animation = "lockPulse 2s infinite alternate";
@@ -332,7 +395,7 @@ class LevelsScreen {
     createHomeButtonElement(x, y, level, clickHandler) {
         const button = document.createElement("img");
         button.src = "./sprites/home.png";
-        button.alt = `Reset Levels`;
+        button.alt = `Home`;
         button.style.position = "absolute";
         button.style.width = "144px"; 
         button.style.height = "51px";
@@ -409,8 +472,86 @@ class LevelsScreen {
         this.createButton(280.95, 409, 12, () => this.goToLevel12());
     }
 
+    //extra button
+    createLevel13Button() {
+        this.createButton(750.1, 414, 13, () => this.goToLevel13());
+    }
+
+    createLevel14Button() {
+        this.createButton(745, 445, 14, () => this.goToLevel14());
+    }
+
+    createLevel15Button() {
+        this.createButton(809, 445, 15, () => this.goToLevel15());
+    }
+
+    createLevel16Button() {
+        // Create a container div for the button
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "exit-button-container";
+        buttonContainer.style.position = "absolute";
+        buttonContainer.style.width = "140px"; 
+        buttonContainer.style.height = "52px";
+        buttonContainer.style.left = "453px";
+        buttonContainer.style.top = "122px";
+        buttonContainer.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Create the logo png button image
+        const button = document.createElement("img");
+        button.src = "./sprites/PAKS.png";
+        button.alt = "EXIT";
+        button.dataset.level = 16;
+        button.style.position = "absolute";
+        button.style.width = "100%";
+        button.style.height = "100%";
+        button.style.cursor = "pointer";
+        button.style.transition = "all 0.3s ease-in-out"; // Apply to all properties
+        button.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Force the initial state explicitly
+        button.style.transform = "scale(1)";
+        button.style.filter = "none";
+        
+        // Add hover effects with lighter glow - simplify for testing
+        button.addEventListener("mouseover", () => {
+            // Remove the level check temporarily for testing
+            button.style.transform = "scale(1.05) rotate(0.1deg)";
+            button.style.filter = "drop-shadow(0 0 5px rgba(177, 177, 177, 0.8)) brightness(1.2)";
+            console.log("Button hover activated"); // Add logging
+        });
+        
+        button.addEventListener("mouseout", () => {
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
+            console.log("Button hover deactivated"); // Add logging
+        });
+        
+        // Add click handler
+        button.addEventListener("click", async () => {
+            console.log("Button clicked"); // Add logging
+            const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+            if (isLevel12Completed) {
+                this.goToLevel16();
+            } else {
+                this.showLockedLevelMessage(16);
+            }
+        });
+        
+        // Store reference in levelButtons array for state management
+        this.levelButtons.push({
+            element: button,
+            level: 16,
+            lockOverlay: null // No lock overlay for EXIT button
+        });
+        
+        buttonContainer.appendChild(button);
+        this.levelsContainer.appendChild(buttonContainer);
+        
+        return button;
+    }
+    
     createnextButton() {
-        this.createButton(153, 455, 13, () => {
+        this.createButton(153, 455, 17, () => {
             this.hide();
             const welcomeScreen = document.getElementById("welcomeScreen");
             if (welcomeScreen) {
@@ -419,20 +560,21 @@ class LevelsScreen {
         });
     }
 
+    
     createbackButton() {
-        this.createButton(234, 454.5, 14, () => this.goTogame());
+        this.createButton(234, 454.5, 18, () => this.goTogame());
     }
 
     createInstructionButton() {
-        this.createInstructionsButton(610, 582, 15, () => this.showInstructions());
+        this.createInstructionsButton(610, 582, 19, () => this.showInstructions());
     }
 
     createResetLevelButton() {
-        this.createResetLevelButtonElement(200, 580, 16, () => this.resetLevels());
+        this.createResetLevelButtonElement(200, 580, 20, () => this.resetLevels());
     }
 
     createHomeLevelButton() {
-        this.createHomeButtonElement(440, 582, 17, () => this.goToWelcomeScreen());
+        this.createHomeButtonElement(440, 582, 21, () => this.goToWelcomeScreen());
     }
 
     createClickLevelsButton() {
@@ -564,13 +706,24 @@ class LevelsScreen {
         document.body.appendChild(instructionsPanel);
     }
 
-    // Level loading approach that checks if level is unlocked
+    // Level loading with special handling for levels 13-16
     async loadLevel(levelNum) {
         try {
-            const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(levelNum);
-            if (!isUnlocked) {
-                this.showLockedLevelMessage(levelNum);
-                return;
+            // Special handling for levels 13-16
+            if (levelNum >= 13 && levelNum <= 16) {
+                const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+                if (!isLevel12Completed) {
+                    this.showLockedLevelMessage(levelNum);
+                    return;
+                }
+            } 
+            // Regular handling for levels 1-12
+            else if (levelNum <= 12) {
+                const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(levelNum);
+                if (!isUnlocked) {
+                    this.showLockedLevelMessage(levelNum);
+                    return;
+                }
             }
     
             // Update global and instance level tracking
@@ -634,7 +787,7 @@ class LevelsScreen {
     }
 
     async goToLevel4() {
-        await this.loadLevel(4); // Fixed from 0 to 4
+        await this.loadLevel(4); 
     }
 
     async goToLevel5() {
@@ -667,6 +820,22 @@ class LevelsScreen {
 
     async goToLevel12() {
         await this.loadLevel(12);
+    }
+
+    async goToLevel13() {
+        await this.loadLevel(13);
+    }
+
+    async goToLevel14() {
+        await this.loadLevel(14);
+    }
+
+    async goToLevel15() {
+        await this.loadLevel(15);
+    }
+
+    async goToLevel16() {
+        await this.loadLevel(16);
     }
 
     async goTogame() {
