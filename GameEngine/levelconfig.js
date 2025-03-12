@@ -745,16 +745,16 @@ class LevelConfig {
                         size: "SHORT"
                     }),
 
-                    new Platform({
-                        gameEngine: this.game,
-                        x: 1650,
-                        y: 475,
-                        speed: 0,
-                        moving: false,
-                        direction: null,
-                        reverseTime: 0,
-                        size: "SHORT"
-                    }),
+                    // new Platform({
+                    //     gameEngine: this.game,
+                    //     x: 1650,
+                    //     y: 475,
+                    //     speed: 0,
+                    //     moving: false,
+                    //     direction: null,
+                    //     reverseTime: 0,
+                    //     size: "SHORT"
+                    // }),
 
 
                     new Spike({
