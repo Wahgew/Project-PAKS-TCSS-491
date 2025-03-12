@@ -602,15 +602,205 @@ class LevelsScreen {
 
     //extra button
     createLevel13Button() {
-        this.createButton(750.1, 414, 13, () => this.goToLevel13());
+        //this.createButton(750.1, 414, 13, () => this.goToLevel13());
+        // Create a container div for the button
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "radiation-button-container";
+        buttonContainer.style.position = "absolute";
+        buttonContainer.style.width = "18px"; // Adjusted size for the hazard icon
+        buttonContainer.style.height = "18px";
+        buttonContainer.style.left = "749px"; // Keep original position
+        buttonContainer.style.top = "414px";
+        buttonContainer.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Create the radiation hazard button image
+        const button = document.createElement("img");
+        button.src = "./sprites/toxic.png"; // Update path to your radiation image
+        button.alt = "Radiation Level";
+        button.dataset.level = 13;
+        button.style.position = "absolute";
+        button.style.width = "100%";
+        button.style.height = "100%";
+        button.style.cursor = "pointer";
+        button.style.transition = "all 0.3s ease-in-out"; // Apply to all properties
+        button.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Force the initial state explicitly
+        button.style.transform = "scale(1)";
+        button.style.filter = "none";
+        
+        // Add hover effects with glow
+        button.addEventListener("mouseover", async () => {
+            const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+            if (this.isDebugModeEnabled() || isLevel12Completed) {
+                button.style.transform = "scale(1.05) rotate(0.1deg)";
+                button.style.filter = "drop-shadow(0 0 5px rgba(255, 0, 0, 0.8)) brightness(1.2)";
+                console.log("Radiation button hover activated");
+            }
+        });
+        
+        button.addEventListener("mouseout", () => {
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
+            console.log("Radiation button hover deactivated");
+        });
+        
+        // Add click handler
+        button.addEventListener("click", async () => {
+            console.log("Radiation button clicked");
+            const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+            if (this.isDebugModeEnabled() || isLevel12Completed) {
+                this.goToLevel13();
+            } else {
+                this.showLockedLevelMessage(13);
+            }
+        });
+        
+        // Store reference in levelButtons array for state management
+        this.levelButtons.push({
+            element: button,
+            level: 13,
+            lockOverlay: null // No lock overlay for special levels
+        });
+        
+        buttonContainer.appendChild(button);
+        this.levelsContainer.appendChild(buttonContainer);
+        
+        return button;
     }
 
     createLevel14Button() {
-        this.createButton(745, 445, 14, () => this.goToLevel14());
+        //this.createButton(745, 445, 14, () => this.goToLevel14());
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "toxic-button-container";
+        buttonContainer.style.position = "absolute";
+        buttonContainer.style.width = "25px"; // Adjusted size for the hazard icon
+        buttonContainer.style.height = "18px";
+        buttonContainer.style.left = "740px"; // Keep original position
+        buttonContainer.style.top = "445px";
+        buttonContainer.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Create the toxic hazard button image
+        const button = document.createElement("img");
+        button.src = "./sprites/redToxic.png"; // Update path to your toxic image
+        button.alt = "Toxic Level";
+        button.dataset.level = 14;
+        button.style.position = "absolute";
+        button.style.width = "100%";
+        button.style.height = "100%";
+        button.style.cursor = "pointer";
+        button.style.transition = "all 0.3s ease-in-out"; // Apply to all properties
+        button.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Force the initial state explicitly
+        button.style.transform = "scale(1)";
+        button.style.filter = "none";
+        
+        // Add hover effects with glow
+        button.addEventListener("mouseover", async () => {
+            const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+            if (this.isDebugModeEnabled() || isLevel12Completed) {
+                button.style.transform = "scale(1.05) rotate(0.1deg)";
+                button.style.filter = "drop-shadow(0 0 5px rgba(255, 255, 0, 0.8)) brightness(1.2)";
+                console.log("Toxic button hover activated");
+            }
+        });
+        
+        button.addEventListener("mouseout", () => {
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
+            console.log("Toxic button hover deactivated");
+        });
+        
+        // Add click handler
+        button.addEventListener("click", async () => {
+            console.log("Toxic button clicked");
+            const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+            if (this.isDebugModeEnabled() || isLevel12Completed) {
+                this.goToLevel14();
+            } else {
+                this.showLockedLevelMessage(14);
+            }
+        });
+        
+        // Store reference in levelButtons array for state management
+        this.levelButtons.push({
+            element: button,
+            level: 14,
+            lockOverlay: null // No lock overlay for special levels
+        });
+        
+        buttonContainer.appendChild(button);
+        this.levelsContainer.appendChild(buttonContainer);
+        
+        return button;
     }
 
     createLevel15Button() {
-        this.createButton(809, 445, 15, () => this.goToLevel15());
+        //this.createButton(809, 445, 15, () => this.goToLevel15());
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "biohazard-button-container";
+        buttonContainer.style.position = "absolute";
+        buttonContainer.style.width = "15px"; // Adjusted size for the hazard icon
+        buttonContainer.style.height = "15px";
+        buttonContainer.style.left = "812px"; // Keep original position
+        buttonContainer.style.top = "446px";
+        buttonContainer.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Create the hazard button image
+        const button = document.createElement("img");
+        button.src = "./sprites/hazard.png"; // Update path to your biohazard or another hazard image
+        button.alt = "Biohazard Level";
+        button.dataset.level = 15;
+        button.style.position = "absolute";
+        button.style.width = "100%";
+        button.style.height = "100%";
+        button.style.cursor = "pointer";
+        button.style.transition = "all 0.3s ease-in-out"; // Apply to all properties
+        button.style.zIndex = "5"; // Ensure it's above other elements
+        
+        // Force the initial state explicitly
+        button.style.transform = "scale(1)";
+        button.style.filter = "none";
+        
+        // Add hover effects with glow
+        button.addEventListener("mouseover", async () => {
+            const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+            if (this.isDebugModeEnabled() || isLevel12Completed) {
+                button.style.transform = "scale(1.05) rotate(0.1deg)";
+                button.style.filter = "drop-shadow(0 0 5px rgba(0, 255, 0, 0.8)) brightness(1.2)"; // Green glow to differentiate
+                console.log("Biohazard button hover activated");
+            }
+        });
+        
+        button.addEventListener("mouseout", () => {
+            button.style.transform = "scale(1)";
+            button.style.filter = "none";
+            console.log("Biohazard button hover deactivated");
+        });
+        
+        // Add click handler
+        button.addEventListener("click", async () => {
+            console.log("Biohazard button clicked");
+            const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+            if (this.isDebugModeEnabled() || isLevel12Completed) {
+                this.goToLevel15();
+            } else {
+                this.showLockedLevelMessage(15);
+            }
+        });
+        
+        // Store reference in levelButtons array for state management
+        this.levelButtons.push({
+            element: button,
+            level: 15,
+            lockOverlay: null // No lock overlay for special levels
+        });
+        
+        buttonContainer.appendChild(button);
+        this.levelsContainer.appendChild(buttonContainer);
+        
+        return button;
     }
 
     createLevel16Button() {
