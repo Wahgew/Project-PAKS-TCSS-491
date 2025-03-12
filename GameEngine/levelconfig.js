@@ -763,6 +763,9 @@ class LevelConfig {
                         length: 150,
                         color: 'red'
                     }),
+                ]
+
+            },
 				10: {
                 map: () => new drawMap(this.TILE_SIZE, this.game),
                 player: () => new Player(this.game, 50, 85), // Player starts in top left
