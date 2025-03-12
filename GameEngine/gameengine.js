@@ -97,7 +97,11 @@ class GameEngine {
                 { value: 9, label: "Floor 9" },
                 { value: 10, label: "Floor 10" },
                 { value: 11, label: "Floor 11" },
-                { value: 12, label: "Floor 12" }
+                { value: 12, label: "Floor 12" },
+                { value: 13, label: "Floor 13" },
+                { value: 14, label: "Floor 14" },
+                { value: 15, label: "Floor 15" },
+                { value: 16, label: "Floor 16" }
             ];
 
             levels.forEach(level => {
@@ -112,9 +116,23 @@ class GameEngine {
             label.textContent = "Level: ";
             label.style.marginRight = "5px";
 
+            // Create unlock all levels button
+            const unlockButton = document.createElement("button");
+            unlockButton.textContent = "Unlock All Levels";
+            unlockButton.style.marginTop = "10px";
+            unlockButton.style.padding = "5px";
+            unlockButton.style.display = "block";
+            unlockButton.style.width = "100%";
+            unlockButton.style.backgroundColor = "#4CAF50";
+            unlockButton.style.color = "white";
+            unlockButton.style.border = "none";
+            unlockButton.style.borderRadius = "4px";
+            unlockButton.style.cursor = "pointer";
+            
             // Add elements to debug menu
             debugMenu.appendChild(label);
             debugMenu.appendChild(levelSelect);
+            debugMenu.appendChild(unlockButton);
 
             // Add to document
             document.body.appendChild(debugMenu);
@@ -124,6 +142,12 @@ class GameEngine {
                 this.options.debugging = e.target.checked;
                 debugMenu.style.display = e.target.checked ? "block" : "none";
                 console.log("Debug mode:", this.options.debugging);
+                
+                // When debug mode is enabled, automatically unlock all levels
+                if (e.target.checked && window.LEVEL_PROGRESS) {
+                    window.unlockAllLevels();
+                    console.log("All levels unlocked via debug mode");
+                }
             });
 
             levelSelect.addEventListener("change", (e) => {
@@ -132,11 +156,28 @@ class GameEngine {
                 if (this.levelConfig) {
                     this.levelConfig.loadLevel(level);
                     this.levelConfig.currentLevel = level;
+                    window.CURRENT_GAME_LEVEL = level;
                 }
             });
+            
+            unlockButton.addEventListener("click", () => {
+                if (window.LEVEL_PROGRESS) {
+                    window.unlockAllLevels();
+                    console.log("All levels unlocked via button");
+                }
+            });
+            
             // Set initial value and display state
             levelSelect.value = this.levelConfig ? this.levelConfig.currentLevel : 1;
             debugMenu.style.display = this.options.debugging ? "block" : "none";
+            
+            // If debug mode is on at initialization, unlock all levels
+            if (this.options.debugging && window.LEVEL_PROGRESS) {
+                setTimeout(() => {
+                    window.unlockAllLevels();
+                    console.log("All levels unlocked on initialization");
+                }, 1000); // Delay to ensure LEVEL_PROGRESS is initialized
+            }
         }
     }
 

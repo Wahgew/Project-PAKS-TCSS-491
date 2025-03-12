@@ -16,6 +16,10 @@ class LevelProgressManager {
         this.setupLevelCompletionHook();
     }
 
+    isDebugModeEnabled() {
+        return document.getElementById("debug") && document.getElementById("debug").checked;
+    }
+
     // Initialize the IndexedDB database
     async initializeDB() {
         return new Promise((resolve, reject) => {
@@ -108,12 +112,21 @@ class LevelProgressManager {
 
     // Check if a level is unlocked
     async isLevelUnlocked(levelNumber) {
+        if (this.isDebugModeEnabled()) {
+            return true;
+        }
+        
         const progress = await this.getProgress();
         return progress.unlockedLevels.includes(Number(levelNumber));
     }
-
-    // Check if a level is completed
+    
+    // Override isLevelCompleted to consider debug mode
     async isLevelCompleted(levelNumber) {
+        if (this.isDebugModeEnabled() && levelNumber === 12) {
+            // In debug mode, consider level 12 always completed to unlock special levels
+            return true;
+        }
+        
         const progress = await this.getProgress();
         return progress.completedLevels.includes(Number(levelNumber));
     }
@@ -258,10 +271,23 @@ class LevelProgressManager {
 window.unlockAllLevels = async function() {
     if (window.LEVEL_PROGRESS) {
         try {
+            // First complete level 12 to unlock the special levels
+            await window.LEVEL_PROGRESS.completeLevel(12);
+            
+            // Then unlock all regular levels 1-12
             for (let i = 1; i <= 12; i++) {
                 await window.LEVEL_PROGRESS.unlockLevel(i);
+                // Also mark them as completed for visual indication
+                await window.LEVEL_PROGRESS.completeLevel(i);
             }
             
+            // And also unlock special levels 13-16
+            for (let i = 13; i <= 16; i++) {
+                // No need to formally "unlock" these as they're controlled by level 12 completion
+                console.log(`Special level ${i} is now accessible`);
+            }
+            
+            // Update the levels screen if it's visible
             const levelsScreen = document.getElementById("levelsScreen");
             if (levelsScreen && levelsScreen.style.display !== "none") {
                 for (let key in window) {
@@ -271,6 +297,8 @@ window.unlockAllLevels = async function() {
                     }
                 }
             }
+            
+            console.log("All levels have been unlocked, including special levels");
         } catch (error) {
             console.error("Error unlocking levels:", error);
         }

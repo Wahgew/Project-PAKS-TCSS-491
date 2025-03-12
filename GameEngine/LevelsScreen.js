@@ -12,9 +12,80 @@ class LevelsScreen {
             window.LEVEL_PROGRESS = new LevelProgressManager();
         }
         
+        // Setup debug mode integration
+        this.setupDebugModeIntegration();
+        
         console.log("LevelsScreen initialized with level:", this.currentLevel);
         
         this.createLevelsScreen();
+    }
+
+    setupDebugModeIntegration() {
+        // Check for existing debug indicator
+        let indicator = document.getElementById('debugModeIndicator');
+        
+        // Create debug indicator if it doesn't exist
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'debugModeIndicator';
+            indicator.style.position = 'fixed';
+            indicator.style.top = '10px';
+            indicator.style.right = '10px';
+            indicator.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
+            indicator.style.color = 'white';
+            indicator.style.padding = '5px 10px';
+            indicator.style.borderRadius = '4px';
+            indicator.style.fontFamily = 'Arial, sans-serif';
+            indicator.style.fontSize = '12px';
+            indicator.style.fontWeight = 'bold';
+            indicator.style.zIndex = '9999';
+            indicator.style.display = 'none';
+            indicator.textContent = 'DEBUG MODE';
+            
+            document.body.appendChild(indicator);
+        }
+        
+        // Get debug checkbox
+        const debugBox = document.getElementById("debug");
+        
+        if (debugBox) {
+            // Update debug indicator based on current state
+            if (debugBox.checked) {
+                indicator.style.display = 'block';
+                
+                // If debug mode is already enabled, unlock all levels
+                setTimeout(() => {
+                    if (window.LEVEL_PROGRESS) {
+                        window.unlockAllLevels();
+                    }
+                }, 500);
+            } else {
+                indicator.style.display = 'none';
+            }
+            
+            // Add event listener for debug checkbox changes
+            debugBox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    indicator.style.display = 'block';
+                    
+                    // Unlock all levels when debug mode is enabled
+                    if (window.LEVEL_PROGRESS) {
+                        window.unlockAllLevels().then(() => {
+                            // Update button states if level screen is visible
+                            if (this.levelsContainer.style.display !== "none") {
+                                this.updateLevelButtonStates();
+                            }
+                        });
+                    }
+                } else {
+                    indicator.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    isDebugModeEnabled() {
+        return document.getElementById("debug") && document.getElementById("debug").checked;
     }
 
     createLevelsScreen() {
@@ -89,6 +160,11 @@ class LevelsScreen {
             existingMessage.remove();
         }
         
+        // If in debug mode, ensure all levels are unlocked
+        if (this.isDebugModeEnabled() && window.LEVEL_PROGRESS) {
+            await window.unlockAllLevels();
+        }
+        
         // Update button states before showing the screen
         await this.updateLevelButtonStates();
         
@@ -155,8 +231,16 @@ class LevelsScreen {
             lockOverlay: level <= 12 ? lockOverlay : null // No lock overlay for levels 13+
         });
         
-        // Add hover effects to the button
+        // Add hover effects to the button with debug mode check
         button.addEventListener("mouseover", async () => {
+            // In debug mode, all buttons should have hover effects
+            if (this.isDebugModeEnabled()) {
+                button.style.transform = "scale(1.1) rotate(5deg)";
+                button.style.filter = "drop-shadow(0 0 7px black)";
+                return;
+            }
+            
+            // Standard hover behavior for non-debug mode
             // Navigation buttons (level 17+)
             if (level >= 17) {
                 button.style.transform = "scale(1.1) rotate(5deg)";
@@ -188,8 +272,15 @@ class LevelsScreen {
             button.style.filter = "none";
         });
         
-        // Add click handler with level unlock check
+        // Add click handler with debug mode check
         button.addEventListener("click", async () => {
+            // In debug mode, all levels are accessible
+            if (this.isDebugModeEnabled()) {
+                clickHandler();
+                return;
+            }
+            
+            // Regular click handling for non-debug mode
             // Navigation buttons (level 17+)
             if (level >= 17) {
                 clickHandler();
@@ -294,6 +385,22 @@ class LevelsScreen {
             const button = buttonObj.element;
             const level = buttonObj.level;
             const lockOverlay = buttonObj.lockOverlay;
+            
+            // In debug mode, all levels are accessible
+            if (this.isDebugModeEnabled()) {
+                // Always unlocked in debug mode
+                button.style.opacity = "1";
+                button.style.filter = "none";
+                button.style.cursor = "pointer";
+                
+                // Hide lock overlay in debug mode
+                if (lockOverlay) {
+                    lockOverlay.style.display = "none";
+                }
+                continue;
+            }
+            
+            // Regular non-debug mode behavior
             
             // Navigation buttons (level 17+)
             if (level >= 17) {
@@ -730,20 +837,23 @@ class LevelsScreen {
     // Level loading with special handling for levels 13-16
     async loadLevel(levelNum) {
         try {
-            // Special handling for levels 13-16
-            if (levelNum >= 13 && levelNum <= 16) {
-                const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
-                if (!isLevel12Completed) {
-                    this.showLockedLevelMessage(levelNum);
-                    return;
-                }
-            } 
-            // Regular handling for levels 1-12
-            else if (levelNum <= 12) {
-                const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(levelNum);
-                if (!isUnlocked) {
-                    this.showLockedLevelMessage(levelNum);
-                    return;
+            // If in debug mode, bypass the level unlock checks
+            if (!this.isDebugModeEnabled()) {
+                // Special handling for levels 13-16
+                if (levelNum >= 13 && levelNum <= 16) {
+                    const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
+                    if (!isLevel12Completed) {
+                        this.showLockedLevelMessage(levelNum);
+                        return;
+                    }
+                } 
+                // Regular handling for levels 1-12
+                else if (levelNum <= 12) {
+                    const isUnlocked = await window.LEVEL_PROGRESS.isLevelUnlocked(levelNum);
+                    if (!isUnlocked) {
+                        this.showLockedLevelMessage(levelNum);
+                        return;
+                    }
                 }
             }
     
