@@ -83,10 +83,23 @@ class LevelsScreen {
     }
 
     async show() {
+        // Force reset any old messages
+        let existingMessage = document.getElementById('lockedLevelMessage');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
         // Update button states before showing the screen
         await this.updateLevelButtonStates();
+        
+        // Always make sure we're using the correct current level
+        this.currentLevel = window.CURRENT_GAME_LEVEL || 1;
+        console.log("Showing levels screen with current level:", this.currentLevel);
+        
+        // Show the levels screen
         this.levelsContainer.style.display = "block";
     }
+    
 
     hide() {
         this.levelsContainer.style.display = "none";
@@ -189,6 +202,7 @@ class LevelsScreen {
                 if (isLevel12Completed) {
                     clickHandler();
                 } else {
+                    // Make sure we're using the instance method
                     this.showLockedLevelMessage(level);
                 }
                 return;
@@ -199,6 +213,7 @@ class LevelsScreen {
             if (isUnlocked) {
                 clickHandler();
             } else {
+                // Make sure we're using the instance method and force message display
                 this.showLockedLevelMessage(level);
             }
         });
@@ -209,28 +224,31 @@ class LevelsScreen {
 
     // Shows a message when player tries to access a locked level
     showLockedLevelMessage(level) {
-        // Create message element if it doesn't exist
-        let messageEl = document.getElementById('lockedLevelMessage');
-        if (!messageEl) {
-            messageEl = document.createElement('div');
-            messageEl.id = 'lockedLevelMessage';
-            messageEl.style.position = 'absolute';
-            messageEl.style.left = '50%';
-            messageEl.style.top = '520px';
-            messageEl.style.transform = 'translateX(-50%)';
-            messageEl.style.padding = '15px';
-            messageEl.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            messageEl.style.color = '#ff3333';
-            messageEl.style.fontFamily = "'Molot', sans-serif";
-            messageEl.style.borderRadius = '8px';
-            messageEl.style.textAlign = 'center';
-            messageEl.style.zIndex = '10';
-            messageEl.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-            messageEl.style.top = '65%';  // Moves it higher
-            messageEl.style.marginTop = '20px'; // Reduce extra spacing
-            this.levelsContainer.appendChild(messageEl);
+        // Remove any existing message first
+        let existingMessage = document.getElementById('lockedLevelMessage');
+        if (existingMessage) {
+            existingMessage.remove();
         }
-
+        
+        // Create a new message element
+        let messageEl = document.createElement('div');
+        messageEl.id = 'lockedLevelMessage';
+        messageEl.style.position = 'absolute';
+        messageEl.style.left = '50%';
+        messageEl.style.top = '520px';
+        messageEl.style.transform = 'translateX(-50%)';
+        messageEl.style.padding = '15px';
+        messageEl.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        messageEl.style.color = '#ff3333';
+        messageEl.style.fontFamily = "'Molot', sans-serif";
+        messageEl.style.borderRadius = '8px';
+        messageEl.style.textAlign = 'center';
+        messageEl.style.zIndex = '10';
+        messageEl.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        messageEl.style.top = '65%';  // Moves it higher
+        messageEl.style.marginTop = '20px'; // Reduce extra spacing
+        this.levelsContainer.appendChild(messageEl);
+    
         // Different message for levels 13-16
         let message;
         if (level >= 13 && level <= 16) {
@@ -238,7 +256,7 @@ class LevelsScreen {
         } else {
             message = `🔒Floor ${level} is locked! Complete previous floors first.`;
         }
-
+    
         // Update message content
         messageEl.textContent = message;
         messageEl.style.textTransform = 'uppercase';
@@ -262,6 +280,9 @@ class LevelsScreen {
             `;
             document.head.appendChild(style);
         }
+        
+        // Force the message to be visible
+        console.log("Showing locked message for level:", level);
     }
 
     // Update the visual state of all level buttons
