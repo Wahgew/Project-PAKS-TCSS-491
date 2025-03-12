@@ -343,7 +343,7 @@ class LevelsScreen {
         // Different message for levels 13-16
         let message;
         if (level >= 13 && level <= 16) {
-            message = `🔒Floor ${level} is locked! Complete Floor 12 first to unlock!`;
+            message = `🔒Floor ${level} is locked! Complete Floor 12 first to unlock the all mystery levels!`;
         } else {
             message = `🔒Floor ${level} is locked! Complete previous floors first.`;
         }
