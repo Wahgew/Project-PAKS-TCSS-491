@@ -71,6 +71,7 @@ class LevelConfig {
             // add second map example
 
             1: {
+                // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 1000, 830),
                 exitDoor: () => new exitDoor(this.game, 30, 95),
@@ -94,6 +95,7 @@ class LevelConfig {
             },
 
             2: {
+                // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 25, 700),
                 exitDoor: () => new exitDoor(this.game, 1800, 68),

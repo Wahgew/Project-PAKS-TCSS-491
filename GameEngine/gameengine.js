@@ -343,7 +343,7 @@ class GameEngine {
 
             // ADJUST THE PIXEL DISPLAY CURSOR
             let offsetX = 35; // Adjust to prevent overlap with cursor
-            let offsetY = 30;
+            let offsetY = 50;
 
             this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
         }

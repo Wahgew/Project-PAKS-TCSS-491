@@ -77,7 +77,7 @@ class LevelsScreen {
         this.createResetLevelButton();
         this.createHomeLevelButton();
         this.createClickLevelsButton();
-        
+
         // Append levels screen to body
         document.body.appendChild(this.levelsContainer);
     }
@@ -88,18 +88,18 @@ class LevelsScreen {
         if (existingMessage) {
             existingMessage.remove();
         }
-        
+
         // Update button states before showing the screen
         await this.updateLevelButtonStates();
-        
+
         // Always make sure we're using the correct current level
         this.currentLevel = window.CURRENT_GAME_LEVEL || 1;
         console.log("Showing levels screen with current level:", this.currentLevel);
-        
+
         // Show the levels screen
         this.levelsContainer.style.display = "block";
     }
-    
+
 
     hide() {
         this.levelsContainer.style.display = "none";
@@ -142,7 +142,7 @@ class LevelsScreen {
         
         // Add button to the container
         buttonContainer.appendChild(button);
-        
+
         // Only add lock overlay for levels 1-12
         if (level <= 12) {
             buttonContainer.appendChild(lockOverlay);
@@ -181,7 +181,7 @@ class LevelsScreen {
                 button.style.filter = "drop-shadow(0 0 7px black)";
             }
         });
-        
+
         button.addEventListener("mouseout", () => {
             // Reset effects for all buttons
             button.style.transform = "scale(1)";
@@ -195,7 +195,7 @@ class LevelsScreen {
                 clickHandler();
                 return;
             }
-            
+
             // Special levels 13-16
             if (level >= 13 && level <= 16) {
                 const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
@@ -229,7 +229,7 @@ class LevelsScreen {
         if (existingMessage) {
             existingMessage.remove();
         }
-        
+
         // Create a new message element
         let messageEl = document.createElement('div');
         messageEl.id = 'lockedLevelMessage';
@@ -248,7 +248,7 @@ class LevelsScreen {
         messageEl.style.top = '65%';  // Moves it higher
         messageEl.style.marginTop = '20px'; // Reduce extra spacing
         this.levelsContainer.appendChild(messageEl);
-    
+
         // Different message for levels 13-16
         let message;
         if (level >= 13 && level <= 16) {
@@ -256,11 +256,11 @@ class LevelsScreen {
         } else {
             message = `🔒Floor ${level} is locked! Complete previous floors first.`;
         }
-    
+
         // Update message content
         messageEl.textContent = message;
         messageEl.style.textTransform = 'uppercase';
-        
+
         // Show message with animation
         messageEl.style.animation = 'none';
         void messageEl.offsetWidth; // Trigger reflow
@@ -280,7 +280,7 @@ class LevelsScreen {
             `;
             document.head.appendChild(style);
         }
-        
+
         // Force the message to be visible
         console.log("Showing locked message for level:", level);
     }
@@ -289,7 +289,7 @@ class LevelsScreen {
     async updateLevelButtonStates() {
         // Check if level 12 is completed for special levels (13-16)
         const isLevel12Completed = await window.LEVEL_PROGRESS.isLevelCompleted(12);
-        
+
         for (const buttonObj of this.levelButtons) {
             const button = buttonObj.element;
             const level = buttonObj.level;
@@ -303,7 +303,7 @@ class LevelsScreen {
                 button.style.cursor = "pointer";
                 continue;
             }
-            
+
             // Special levels (13-16)
             if (level >= 13 && level <= 16) {
                 if (isLevel12Completed) {
@@ -418,13 +418,13 @@ class LevelsScreen {
         button.src = "./sprites/home.png";
         button.alt = `Home`;
         button.style.position = "absolute";
-        button.style.width = "144px"; 
+        button.style.width = "144px";
         button.style.height = "51px";
         button.style.cursor = "pointer";
         button.style.transition = "0.3s ease-in-out";
         button.style.left = `${x}px`;
         button.style.top = `${y}px`;
-        
+
         // Add hover effects with lighter glow
         button.addEventListener("mouseover", () => {
             button.style.transform = "scale(1.05) rotate(0.1deg)";
@@ -437,9 +437,9 @@ class LevelsScreen {
             button.style.transform = "scale(1)";
             button.style.filter = "none";
         });
-        
+
         button.addEventListener("click", clickHandler);
-        
+
         this.levelsContainer.appendChild(button);
         return button;
     }
@@ -511,12 +511,12 @@ class LevelsScreen {
         const buttonContainer = document.createElement("div");
         buttonContainer.className = "exit-button-container";
         buttonContainer.style.position = "absolute";
-        buttonContainer.style.width = "140px"; 
+        buttonContainer.style.width = "140px";
         buttonContainer.style.height = "52px";
         buttonContainer.style.left = "453px";
         buttonContainer.style.top = "122px";
         buttonContainer.style.zIndex = "5"; // Ensure it's above other elements
-        
+
         // Create the logo png button image
         const button = document.createElement("img");
         button.src = "./sprites/PAKS.png";
@@ -528,11 +528,11 @@ class LevelsScreen {
         button.style.cursor = "pointer";
         button.style.transition = "all 0.3s ease-in-out"; // Apply to all properties
         button.style.zIndex = "5"; // Ensure it's above other elements
-        
+
         // Force the initial state explicitly
         button.style.transform = "scale(1)";
         button.style.filter = "none";
-        
+
         // Add hover effects with lighter glow - simplify for testing
         button.addEventListener("mouseover", () => {
             // Remove the level check temporarily for testing
@@ -540,13 +540,13 @@ class LevelsScreen {
             button.style.filter = "drop-shadow(0 0 5px rgba(177, 177, 177, 0.8)) brightness(1.2)";
             console.log("Button hover activated"); // Add logging
         });
-        
+
         button.addEventListener("mouseout", () => {
             button.style.transform = "scale(1)";
             button.style.filter = "none";
             console.log("Button hover deactivated"); // Add logging
         });
-        
+
         // Add click handler
         button.addEventListener("click", async () => {
             console.log("Button clicked"); // Add logging
@@ -557,20 +557,20 @@ class LevelsScreen {
                 this.showLockedLevelMessage(16);
             }
         });
-        
+
         // Store reference in levelButtons array for state management
         this.levelButtons.push({
             element: button,
             level: 16,
             lockOverlay: null // No lock overlay for EXIT button
         });
-        
+
         buttonContainer.appendChild(button);
         this.levelsContainer.appendChild(buttonContainer);
-        
+
         return button;
     }
-    
+
     createnextButton() {
         this.createButton(153, 455, 17, () => {
             this.hide();
@@ -581,7 +581,7 @@ class LevelsScreen {
         });
     }
 
-    
+
     createbackButton() {
         this.createButton(234, 454.5, 18, () => this.goTogame());
     }
@@ -600,15 +600,15 @@ class LevelsScreen {
 
     createClickLevelsButton() {
         const button = document.createElement("img");
-        button.src = "./sprites/level.png"; 
+        button.src = "./sprites/level.png";
         button.alt = "Click Levels Here";
         button.style.position = "absolute";
-        button.style.width = "298px"; 
+        button.style.width = "298px";
         button.style.height = "54px";
         button.style.cursor = "pointer";
         button.style.left = "38px";
         button.style.top = "135px";
-        
+
         // Create CSS animation for pulsing/popping effect using Javascript
         if (!document.querySelector('#buttonAnimationStyle')) {
             const style = document.createElement('style');
@@ -626,17 +626,17 @@ class LevelsScreen {
             `;
             document.head.appendChild(style);
         }
-        
+
         // Apply the animation class
         button.classList.add('pulsing-button');
-    
+
         button.addEventListener("mouseout", () => {
             // Resume animation when not hovering
             button.style.animation = "";
             button.style.transform = "";
             button.style.filter = "";
         });
-        
+
         this.levelsContainer.appendChild(button);
         return button;
     }
@@ -837,7 +837,7 @@ class LevelsScreen {
     }
 
     async goToLevel4() {
-        await this.loadLevel(4); 
+        await this.loadLevel(4);
     }
 
     async goToLevel5() {

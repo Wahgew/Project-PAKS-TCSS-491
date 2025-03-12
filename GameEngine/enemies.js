@@ -74,18 +74,13 @@ class ProjectileLauncher {
 class Projectile {
     constructor(game, x, y, speed, direction) {
         Object.assign(this, {game, x, y, speed, direction});
-        // switch(direction) { // this is because the sprite is slightly misaligned temp.
-        //     case 'UP':
-        //         this.y += 9;
-        //     break;
-        // }
-        this.y += 9; // this is hardcoded right now, needs to adjust for direction, use switch case prolly.
 
-        this.height = 45;
-        this.width = 45;
+        this.height = 30;
+        this.width = 30;
+        this.spin = 0;
 
         // Load spritesheet
-        this.spritesheet = ASSET_MANAGER.getAsset("./sprites/tempproj3.png");
+        this.spritesheet = ASSET_MANAGER.getAsset("./sprites/proj_small.png");
 
         // Create animator with full sprite dimensions
         this.animator = new Animator(this.spritesheet, 0, 0, this.width, this.height, 1, 0.1);
@@ -141,7 +136,8 @@ class Projectile {
                 this.removeFromWorld = true;
             }
         });
-
+        this.spin += 360 * this.game.clockTick;
+        if (this.spin >= 720) this.spin = 0;
         this.updateBB();
     }
 
@@ -152,21 +148,7 @@ class Projectile {
             ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
 
-        // Draw the sprite
-        switch (this.direction) {
-            case 'UP':
-                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 90);
-                break;
-            case 'DOWN':
-                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 270);
-                break;
-            case 'RIGHT':
-                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, 180);
-                break;
-            case 'LEFT':
-                this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y);
-                break;
-        }
+        this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1, this.spin);
     }
 }
 
