@@ -103,6 +103,7 @@ class LevelConfig {
                     new Spike({gameEngine: this.game, x: 980, y: 573, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 980, y: 530, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new Spike({gameEngine: this.game, x: 1275, y: 360, speed: 50, moving: true, direction: 'LEFT', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 1625, y: 400, speed: 120, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
                     new BigBlock(this.game, 25, 25, 1375, 240),
                     new BigBlock(this.game, 800, 624, 1875, 875),
                 ]
@@ -115,6 +116,12 @@ class LevelConfig {
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
                     new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+                    new Spike({gameEngine: this.game, x: 525, y: 450, speed: 0, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 1750, y: 450, speed: 0, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 1375, y: 185, speed: 120, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 220, y: 200, speed: 120, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+
+
                     new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
                         moving: false,
                         direction: null,
@@ -463,7 +470,85 @@ class LevelConfig {
                     })
                 ]
             },
-            // add more levels below
+            10: {
+                map: () => new drawMap(this.TILE_SIZE, this.game),
+                player: () => new Player(this.game, 50, 85), // Player starts in top left
+                exitDoor: () => new exitDoor(this.game, 1750, 90, 3), // Exit door top right
+                hazards: () => [
+
+                    new BigBlock(this.game, 1000, 25, 1425, 400),
+                    
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 250,
+                        y: 600,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 850,
+                        y: 460,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 1225,
+                        y: 730,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1850,
+                        y: 600,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 325,
+                        shotdirec: "LEFT"
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1845,
+                        y: 750,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 4,
+                        projspd: 175,
+                        shotdirec: "LEFT"
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 30,
+                        y: 880,
+                        direction: 'HORIZONTAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 1840,
+                        color: 'red',
+                        glowColor: 'rgba(255, 0, 0, 0.7)', // More opaque for visibility
+                        width: 8,               // Increased width
+                        glowWidth: 12           // Increased glow for visibility
+                    })
+                ]
+
+            }
         };
 
         // If a valid level exists, call the function for that level, otherwise return null.
