@@ -463,6 +463,309 @@ class LevelConfig {
                     })
                 ]
             },
+
+            8: {
+                map: () => new drawMap(this.TILE_SIZE, this.game),
+                player: () => new Player(this.game, 50, 150),
+                exitDoor: () => new exitDoor(this.game, 1800, 193, 3),
+                hazards: () => [
+                    new Platform({
+                            gameEngine: this.game,
+                            x: 1140,
+                            y: 554,
+                            speed: 0,
+                            moving: false,
+                            direction: null,
+                            reverseTime: 0,
+                            size: "SHORT"
+                    }),
+
+                    new Spike({gameEngine: this.game, x: 1250, y: 120, speed: 120, moving: true, direction: null, tracking: true, reverseTime: 5.5}),
+
+                    new Lever( {
+                        gameEngine: this.game,
+                        x: 945,
+                        y: 550,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new Lever( {
+                        gameEngine: this.game,
+                        x: 90,
+                        y: 805,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new Lever( {
+                        gameEngine: this.game,
+                        x: 1800,
+                        y: 805,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 325,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 650,
+                        shotdirec: "DOWN"
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 800,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 650,
+                        shotdirec: "DOWN"
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1500,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 650,
+                        shotdirec: "DOWN"
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1230,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 650,
+                        shotdirec: "DOWN"
+                    }),
+                ]
+
+            },
+
+            9: {
+                map: () => new drawMap(this.TILE_SIZE, this.game),
+                player: () => new Player(this.game, 50, 150),
+                exitDoor: () => new exitDoor(this.game, 1650, 93, 4),
+                hazards: () => [
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 812,
+                        y: 556,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 980,
+                        y: 320,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1345,
+                        y: 175,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1650,
+                        y: 475,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+
+                    new Spike({
+                        gameEngine: this.game,
+                        x: 1767,
+                        y: 120,
+                        speed: 70,
+                        moving: true,
+                        direction: null,
+                        tracking: true,
+                        reverseTime: 0
+                    }),
+
+
+                    new Spike({
+                        gameEngine: this.game,
+                        x: 175,
+                        y: 645,
+                        speed: 80,
+                        moving: true,
+                        direction: "RIGHT",
+                        tracking: false,
+                        reverseTime: 2
+                    }),
+
+                    new Spike({
+                        gameEngine: this.game,
+                        x: 1833,
+                        y: 425,
+                        speed: 60,
+                        moving: false,
+                        direction: null,
+                        tracking: false,
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 333,
+                        y: 100,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 1777,
+                        y: 410,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 62,
+                        y: 800,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new Lever({
+                        gameEngine: this.game,
+                        x: 732,
+                        y: 300,
+                        speed: 0,
+                        moving: false,
+                        direction: "LEFT",
+                        reverseTime: 0
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 500,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 1.8,
+                        projspd: 250,
+                        shotdirec: "DOWN"
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1777,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 300,
+                        shotdirec: "DOWN"
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1080,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 1.5,
+                        projspd: 350,
+                        shotdirec: "DOWN"
+                    }),
+
+                    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 885,
+                        y: 25,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2.2,
+                        projspd: 280,
+                        shotdirec: "DOWN"
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 420,
+                        y: 750,
+                        direction: 'HORIZONTAL',
+                        flow: 'DOWN',
+                        length: 200,
+                        color: 'red'
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 25,
+                        y: 750,
+                        direction: 'HORIZONTAL',
+                        flow: 'DOWN',
+                        length: 150,
+                        color: 'red'
+                    }),
+
+                ]
+            }
             // add more levels below
         };
 
