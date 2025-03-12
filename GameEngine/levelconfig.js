@@ -71,7 +71,6 @@ class LevelConfig {
             // add second map example
 
             1: {
-                // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 1000, 830),
                 exitDoor: () => new exitDoor(this.game, 30, 95),
@@ -95,20 +94,21 @@ class LevelConfig {
             },
 
             2: {
-                // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 25, 700),
-                exitDoor: () => new exitDoor(this.game, 1800, 43),
+                exitDoor: () => new exitDoor(this.game, 1800, 68),
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 650, y: 430, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 350, y: 430, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
                     new Spike({gameEngine: this.game, x: 980, y: 573, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 980, y: 530, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1275, y: 360, speed: 50, moving: true, direction: 'LEFT', tracking: false, reverseTime: 3}),
                     new BigBlock(this.game, 25, 25, 1375, 240),
                     new BigBlock(this.game, 800, 624, 1875, 875),
                 ]
             },
 
             3: {
-                // replace with real second map
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 925, 700),
                 exitDoor: () => new exitDoor(this.game, 1190, 69, 1),
@@ -130,11 +130,15 @@ class LevelConfig {
             4: {
                 map: () => new drawMap(this.TILE_SIZE,this.game),
                 player: () => new Player(this.game, 90, 840),
-                exitDoor: () => new exitDoor(this.game, 1800, 117),
+                exitDoor: () => new exitDoor(this.game, 1450, 117),
                 hazards: () => [
                     //Beginning Spikes
                     new Spike({gameEngine: this.game, x: 60, y: 310, speed: 120, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 2}),
                     new Spike({gameEngine: this.game, x: 60, y: 645, speed: 120, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+
+                    // Falling Spikes
+                    new Spike({gameEngine: this.game, x: 500, y: 400, speed: 120, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 635, y: 825, speed: 120, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
 
                     //Corridor Spikes
                     new Spike({gameEngine: this.game, x: 890, y: 690, speed: 120, moving: true, direction: 'UP', tracking: false, reverseTime: 1}),
@@ -145,12 +149,20 @@ class LevelConfig {
                         moving: false,
                         direction: null,
                         reverseTime: 0,
-                        atkspd: 10,
-                        projspd: 50,
+                        atkspd: 5,
+                        projspd: 100,
                         shotdirec: "LEFT"}),
 
 
-                    new BigBlock(this.game, 25, 25, 425, 100),
+                    new BigBlock(this.game, 25, 25, 700, 125), // top left
+
+                    new BigBlock(this.game, 425, 750, 525, 875), // bottom mid
+
+                    new BigBlock(this.game, 1775, 775, 1875, 875), // bottom right
+
+                    new BigBlock(this.game, 1600, 25, 1875, 200), // top right
+
+                    new Spike({gameEngine: this.game, x: 1330, y: 250, speed: 120, moving: false, direction: 'RIGHT', tracking: false, reverseTime: 2}),
 
 
                     //Beginning platfrom
@@ -518,30 +530,23 @@ class LevelConfig {
     }
 
     loadNextLevel() {
-        if (this.currentLevel < 13) {
-            // Make sure any level completion UI is hidden before loading next level
-            if (this.game.levelUI) {
-                this.game.levelUI.hideLevelComplete();
-            }
+        this.currentLevel++;
 
-            // Increment the current level BEFORE loading it
-            const nextLevel = this.currentLevel + 1;
+        // Store current level in global variable for resume
+        window.CURRENT_GAME_LEVEL = this.currentLevel;
 
-            // Add a small delay to ensure UI is properly cleared
-            setTimeout(() => {
-                console.log(`Loading next level: ${nextLevel}`);
+        // Check if we can use elevator transition
+        if (window.ELEVATOR_TRANSITION) {
+            console.log("Using elevator transition for next level:", this.currentLevel);
 
-                // Update currentLevel before loading the level
-                this.currentLevel = nextLevel;
-
-                // Now load the updated level
-                this.loadLevel(nextLevel);
-
-                // Play a random game track for the new level
-                if (window.AUDIO_MANAGER) {
-                    window.AUDIO_MANAGER.playGameMusic();
-                }
-            }, 100);
+            window.ELEVATOR_TRANSITION.transition(() => {
+                console.log("Loading level after transition:", this.currentLevel);
+                this.loadLevel(this.currentLevel);
+            });
+        } else {
+            // Fallback without transition
+            console.log("No transition available, loading next level directly:", this.currentLevel);
+            this.loadLevel(this.currentLevel);
         }
     }
 

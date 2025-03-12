@@ -7,7 +7,6 @@ class LevelUI {
         this.newBestTimeMsg = '';
         this.cachedBestTime = '--:--:--';  // Default value
         this.levelComplete = false;
-        this.clickHandlerAdded = false;
 
         // Add button states for hover effects
         this.buttonStates = {
@@ -50,15 +49,29 @@ class LevelUI {
                 // First hide the current UI
                 this.hideLevelComplete();
 
-                // Clean up game state
-                this.cleanupGameState();
+                if (window.ELEVATOR_TRANSITION) {
+                    // Use the elevator transition
+                    window.ELEVATOR_TRANSITION.transition(() => {
+                        // Clean up game state
+                        this.cleanupGameState();
 
-                // Get welcome screen and show it
-                const welcomeScreen = document.getElementById("welcomeScreen");
-                if (welcomeScreen) {
-                    welcomeScreen.style.display = "flex";
+                        // Get welcome screen and show it
+                        const welcomeScreen = document.getElementById("welcomeScreen");
+                        if (welcomeScreen) {
+                            welcomeScreen.style.display = "flex";
+                        } else {
+                            new WelcomeScreen(startGame, showLevels);
+                        }
+                    });
                 } else {
-                    new WelcomeScreen(startGame, showLevels);
+                    // Fallback without transition
+                    this.cleanupGameState();
+                    const welcomeScreen = document.getElementById("welcomeScreen");
+                    if (welcomeScreen) {
+                        welcomeScreen.style.display = "flex";
+                    } else {
+                        new WelcomeScreen(startGame, showLevels);
+                    }
                 }
                 break;
 
@@ -66,49 +79,83 @@ class LevelUI {
                 // First hide the current UI
                 this.hideLevelComplete();
 
-                // Clean up game state
-                this.cleanupGameState();
+                if (window.ELEVATOR_TRANSITION) {
+                    // Use the elevator transition
+                    window.ELEVATOR_TRANSITION.transition(() => {
+                        // Clean up game state
+                        this.cleanupGameState();
 
-                // Show levels screen
-                const levelsScreen = new LevelsScreen();
-                levelsScreen.show();
+                        // Show levels screen
+                        const levelsScreen = new LevelsScreen();
+                        levelsScreen.show();
+                    });
+                } else {
+                    // Fallback without transition
+                    this.cleanupGameState();
+                    const levelsScreen = new LevelsScreen();
+                    levelsScreen.show();
+                }
                 break;
 
             case 'continue':
                 console.log("Continue action, death:", this.isDisplayingDeath, "complete:", this.isDisplayingComplete);
 
-                // If player is dead, restart current level
+                // If player is dead, restart current level (no transition)
                 if (this.isDisplayingDeath) {
                     console.log("Restarting level from death screen");
                     this.restartLevel();
                 }
-                // If level is complete, go to next level
+                // If level is complete, go to next level (with transition)
                 else if (this.isDisplayingComplete) {
                     console.log("Loading next level from complete screen");
                     this.hideLevelComplete();
 
                     if (this.gameEngine && this.gameEngine.levelConfig) {
-                        this.gameEngine.levelConfig.loadNextLevel();
+                        // Check if elevator transition is available
+                        if (window.ELEVATOR_TRANSITION) {
+                            console.log("Using elevator transition for next level");
+
+                            // Get the next level before transition
+                            const nextLevel = this.gameEngine.levelConfig.currentLevel + 1;
+                            window.CURRENT_GAME_LEVEL = nextLevel; // Update global tracking
+
+                            // Use transition with callback
+                            window.ELEVATOR_TRANSITION.transition(() => {
+                                console.log("Loading next level after transition");
+                                // Load the next level directly after transition
+                                this.gameEngine.levelConfig.loadLevel(nextLevel);
+                            });
+                        } else {
+                            // Fallback without transition
+                            console.log("No transition available, loading next level directly");
+                            this.gameEngine.levelConfig.loadNextLevel();
+                        }
                     }
                 }
                 break;
         }
     }
 
+
     // Helper method to clean up game state before transitioning
+    // Updated cleanupGameState method for LevelUI.js
     cleanupGameState() {
-        // Stop the game engine
+        // Stop the game engine properly
         if (this.gameEngine) {
             // Pause the game
             this.gameEngine.isPaused = true;
 
-            // Clear all entities and reset the game state
-            this.gameEngine.entities = [];
+            // Stop the running flag - CRITICAL for preventing the black screen
+            this.gameEngine.running = false;
 
             // Stop the timer if it exists
             if (this.gameEngine.timer) {
                 this.gameEngine.timer.stop();
+                this.gameEngine.timer.isRunning = false;
             }
+
+            // Clear all entities and reset the game state
+            this.gameEngine.entities = [];
 
             // Clear the canvas
             if (this.gameEngine.ctx) {
@@ -121,6 +168,10 @@ class LevelUI {
             if (gameCanvas) {
                 gameCanvas.style.display = 'none';
             }
+
+            // Reset important properties
+            this.gameEngine.Player = null;
+            this.gameEngine.entityCount = 0;
         }
 
         // Stop game music and play menu music
@@ -133,6 +184,11 @@ class LevelUI {
         if (window.GAME_MENU) {
             window.GAME_MENU.hide();
         }
+
+        // Reset global variables to ensure a clean state
+        window.gameEngine = null;
+
+        console.log("Game state cleaned up, engine stopped");
     }
 
     // New method to update the best time cache
@@ -251,7 +307,7 @@ class LevelUI {
             }
         }
 
-        // Load the current level
+        // Load the current level with no transition
         if (this.gameEngine && this.gameEngine.levelConfig) {
             console.log("Loading level:", this.gameEngine.levelConfig.currentLevel);
             this.gameEngine.levelConfig.loadLevel(this.gameEngine.levelConfig.currentLevel);
@@ -737,13 +793,12 @@ class LevelUI {
             continue: { hover: false }
         };
 
-        // Reset click handler flag so it will be reattached when needed
-        this.clickHandlerAdded = false;
-
-        // If we have a stored click handler, remove it
-        if (this.clickHandler && this.gameEngine && this.gameEngine.ctx) {
+        // Remove click handler if it exists
+        if (this.clickHandler && this.gameEngine && this.gameEngine.ctx && this.gameEngine.ctx.canvas) {
             this.gameEngine.ctx.canvas.removeEventListener('click', this.clickHandler);
             this.clickHandler = null;
         }
+
+        console.log("LevelUI state reset");
     }
 }

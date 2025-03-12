@@ -1,6 +1,7 @@
 class WelcomeScreen {
     constructor(startCallback, levelsCallback, aboutCallback) {
-        this.startCallback = startCallback;
+        // We'll ignore the startCallback and use our own implementation
+
         this.levelsCallback = levelsCallback;
         this.aboutCallback = aboutCallback;
         this.createWelcomeScreen();
@@ -44,11 +45,11 @@ class WelcomeScreen {
         buttonContainer.style.justifyContent = "center";
         buttonContainer.style.alignItems = "center";
 
-        // Define buttons
+        // Define buttons - replace startCallback with goToGame
         const buttons = [
-            { src: "./sprites/start.png", callback: this.startCallback, width: "150px" },
+            { src: "./sprites/start.png", callback: () => this.goToGame(), width: "150px" },
             { src: "./sprites/aboutme.png", callback: this.aboutCallback, width: "120px" },
-            { src: "./sprites/levels.png", callback: this.levelsCallback, width: "150px" }
+            { src: "./sprites/levels.png", callback: () => this.goToLevels(), width: "150px" }
         ];
 
         // Create buttons
@@ -76,6 +77,7 @@ class WelcomeScreen {
                 });
             } else {
                 buttonImg.addEventListener("click", () => {
+                    // Just hide welcome screen, transition handles the rest
                     this.hideWelcomeScreen();
                     button.callback();
                 });
@@ -86,6 +88,159 @@ class WelcomeScreen {
 
         this.welcomeContainer.appendChild(buttonContainer);
         document.body.appendChild(this.welcomeContainer);
+    }
+
+    // goToGame method to use elevator transition properly
+    goToGame() {
+        // Hide welcome screen first
+        this.hideWelcomeScreen();
+
+        // Force a more thorough cleanup
+        emergencyCleanup();
+
+        // Reset the canvas explicitly to ensure it's visible
+        resetGameCanvas();
+
+        // Ensure the correct level is resumed
+        let levelToLoad = window.CURRENT_GAME_LEVEL || 1;
+        console.log("Starting/resuming game at level:", levelToLoad);
+
+        // Now check for elevator transition
+        if (window.ELEVATOR_TRANSITION) {
+            console.log("Using elevator transition to start game");
+            // Check if ASSET_MANAGER is ready
+            if (ASSET_MANAGER && ASSET_MANAGER.successCount >= 2) {
+                // Assets are loaded, we can safely use the transition
+                window.ELEVATOR_TRANSITION.transition(() => {
+                    // Force render a loading screen
+                    const canvas = document.getElementById("gameWorld");
+                    if (canvas) {
+                        const ctx = canvas.getContext("2d");
+                        if (ctx) {
+                            ctx.fillStyle = '#333';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.fillStyle = '#fff';
+                            ctx.font = '24px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('Loading game...', canvas.width/2, canvas.height/2);
+                        }
+                    }
+                    this.startOrResumeGame(levelToLoad);
+                });
+            } else {
+                console.log("Assets not fully loaded yet, using fallback method");
+                // Create a simple visual transition effect instead
+                this.createSimpleTransition(() => {
+                    this.startOrResumeGame(levelToLoad);
+                });
+            }
+        } else {
+            console.log("No elevator transition available, starting game directly");
+            // Fallback without transition
+            this.startOrResumeGame(levelToLoad);
+        }
+    }
+
+// Create a simple transition when elevator transition isn't ready
+    createSimpleTransition(callback) {
+        // Create a simple overlay
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+        overlay.style.transition = 'background-color 0.5s ease-in-out';
+        overlay.style.zIndex = '9999';
+        document.body.appendChild(overlay);
+
+        // Play door sound if available
+        try {
+            const doorSound = new Audio('./sounds/elevator-ding.mp3');
+            doorSound.volume = 0.3;
+            doorSound.play().catch(e => console.log("Could not play door sound:", e));
+        } catch (error) {
+            console.log("Could not play sound:", error);
+        }
+
+        // Fade to black
+        setTimeout(() => {
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+        }, 100);
+
+        // Execute callback after fade is complete
+        setTimeout(() => {
+            if (callback) callback();
+
+            // Fade back in
+            setTimeout(() => {
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+
+                // Remove overlay when done
+                setTimeout(() => {
+                    document.body.removeChild(overlay);
+                }, 600);
+            }, 100);
+        }, 700);
+    }
+
+    // Modified to use elevator transition
+    goToLevels() {
+        // Hide welcome screen
+        this.hideWelcomeScreen();
+
+        if (window.ELEVATOR_TRANSITION) {
+            console.log("Using elevator transition to show levels");
+            window.ELEVATOR_TRANSITION.transition(() => {
+                // After transition closes, show levels screen
+                const levelsScreen = new LevelsScreen();
+                levelsScreen.show();
+            });
+        } else {
+            console.log("No elevator transition available, showing levels directly");
+            // Fallback without transition
+            this.levelsCallback();
+        }
+    }
+
+    // Helper method to start or resume the game
+    startOrResumeGame(levelToLoad) {
+        // Always make sure the canvas is visible
+        const gameCanvas = document.getElementById("gameWorld");
+        if (gameCanvas) {
+            gameCanvas.style.display = "block";
+        }
+
+        // Check if we need to start the game fresh
+        if (!window.gameEngine) {
+            console.log("No existing game engine, starting fresh with level:", levelToLoad);
+            window.targetLevelToLoad = levelToLoad;
+            startGame();
+        } else {
+            console.log("Using existing game engine, resuming at level:", levelToLoad);
+            // Resume with existing game engine
+            if (window.gameEngine.levelConfig) {
+                window.gameEngine.levelConfig.currentLevel = levelToLoad;
+                window.gameEngine.levelConfig.loadLevel(levelToLoad);
+
+                // Switch music back to game music
+                if (window.AUDIO_MANAGER) {
+                    window.AUDIO_MANAGER.stopMenuMusic();
+                    window.AUDIO_MANAGER.playGameMusic();
+                }
+
+                // Make sure the game is running
+                if (!window.gameEngine.running) {
+                    window.gameEngine.running = true;
+                    window.gameEngine.start();
+                }
+            } else {
+                console.error("Game engine exists but no level config found, starting fresh");
+                window.targetLevelToLoad = levelToLoad;
+                startGame();
+            }
+        }
     }
 
     createAboutContent() {
@@ -140,7 +295,7 @@ class WelcomeScreen {
         title.style.margin = "0";
         title.style.fontSize = "32px";
         title.style.fontFamily = "Molot, sans-serif";
-        title.style.fontWeight = "normal"; 
+        title.style.fontWeight = "normal";
         header.appendChild(title);
 
         // Add close button.

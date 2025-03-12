@@ -38,8 +38,25 @@ class Lever {
         // Determine flip state based on direction parameter
         this.isFlipped = (this.direction === 'LEFT');
 
+        // Check for player collision and play sound once
+        if (this.collected && !this.soundPlayed) {
+            this.soundPlayed = true;
+            this.playLeverSound();
+        }
+
         this.updateBB();
     }
+
+    playLeverSound() {
+        if (window.AUDIO_MANAGER) {
+            const leverSound = new Audio('./sounds/lever.mp3');
+            leverSound.volume = window.AUDIO_MANAGER.isMuted ? 0 : window.AUDIO_MANAGER.volume;
+            leverSound.play().catch(error => {
+                console.error("Error playing lever sound:", error);
+            });
+        }
+    }
+
 
     draw(ctx) {
         if (this.game.options.debugging) {
