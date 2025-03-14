@@ -1,3 +1,5 @@
+// COMPLETELY REPLACE YOUR PLATFORM CLASS WITH THIS VERSION
+
 class Platform {
     constructor({gameEngine, x, y, speed, moving, direction, reverseTime, size}) {
         this.game = gameEngine;
@@ -7,6 +9,9 @@ class Platform {
         this.moving = false;
         this.tracking = null;
         Object.assign(this, {x, y, speed, moving, direction, reverseTime, size});
+
+        // Keep track if player is riding this specific platform
+        this.playerRiding = false;
 
         switch (this.size){
             case 'SHORT':
@@ -51,102 +56,99 @@ class Platform {
         // Handle player on platform
         const player = this.game.Player;
         if (player && !player.dead) {
-            // Create a slightly larger bounding box for more reliable collision detection
-            const landingBB = new BoundingBox(
-                this.BB.left - 5,    // Expand left
-                this.BB.top - 5,     // Expand top a bit to catch landing players
-                this.BB.width + 10,  // Expand width on both sides
-                10                   // Short height just to detect landings
-            );
+            // Is player currently riding this specific platform?
+            if (player.standingPlatform === this) {
+                this.playerRiding = true;
 
-            // Check if player is landing on the platform
-            const playerFalling = player.velocity.y > 0;
-            const playerAbovePlatform = player.lastBB && player.lastBB.bottom <= this.lastBB.top;
-            const playerOverlapsPlatform = player.BB.right > this.BB.left && player.BB.left < this.BB.right;
-
-            if (playerFalling && playerAbovePlatform && playerOverlapsPlatform) {
-                // Player is falling from above the platform
-                if (player.BB.collide(landingBB) && !this.game.keys['s']) {
-                    // Land on platform unless S is pressed
-                    player.isGrounded = true;
-                    player.velocity.y = 0;
-                    // Position player on top of platform
-                    player.y = this.BB.top - player.height;
-                    player.updateBB();
-                }
-            }
-
-            // Check if player is standing on this platform
-            if (player.isGrounded && player.BB.bottom <= this.BB.top + 5 &&
-                player.BB.right > this.BB.left && player.BB.left < this.BB.right) {
-
-                // Only allow dropping through if S is pressed
+                // Allow dropping through with S
                 if (this.game.keys['s']) {
-                    player.isGrounded = false;
-                } else {
-                    // Move player with platform
-                    player.x += deltaX;
-                    // Only adjust Y if platform is moving up
-                    if (deltaY < 0) {
-                        player.y += deltaY;
+                    // This prevents the issue when walking from tiles to platform with S held
+                    const justPressedS = this.game.keys['s'] && !player.previousSKeyState;
+
+                    // If S was just pressed OR player has been on this platform for a while and is pressing S
+                    if (justPressedS || (player.platformTime > 0.1 && this.game.keys['s'])) {
+                        player.isGrounded = false;
+                        player.groundedOn = null;
+                        player.standingPlatform = null;
+                        player.platformTime = 0; // Reset platform time
+                        player.velocity.y = 5; // Small downward velocity
+                        this.playerRiding = false;
+                    } else if (this.game.keys['s']) {
+                        // S is held but we haven't been on platform long enough
+                        // Just track the time without dropping
+                        player.platformTime += this.game.clockTick;
                     }
-                    // Make sure player stays on top
+                } else {
+                    // Not pressing S, ensure platformTime is incremented
+                    player.platformTime += this.game.clockTick;
+
+                    // Rest of your original code for moving player with platform...
+                    player.x += deltaX;
+                    if (deltaY < 0) player.y += deltaY;
+
+                    // IMPORTANT: Set exact position and zero out velocity to prevent stuttering
                     player.y = this.BB.top - player.height;
+                    player.velocity.y = 0; // Force zero vertical velocity
+
+                    // Update player's bounding box with new position
                     player.updateBB();
+
+                    // Check if player walked off platform edges
+                    if (player.BB.right <= this.BB.left || player.BB.left >= this.BB.right) {
+                        player.isGrounded = false;
+                        player.groundedOn = null;
+                        player.standingPlatform = null;
+                        player.platformTime = 0; // Reset platform time
+                        player.velocity.y = 1; // Small initial falling velocity
+                        this.playerRiding = false;
+                    }
                 }
             }
+            // Check if player should land on this platform
+            else if (!player.isGrounded && player.velocity.y > 0) {
+                const fromAbove = player.lastBB && player.lastBB.bottom <= this.BB.top + 2; // Even tighter tolerance
+                const horizontalOverlap = player.BB.right > this.BB.left && player.BB.left < this.BB.right;
+                const closeEnough = this.BB.top - player.BB.bottom < 5; // Smaller tolerance
+
+                if (fromAbove && horizontalOverlap && closeEnough && !this.game.keys['s']) {
+                    // Only land if we're not currently on another platform or this is closer
+                    if (!player.standingPlatform ||
+                        (this.BB.top - player.BB.bottom) < (player.standingPlatform.BB.top - player.BB.bottom)) {
+
+                        player.isGrounded = true;
+                        player.groundedOn = 'platform';
+                        player.standingPlatform = this;
+                        player.velocity.y = 0; // Force zero vertical velocity
+                        player.y = this.BB.top - player.height; // Exact position
+                        player.updateBB();
+                        this.playerRiding = true;
+                    }
+                }
+            }
+        } else {
+            // Player is dead or not existing
+            this.playerRiding = false;
         }
     }
 
     draw(ctx) {
         if (this.game.options.debugging) {
-            // Draw debug box
-            ctx.strokeStyle = 'red';
-            ctx.strokeRect(this.x, this.y, this.width, this.height);
+            // Draw bounding box
+            ctx.strokeStyle = this.playerRiding ? 'green' : 'red';
+            ctx.strokeRect(this.BB.left, this.BB.top, this.BB.right - this.BB.left, this.BB.bottom - this.BB.top);
 
-            // Draw landing detection box
+            // Draw top collision area to make sure it's not extending too high
             ctx.strokeStyle = 'blue';
-            ctx.strokeRect(this.x - 5, this.y - 5, this.width + 10, 10);
+            ctx.strokeRect(this.BB.left, this.BB.top - 5, this.BB.right - this.BB.left, 10);
+
+            // Show if player is riding
+            if (this.playerRiding) {
+                ctx.fillStyle = 'green';
+                ctx.fillText("PLAYER RIDING", this.x + 10, this.y - 10);
+            }
         }
 
         // Draw the sprite
         this.animator.drawFrame(this.game.clockTick, ctx, this.x, this.y, 1);
     }
 }
-
-/**
- * Update movement for if enemy entity is moving but !tracking.
- * @param {gameEngine} game 
- * @param {Platform} object
- */
-function updateMovement(game, object) {
-    // Check if object is moving, and tracking is either undefined or false
-    if (object.moving && (object.tracking === null || !object.tracking)) {
-        switch (object.direction) {
-            case 'UP':
-                if (!object.reverse) object.velocity.y = -object.speed; // Moving up (negative y)
-                else object.velocity.y = object.speed; // Moving down (positive y)
-                break;
-            case 'DOWN':
-                if (!object.reverse) object.velocity.y = object.speed; // Moving down (positive y)
-                else object.velocity.y = -object.speed; // Moving up (negative y)
-                break;
-            case 'LEFT':
-                if (!object.reverse) object.velocity.x = -object.speed; // Moving left (negative x)
-                else object.velocity.x = object.speed; // Moving right (positive x)
-                break;
-            case 'RIGHT':
-                if (!object.reverse) object.velocity.x = object.speed; // Moving right (positive x)
-                else object.velocity.x = -object.speed; // Moving left (negative x)
-                break;
-        }
-
-        // Common code for all directions
-        if (object.time >= object.reverseTime) {
-            object.time = 0;
-            object.reverse = !object.reverse;
-        }
-        // Use the clockTick property of the engine
-        object.time += game.clockTick;
-    }
-}   

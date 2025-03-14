@@ -57,10 +57,14 @@ class Player {
         this.deathAnimation = null;
         this.win = false;
         this.isGrounded = true;
+        this.groundedOn = null; // 'tile' or entity (such as platform or big block)
+        this.standingPlatform = null; // Reference to the specific platform player is standing on
         this.gravity = 2000;
         this.levers = 0;
         this.previousJumpButtonState = false;
         this.jumpInputConsumed = false;
+        this.previousSKeyState = false; // Track previous S key state
+        this.platformTime = 0;          // Track time spent on current platform
 
         this.velocity = {x: 0, y: 0};
 
@@ -201,6 +205,9 @@ class Player {
             this.jumpInputConsumed = false;
         }
         this.previousJumpButtonState = jumpKeyPressed;
+        // Track S key state changes
+        // Update at the end of your update method
+        this.previousSKeyState = this.game.keys['s'];
 
         // Update BoundingBoxes
         this.updateLastBB();
@@ -213,12 +220,25 @@ class Player {
                 that.kill();
             } else if (entity.BB && (entity instanceof Spike || entity instanceof GlowingLaser) && that.BB.collide(entity.BB)) {
                 that.kill();
-            } else if (entity.BB && entity instanceof Platform && that.BB.collide(entity.BB) && that.velocity.y > 0 && (that.lastBB.bottom) <= entity.BB.top + 5) {
-                that.isGrounded = true;
-                if (!that.game.keys['s']) { // allow player to jump off
-                    that.velocity.y = 0;
-                    that.BB.bottom = entity.BB.top; // lock bounding box position
-                    that.y = entity.BB.top - that.BB.height;
+            } else if (entity.BB && entity instanceof Platform && that.BB.collide(entity.BB)) {
+                // The actual platform landing logic is now handled in the Platform class
+                // This section now just handles interactions that don't involve landing on the platform
+
+                // If platform is moving up and pushing player into ceiling
+                if (entity.velocity && entity.velocity.y < 0 && that.isGrounded && that.standingPlatform === entity) {
+                    // Check for ceiling collision
+                    const ceilingCheck = that.map.checkCollisions({
+                        BB: new BoundingBox(that.x, that.y - 5, that.width, that.height),
+                        x: that.x,
+                        y: that.y - 5,
+                        width: that.width,
+                        height: that.height
+                    });
+
+                    if (ceilingCheck.collides) {
+                        // Handle ceiling collision - player gets squished
+                        that.kill();
+                    }
                 }
             } else if (entity.BB && entity instanceof Lever && that.BB.collide(entity.BB) && !entity.collected) {
                 that.levers++;
@@ -272,15 +292,31 @@ class Player {
         this.updateHorizontalMovement(TICK, MIN_WALK, MAX_WALK, MAX_RUN, ACC_WALK, ACC_RUN, ACC_AIR, DEC_REL, DEC_SKID, DEC_SLIDE);
 
         // Jump input handling
-        if ((this.game.keys[' '] || this.game.keys['w'] || this.jumpBufferTimer > 0) && this.isGrounded 
-            && this.state !== this.STATES.CROUCHING && !this.jumpInputConsumed) {
+        if ((this.game.keys[' '] || this.game.keys['w'] || this.jumpBufferTimer > 0) &&
+            this.isGrounded && this.state !== this.STATES.CROUCHING && !this.jumpInputConsumed) {
+
+            //console.log("Player initiating jump!");
+
+            // MOST IMPORTANT: First clear platform reference BEFORE applying jump velocity
+            if (this.standingPlatform) {
+                const oldPlatform = this.standingPlatform;
+                this.standingPlatform = null;
+                oldPlatform.playerRiding = false;
+            }
+
+            // Update state AFTER clearing platform
+            this.isGrounded = false;
+            this.groundedOn = null;
+
+            // NOW apply jump velocity after all platform links are severed
             this.velocity.y = -MAX_JUMP;
             this.state = this.STATES.JUMPING;
-            this.isGrounded = false;
             this.jumpRelease = false;
             this.canWallJump = false;
-            this.jumpBufferTimer = 0; // Reset buffer after using the jump
-            this.jumpInputConsumed = true; // Mark this input as consumed
+
+            // Reset jump buffer and mark input as consumed
+            this.jumpBufferTimer = 0;
+            this.jumpInputConsumed = true;
         }
 
         // wall jump
@@ -376,7 +412,18 @@ class Player {
         if (!jumpKeyPressed) {
             this.jumpInputConsumed = false;
         }
-        
+
+        if (this.standingPlatform) {
+            this.isGrounded = true;
+            if (Math.abs(this.velocity.x) < 20) {
+                this.state = this.STATES.IDLE;
+            } else if (this.game.keys['shift'] && (this.game.keys['d'] || this.game.keys['a'])) {
+                this.state = this.STATES.RUNNING;
+            } else {
+                this.state = this.STATES.WALKING;
+            }
+        }
+
         // Update state based on movement and keys
         this.updateState();
 
@@ -384,7 +431,13 @@ class Player {
         this.checkWallStickingState();
 
         // Apply gravity
-        this.velocity.y += this.gravity * TICK;
+        if (!this.standingPlatform) {
+            // Apply gravity
+            this.velocity.y += this.gravity * TICK;
+        } else {
+            // Force zero velocity when on platform
+            this.velocity.y = 0;
+        }
 
         // Apply max velocities
         this.applyMaxVelocities(MAX_WALK, MAX_RUN, MAX_FALL);
@@ -538,6 +591,28 @@ class Player {
 
     // Handles collisions and movement - TICK is time elapsed since last update
     handleCollisions(TICK) {
+        // Reset groundedOn platform if we're not touching the platform anymore
+        // This is a more reliable check than just checking velocity
+        if (this.groundedOn === 'platform') {
+            let stillOnPlatform = false;
+
+            // Check if we're still above any platform
+            this.game.entities.forEach(entity => {
+                if (entity instanceof Platform) {
+                    if (this.BB.right > entity.BB.left + 5 &&
+                        this.BB.left < entity.BB.right - 5 &&
+                        this.BB.bottom <= entity.BB.top + 5) {
+                        stillOnPlatform = true;
+                    }
+                }
+            });
+
+            if (!stillOnPlatform) {
+                this.isGrounded = false;
+                this.groundedOn = null;
+            }
+        }
+
         // Calculate next position
         let nextX = this.x + this.velocity.x * TICK;
         let nextY = this.y + this.velocity.y * TICK;
@@ -662,6 +737,15 @@ class Player {
 
     // Handles vertical collision detection and response
     handleVerticalCollision(verticalBB, nextY, mapHeight) {
+        // Skip all tile collision if currently standing on a platform
+        if (this.standingPlatform) {
+            // Don't apply any vertical movement - platform controls it
+            return;
+        }
+
+        // Only get here if not on a platform
+
+        // Original code for tile collision handling...
         const collision = this.map.checkCollisions({
             BB: verticalBB,
             x: this.x,
@@ -672,24 +756,34 @@ class Player {
 
         if (collision.collides) {
             if (this.velocity.y > 0) {
+                // Landing on a tile
                 this.y = collision.tileY - this.height;
                 this.isGrounded = true;
+                this.groundedOn = 'tile';
                 this.velocity.y = 0;
-                this.wallSticking = false; // Stop wall sticking when grounded
+                this.wallSticking = false;
                 this.isWallSliding = false;
             } else if (this.velocity.y < 0) {
+                // Hitting head on a tile
                 this.y = collision.tileY + this.map.drawSize;
                 this.velocity.y = 0;
             }
         } else {
+            // No tile collision
             this.y = nextY;
-            const wasGrounded = this.isGrounded;
-            this.isGrounded = this.y + this.height >= mapHeight;
 
-            // If just landed, stop wall sticking
-            if (!wasGrounded && this.isGrounded) {
-                this.wallSticking = false;
-                this.isWallSliding = false;
+            // Only update grounded status if on a tile (not platform)
+            if (this.groundedOn === 'tile') {
+                this.isGrounded = false;
+                this.groundedOn = null;
+            }
+
+            // Handle map bottom boundary
+            if (this.y + this.height >= mapHeight) {
+                this.y = mapHeight - this.height;
+                this.isGrounded = true;
+                this.groundedOn = 'tile';
+                this.velocity.y = 0;
             }
         }
     }

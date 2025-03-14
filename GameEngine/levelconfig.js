@@ -224,16 +224,16 @@ class LevelConfig {
                     new BigBlock(this.game, 360, 800, 750, 875),
 
 
-                    //platfrom
+                    //platform
                     new Platform({
                         gameEngine: this.game, x: 1200, y: 370, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
                     }),
-                    // new Platform({
-                    //     gameEngine: this.game, x: 50, y: 740, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
-                    // }),
-                    // new Platform({
-                    //     gameEngine: this.game, x: 50, y: 575, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
-                    // }),
+                    new Platform({
+                        gameEngine: this.game, x: 50, y: 740, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
+                    new Platform({
+                        gameEngine: this.game, x: 50, y: 575, speed: 0, moving: false, direction: "RIGHT", reverseTime: 0, size: "SHORT"
+                    }),
                     // Levers that need to be collected
                     new Lever({gameEngine: this.game, x: 150, y: 490, speed: 0, moving: false, direction: null, reverseTime: 0}),
                 ]
@@ -321,7 +321,7 @@ class LevelConfig {
 
             7: {
                 map: () => new drawMap(this.TILE_SIZE, this.game),
-                player: () => new Player(this.game, 945, 450), // Player starts in center
+                player: () => new Player(this.game, 945, 676), // Player starts in center
                 exitDoor: () => new exitDoor(this.game, 915, 480, 4), // Exit door in center, requiring 4 levers
                 hazards: () => [
                     // Four quadrant blocks
@@ -329,7 +329,7 @@ class LevelConfig {
                     new BigBlock(this.game, 100, 150, 799, 337),
 
                     // Top-Right Block
-                    new BigBlock(this.game, 1100, 150, 1799, 337),
+                    new BigBlock(this.game, 1100, 151, 1799, 337),
 
                     // Bottom-Left Block
                     new BigBlock(this.game, 100, 587, 799, 774),
@@ -464,145 +464,6 @@ class LevelConfig {
                 ]
             },
 
-
-            11: {
-                map: () => new drawMap(this.TILE_SIZE,this.game),
-                player: () => new Player(this.game, 276, 80),
-                exitDoor: () => new exitDoor(this.game, 1800, 818, 3),
-                hazards: () => [
-                    new Spike({gameEngine: this.game, x: 1190, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 1290, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-
-                    new Spike({gameEngine: this.game, x: 475, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-
-                    new Spike({gameEngine: this.game, x: 800, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 900, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-
-                    new Spike({gameEngine: this.game, x: 1600, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 1700, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-
-
-                    new Spike({gameEngine: this.game, x: 25, y: 80, speed: 30, moving: true, direction: null, tracking: true, reverseTime: 0}),
-
-
-                    new BigBlock(this.game, 225, 375, 1875, 500),
-
-
-                    new ProjectileLauncher({gameEngine: this.game, x: 1800, y: 55,speed: 0,
-                        moving: false,
-                        direction: null,
-                        reverseTime: 0,
-                        atkspd: 2,
-                        projspd: 200,
-                        shotdirec: "LEFT"}),
-                    new Lever({gameEngine: this.game, x: 150, y: 70, speed: 0, moving: false, direction: null, reverseTime: 0}),
-                    new Lever({gameEngine: this.game, x: 1854, y: 223, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
-                    new Lever({gameEngine: this.game, x: 24, y: 325, speed: 0, moving: false, direction: null, reverseTime: 0}),
-
-
-
-                    new ProjectileLauncher({gameEngine: this.game, x: 40, y: 225,speed: 0,
-                        moving: false,
-                        direction: null,
-                        reverseTime: 0,
-                        atkspd: 2,
-                        projspd: 200,
-                        shotdirec: "RIGHT"}),
-                ]
-            },
-
-            12: {
-                map: () => new drawMap(this.TILE_SIZE, this.game),
-                player: () => new Player(this.game, 955, 750), // Player starts in center
-                exitDoor: () => new exitDoor(this.game, 935, 93, 2), // Exit door in center, requiring 4 levers
-                hazards: () => [
-                    // new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    // new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-                    // new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
-                    //     moving: false,
-                    //     direction: null,
-                    //     reverseTime: 0,
-                    //     atkspd: 2,
-                    //     projspd: 100,
-                    //     shotdirec: "DOWN"}),
-                    new Lever({gameEngine: this.game, x: 24, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
-                    new Lever({gameEngine: this.game, x: 1853, y: 90, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
-
-                    new Spike({gameEngine: this.game, x: 750, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 1135, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
-
-                    new Spike({gameEngine: this.game, x: 955, y: 850, speed: 45, moving: true, direction: null, tracking: true, reverseTime: 0}),
-                    new Spike({gameEngine: this.game, x: 955, y: 850, speed: 45, moving: true, direction: null, tracking: true, reverseTime: 0}),
-
-
-                    new BigBlock(this.game, 850, 224, 1075, 250),
-
-
-                    new Platform({
-                        gameEngine: this.game,
-                        x: 168,
-                        y: 766,
-                        speed: 100,
-                        moving: true,
-                        direction: "RIGHT",
-                        reverseTime: 3,
-                        size: "SHORT"
-                    }),
-
-                    new Platform({
-                        gameEngine: this.game,
-                        x: 1568,
-                        y: 766,
-                        speed: 100,
-                        moving: true,
-                        direction: "LEFT",
-                        reverseTime: 3,
-                        size: "SHORT"
-                    }),
-
-                    new Platform({
-                        gameEngine: this.game,
-                        x: 200,
-                        y: 270,
-                        speed: 150,
-                        moving: true,
-                        direction: "UP",
-                        reverseTime: 3,
-                        size: "SHORT"
-                    }),
-
-                    new Platform({
-                        gameEngine: this.game,
-                        x: 1400,
-                        y: 270,
-                        speed: 150,
-                        moving: true,
-                        direction: "UP",
-                        reverseTime: 3,
-                        size: "SHORT"
-                    }),
-
-
-                    new GlowingLaser({
-                        gameEngine: this.game,
-                        x: 30,
-                        y: 880,
-                        direction: 'HORIZONTAL', // New clearer orientation system
-                        flow: 'RIGHT',          // Direction of particle animation
-                        length: 1840,
-                        color: 'Blue',
-                        glowColor: 'rgba(255, 0, 0, 0.7)', // More opaque for visibility
-                        width: 8,               // Increased width
-                        glowWidth: 12           // Increased glow for visibility
-                    })
-
-                ]
-            },
-
-
-
-
             8: {
                 map: () => new drawMap(this.TILE_SIZE, this.game),
                 player: () => new Player(this.game, 50, 150),
@@ -621,6 +482,19 @@ class LevelConfig {
 
                     new Spike({gameEngine: this.game, x: 1250, y: 120, speed: 120, moving: true, direction: null, tracking: true, reverseTime: 5.5}),
 
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 190,
+                        y: 330,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'LEFT',          // Direction of particle animation
+                        length: 415,
+                        color: 'black',
+                        glowColor: 'rgba(240, 240, 240, 0.7)', // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 12           // Increased glow for visibility
+                    }),
+
                     new Lever( {
                         gameEngine: this.game,
                         x: 945,
@@ -637,7 +511,7 @@ class LevelConfig {
                         y: 805,
                         speed: 0,
                         moving: false,
-                        direction: "LEFT",
+                        direction: "RIGHT",
                         reverseTime: 0
                     }),
 
@@ -745,16 +619,16 @@ class LevelConfig {
                         size: "SHORT"
                     }),
 
-                    // new Platform({
-                    //     gameEngine: this.game,
-                    //     x: 1650,
-                    //     y: 475,
-                    //     speed: 0,
-                    //     moving: false,
-                    //     direction: null,
-                    //     reverseTime: 0,
-                    //     size: "SHORT"
-                    // }),
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1650,
+                        y: 475,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
 
 
                     new Spike({
@@ -983,7 +857,142 @@ class LevelConfig {
                     })
 
                 ]
-            }
+            },
+
+            11: {
+                map: () => new drawMap(this.TILE_SIZE,this.game),
+                player: () => new Player(this.game, 276, 80),
+                exitDoor: () => new exitDoor(this.game, 1800, 818, 3),
+                hazards: () => [
+                    new Spike({gameEngine: this.game, x: 1190, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 1290, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+
+                    new Spike({gameEngine: this.game, x: 475, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+
+                    new Spike({gameEngine: this.game, x: 800, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 900, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+
+                    new Spike({gameEngine: this.game, x: 1600, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 1700, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+
+
+                    new Spike({gameEngine: this.game, x: 25, y: 80, speed: 30, moving: true, direction: null, tracking: true, reverseTime: 0}),
+
+
+                    new BigBlock(this.game, 225, 375, 1875, 500),
+
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1800, y: 55,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 200,
+                        shotdirec: "LEFT"}),
+                    new Lever({gameEngine: this.game, x: 150, y: 70, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1854, y: 223, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 24, y: 325, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 40, y: 225,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 200,
+                        shotdirec: "RIGHT"}),
+                ]
+            },
+
+            12: {
+                map: () => new drawMap(this.TILE_SIZE, this.game),
+                player: () => new Player(this.game, 955, 750), // Player starts in center
+                exitDoor: () => new exitDoor(this.game, 935, 93, 2), // Exit door in center, requiring 4 levers
+                hazards: () => [
+                    // new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    // new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+                    // new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                    //     moving: false,
+                    //     direction: null,
+                    //     reverseTime: 0,
+                    //     atkspd: 2,
+                    //     projspd: 100,
+                    //     shotdirec: "DOWN"}),
+                    new Lever({gameEngine: this.game, x: 24, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1853, y: 90, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 750, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1135, y: 250, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 955, y: 850, speed: 45, moving: true, direction: null, tracking: true, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 955, y: 850, speed: 45, moving: true, direction: null, tracking: true, reverseTime: 0}),
+
+
+                    new BigBlock(this.game, 850, 224, 1075, 250),
+
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 168,
+                        y: 766,
+                        speed: 100,
+                        moving: true,
+                        direction: "RIGHT",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1568,
+                        y: 766,
+                        speed: 100,
+                        moving: true,
+                        direction: "LEFT",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 200,
+                        y: 270,
+                        speed: 150,
+                        moving: true,
+                        direction: "UP",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1400,
+                        y: 270,
+                        speed: 150,
+                        moving: true,
+                        direction: "UP",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 30,
+                        y: 880,
+                        direction: 'HORIZONTAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 1840,
+                        color: 'Blue',
+                        glowColor: 'rgba(255, 0, 0, 0.7)', // More opaque for visibility
+                        width: 8,               // Increased width
+                        glowWidth: 12           // Increased glow for visibility
+                    })
+
+                ]
+            },
             // add more levels below
         };
 
