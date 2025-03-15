@@ -1102,28 +1102,92 @@ class LevelConfig {
 
             14: {
                 map: () => new drawMap(this.TILE_SIZE,this.game),
-                player: () => new Player(this.game, 925, 700),
-                exitDoor: () => new exitDoor(this.game, 1190, 69, 1),
+                player: () => new Player(this.game, 925, 930),
+                exitDoor: () => new exitDoor(this.game, 915, 50, 2),
                 hazards: () => [
-                    new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-                    new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                    new BigBlock(this.game, 25, 149, 900, 25),
+                    new BigBlock(this.game, 1875, 149, 999, 25),
+
+                    // new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    // new Spike({gameEngine: this.game, x: 950, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+                    // new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                    //     moving: false,
+                    //     direction: null,
+                    //     reverseTime: 0,
+                    //     atkspd: 2,
+                    //     projspd: 100,
+                    //     shotdirec: "DOWN"}),
+
+                    new Spike({gameEngine: this.game, x: 650, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 400, y: 586, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 150, y: 336, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 1210, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1459, y: 586, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1709, y: 336, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 650, y: 150,speed: 0,
                         moving: false,
                         direction: null,
                         reverseTime: 0,
                         atkspd: 2,
-                        projspd: 100,
+                        projspd: 500,
                         shotdirec: "DOWN"}),
-                    new Lever({gameEngine: this.game, x: 140, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 410, y: 150,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 600,
+                        shotdirec: "DOWN"}),
+
+
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1210, y: 150,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 500,
+                        shotdirec: "DOWN"}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1460, y: 150,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 600,
+                        shotdirec: "DOWN"}),
+
+                    new Lever({gameEngine: this.game, x: 24, y: 170, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1853, y: 170, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+
+                    new Lever({gameEngine: this.game, x: 24, y: 170, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1853, y: 170, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+
+                    new Lever({gameEngine: this.game, x: 933, y: 650, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
                     new Platform({
                         gameEngine: this.game,
-                        x: 1400,
-                        y: 500,
-                        speed: 150,
+                        x: 720,
+                        y: 100,
+                        speed: 250,
                         moving: true,
                         direction: "UP",
-                        reverseTime: 3,
-                        size: "SHORT"
+                        reverseTime: 2,
+                        size: "WIDE"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 720,
+                        y: 340,
+                        speed: 100,
+                        moving: true,
+                        direction: "UP",
+                        reverseTime: 4,
+                        size: "WIDE"
                     }),
                 ]
             },
