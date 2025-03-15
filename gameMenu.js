@@ -220,11 +220,11 @@ class GameMenu {
         
         if (this.gameEngine && this.gameEngine.levelConfig) {
             currentLevel = this.gameEngine.levelConfig.currentLevel;
-            console.log("GameMenu: Current level before showing levels screen:", currentLevel);
-            
             // Make sure global current level is up to date
             window.CURRENT_GAME_LEVEL = currentLevel;
         }
+        
+        console.log("Showing levels with current level:", currentLevel);
         
         // Stop the game engine
         if (this.gameEngine) {
@@ -236,12 +236,6 @@ class GameMenu {
             if (gameCanvas) {
                 gameCanvas.style.display = 'none';
             }
-            
-            // Clear the canvas
-            if (this.gameEngine.ctx) {
-                const canvas = this.gameEngine.ctx.canvas;
-                this.gameEngine.ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
         }
         
         // Play menu music instead of game music
@@ -250,9 +244,19 @@ class GameMenu {
             window.AUDIO_MANAGER.playMenuMusic();
         }
         
-        // Now show the levels screen with the current level
-        const levelsScreen = new LevelsScreen(currentLevel);
-        levelsScreen.show();
+        // Reset button activity state
+        window.IS_BUTTON_ACTIVE = true;
+        
+        // Either use existing instance or create a new one
+        if (window.LEVELS_SCREEN_INSTANCE) {
+            // Update current level in existing instance
+            window.LEVELS_SCREEN_INSTANCE.currentLevel = currentLevel;
+            window.LEVELS_SCREEN_INSTANCE.show();
+        } else {
+            // Create a new instance and store it globally
+            window.LEVELS_SCREEN_INSTANCE = new LevelsScreen(currentLevel);
+            window.LEVELS_SCREEN_INSTANCE.show();
+        }
     }
 
     showResetTimesConfirmation() {

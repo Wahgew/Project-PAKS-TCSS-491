@@ -27,9 +27,8 @@ function startGame() {
 
     // hazard assets
     ASSET_MANAGER.queueDownload("./sprites/spike_small.png");
+    ASSET_MANAGER.queueDownload("./sprites/proj_small.png");
     ASSET_MANAGER.queueDownload("./sprites/launcher_small.png");
-    ASSET_MANAGER.queueDownload("./sprites/laser_test.png");
-    ASSET_MANAGER.queueDownload("./sprites/tempproj3.png")
     // level assets
     ASSET_MANAGER.queueDownload("./sprites/plat_wide.png");
     ASSET_MANAGER.queueDownload("./sprites/plat_short.png");

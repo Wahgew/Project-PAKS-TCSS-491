@@ -4,7 +4,7 @@ class LevelTimesManager {
         this.storeName = 'levelTimes';
         this.db = null;
         this.DEFAULT_TIME = 9000000000;
-        this.NUMBER_OF_LEVELS = 12;
+        this.NUMBER_OF_LEVELS = 16;
         this.dbReady = this.initializeDB();
     }
 

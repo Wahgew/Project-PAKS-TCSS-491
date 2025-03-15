@@ -1,6 +1,6 @@
 class WelcomeScreen {
     constructor(startCallback, levelsCallback, aboutCallback) {
-        this.startCallback = startCallback;
+        // We'll ignore the startCallback and use our own implementation
         this.levelsCallback = levelsCallback;
         this.aboutCallback = aboutCallback;
         this.createWelcomeScreen();
@@ -44,9 +44,9 @@ class WelcomeScreen {
         buttonContainer.style.justifyContent = "center";
         buttonContainer.style.alignItems = "center";
 
-        // Define buttons
+        // Define buttons - replace startCallback with goToGame
         const buttons = [
-            { src: "./sprites/start.png", callback: this.startCallback, width: "150px" },
+            { src: "./sprites/start.png", callback: () => this.goToGame(), width: "150px" },
             { src: "./sprites/aboutme.png", callback: this.aboutCallback, width: "120px" },
             { src: "./sprites/levels.png", callback: this.levelsCallback, width: "150px" }
         ];
@@ -86,6 +86,61 @@ class WelcomeScreen {
 
         this.welcomeContainer.appendChild(buttonContainer);
         document.body.appendChild(this.welcomeContainer);
+    }
+
+    // New goToGame method copied from LevelsScreen's goToGame method
+    async goToGame() {
+        // Hide welcome screen
+        this.hideWelcomeScreen();
+    
+        // Ensure the correct level is resumed
+        let levelToLoad = window.CURRENT_GAME_LEVEL || 1; 
+        console.log("Starting/resuming game at level:", levelToLoad);
+    
+        if (window.gameEngine) {
+            // Ensure the game canvas is visible
+            const gameCanvas = document.getElementById("gameWorld");
+            if (gameCanvas) {
+                gameCanvas.style.display = "block";
+            }
+    
+            // Resume the game with the most recent level
+            if (window.gameEngine.levelConfig) {
+                window.gameEngine.levelConfig.currentLevel = levelToLoad;
+                window.gameEngine.levelConfig.loadLevel(levelToLoad);
+                
+                // Switch music back to game music
+                if (window.AUDIO_MANAGER) {
+                    window.AUDIO_MANAGER.stopMenuMusic();
+                    window.AUDIO_MANAGER.playGameMusic();
+                }
+            }
+        } else {
+            // If game engine isn't initialized yet, load the level
+            console.log("Game engine not found, loading level:", levelToLoad);
+            
+            window.targetLevelToLoad = levelToLoad;
+            
+            if (!window.checkGameEngineInterval) {
+                window.checkGameEngineInterval = setInterval(() => {
+                    if (window.gameEngine && window.gameEngine.levelConfig) {
+                        window.gameEngine.levelConfig.currentLevel = window.targetLevelToLoad;
+                        window.gameEngine.levelConfig.loadLevel(window.targetLevelToLoad);
+                        const gameCanvas = document.getElementById("gameWorld");
+                        if (gameCanvas) {
+                            gameCanvas.style.display = "block";
+                        }
+                        if (window.AUDIO_MANAGER) {
+                            window.AUDIO_MANAGER.stopMenuMusic();
+                            window.AUDIO_MANAGER.playGameMusic();
+                        }
+                        clearInterval(window.checkGameEngineInterval);
+                        window.checkGameEngineInterval = null;
+                    }
+                }, 200);
+            }
+            startGame();
+        }
     }
 
     createAboutContent() {
