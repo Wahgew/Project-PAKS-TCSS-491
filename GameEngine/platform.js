@@ -60,6 +60,32 @@ class Platform {
             if (player.standingPlatform === this) {
                 this.playerRiding = true;
 
+                // If platform is moving upward with player on it
+                if (deltaY < 0) {  // Platform moving up
+                    // Check for ceiling collision above player
+                    const ceilingCheckBB = new BoundingBox(
+                        player.x,
+                        player.y - Math.abs(deltaY) - 10, // Check further up based on platform speed
+                        player.width,
+                        10  // Just check a thin slice above player's head
+                    );
+
+                    const ceilingCollision = player.map.checkCollisions({
+                        BB: ceilingCheckBB,
+                        x: player.x,
+                        y: player.y - Math.abs(deltaY) - 10,
+                        width: player.width,
+                        height: 10
+                    });
+
+                    // If ceiling collision detected, kill player
+                    if (ceilingCollision.collides) {
+                        console.log("Player crushed by platform!");
+                        player.kill();
+                        this.playerRiding = false;
+                    }
+                }
+
                 // Allow dropping through with S
                 if (this.game.keys['s']) {
                     // This prevents the issue when walking from tiles to platform with S held
