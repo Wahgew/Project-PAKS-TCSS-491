@@ -115,6 +115,9 @@ class LevelConfig {
                 hazards: () => [
                     new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
                     new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+		    new Spike({gameEngine: this.game, x: 520, y: 440, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+		    new Spike({gameEngine: this.game, x: 1400, y: 210, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+		    new Spike({gameEngine: this.game, x: 1780, y: 500, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
                     new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
                         moving: false,
                         direction: null,
@@ -415,7 +418,7 @@ class LevelConfig {
                     new ProjectileLauncher({
                         gameEngine: this.game,
                         x: 1818,
-                        y: 50,
+                        y: 75,
                         speed: 0,
                         moving: false,
                         direction: null,
@@ -427,7 +430,7 @@ class LevelConfig {
                     new ProjectileLauncher({
                         gameEngine: this.game,
                         x: 25,
-                        y: 820,
+                        y: 830,
                         speed: 0,
                         moving: false,
                         direction: null,
@@ -836,8 +839,21 @@ class LevelConfig {
 
                     new ProjectileLauncher({
                         gameEngine: this.game,
-                        x: 1845,
-                        y: 750,
+                        x: 1830,
+                        y: 730,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 4,
+                        projspd: 175,
+                        shotdirec: "LEFT"
+                    }),
+
+		    new ProjectileLauncher({
+                        gameEngine: this.game,
+                        x: 1830,
+                        y: 605,
                         speed: 0,
                         moving: false,
                         direction: null,
