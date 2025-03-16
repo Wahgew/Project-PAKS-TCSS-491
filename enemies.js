@@ -420,8 +420,8 @@ class GlowingLaser {
         this.particles = [];
 
         // Debug info
-        console.log(`Created GlowingLaser at (${this.x}, ${this.y}) with orientation ${this.orientation}`);
-        console.log(`Endpoints: (${this.endX}, ${this.endY}), Length: ${this.length}`);
+        console.log('%cCreated GlowingLaser at (' + this.x + ', ' + this.y + ') with orientation ' + this.orientation, 'color: black');
+        console.log('%cEndpoints: (' + this.endX + ', ' + this.endY + '), Length: ' + this.length, 'color: black');
     }
 
     setEndpoints() {
@@ -569,9 +569,9 @@ class GlowingLaser {
 
             // Add orientation text
             ctx.font = '12px Arial';
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = 'Black';
             ctx.fillText(`Laser: ${this.orientation} (${this.x},${this.y}) to (${this.endX},${this.endY})`,
-                this.x, this.y - 15);
+                this.x - 100, this.y - 15);
         }
 
         // LASER BEAM RENDERING

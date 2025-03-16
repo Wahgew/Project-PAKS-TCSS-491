@@ -823,15 +823,15 @@ class LevelConfig {
 
                     new ProjectileLauncher({
                         gameEngine: this.game,
-                        x: 1850,
-                        y: 600,
+                        x: 850,
+                        y: 845,
                         speed: 0,
                         moving: false,
                         direction: null,
                         reverseTime: 0,
                         atkspd: 2,
                         projspd: 325,
-                        shotdirec: "LEFT"
+                        shotdirec: "UP"
                     }),
 
                     new ProjectileLauncher({
@@ -1102,67 +1102,540 @@ class LevelConfig {
 
             14: {
                 map: () => new drawMap(this.TILE_SIZE,this.game),
-                player: () => new Player(this.game, 925, 700),
-                exitDoor: () => new exitDoor(this.game, 1190, 69, 1),
+                player: () => new Player(this.game, 925, 930),
+                exitDoor: () => new exitDoor(this.game, 915, 50, 2),
                 hazards: () => [
-                    new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-                    new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                    new BigBlock(this.game, 25, 149, 900, 25),
+                    new BigBlock(this.game, 1875, 149, 999, 25),
+
+                    // new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
+                    // new Spike({gameEngine: this.game, x: 950, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+                    // new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                    //     moving: false,
+                    //     direction: null,
+                    //     reverseTime: 0,
+                    //     atkspd: 2,
+                    //     projspd: 100,
+                    //     shotdirec: "DOWN"}),
+
+                    new Spike({gameEngine: this.game, x: 650, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 400, y: 586, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 150, y: 336, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 1210, y: 835, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1459, y: 586, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1709, y: 336, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 650, y: 150,speed: 0,
                         moving: false,
                         direction: null,
                         reverseTime: 0,
                         atkspd: 2,
-                        projspd: 100,
+                        projspd: 500,
                         shotdirec: "DOWN"}),
-                    new Lever({gameEngine: this.game, x: 140, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 410, y: 150,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 600,
+                        shotdirec: "DOWN"}),
+
+
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1210, y: 150,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 500,
+                        shotdirec: "DOWN"}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1460, y: 150,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 2,
+                        projspd: 600,
+                        shotdirec: "DOWN"}),
+
+                    new Lever({gameEngine: this.game, x: 24, y: 170, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1853, y: 170, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+
+                    new Lever({gameEngine: this.game, x: 24, y: 170, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1853, y: 170, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+
+                    new Lever({gameEngine: this.game, x: 933, y: 650, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
                     new Platform({
                         gameEngine: this.game,
-                        x: 1400,
-                        y: 500,
-                        speed: 150,
+                        x: 720,
+                        y: 100,
+                        speed: 250,
                         moving: true,
                         direction: "UP",
-                        reverseTime: 3,
-                        size: "SHORT"
+                        reverseTime: 2,
+                        size: "WIDE"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 720,
+                        y: 340,
+                        speed: 100,
+                        moving: true,
+                        direction: "UP",
+                        reverseTime: 4,
+                        size: "WIDE"
                     }),
                 ]
             },
 
             15: {
                 map: () => new drawMap(this.TILE_SIZE,this.game),
-                player: () => new Player(this.game, 925, 700),
-                exitDoor: () => new exitDoor(this.game, 1190, 69, 1),
+                player: () => new Player(this.game, 426, 97),
+                exitDoor: () => new exitDoor(this.game, 1806, 393, 6),
                 hazards: () => [
-                    new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-                    new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                    new ProjectileLauncher({gameEngine: this.game, x: 1450, y:423,speed: 0,
                         moving: false,
                         direction: null,
                         reverseTime: 0,
-                        atkspd: 2,
+                        atkspd: 5,
                         projspd: 100,
-                        shotdirec: "DOWN"}),
-                    new Lever({gameEngine: this.game, x: 140, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                        shotdirec: "UP"}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1509, y:423,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 5,
+                        projspd: 100,
+                        shotdirec: "UP"}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1567, y:423,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 5,
+                        projspd: 100,
+                        shotdirec: "UP"}),
+
+                    new ProjectileLauncher({gameEngine: this.game, x: 1626, y:423,speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        atkspd: 5,
+                        projspd: 100,
+                        shotdirec: "UP"}),
+
+                    new Lever({gameEngine: this.game, x: 448, y: 498, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 448, y: 423, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+
+                    new Lever({gameEngine: this.game, x: 654, y: 498, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 698, y: 498, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+                    new Lever({gameEngine: this.game, x: 903, y: 498, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 903, y: 423, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+
+                    new Lever({gameEngine: this.game, x: 1404, y: 498, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1449, y: 498, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 90,
+                        y: 565,
+                        speed: 100,
+                        moving: true,
+                        direction: "UP",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1055,
+                        y: 655,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1055,
+                        y: 280,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 570,
+                        y: 282,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1800,
+                        y: 560,
+                        direction: 'HORIZONTAL', // New clearer orientation system
+                        flow: 'LEFT',          // Direction of particle animation
+                        length: 250,
+                        color: '#00FFFF',  // Cyan,
+                        glowColor: 'rgba(0, 255, 255, 0.7)', // More opaque for visibility
+                        width: 8,               // Increased width
+                        glowWidth: 16           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1800,
+                        y: 666,
+                        direction: 'HORIZONTAL', // New clearer orientation system
+                        flow: 'LEFT',          // Direction of particle animation
+                        length: 250,
+                        color: '#FF00FF',  // Magenta
+                        glowColor: 'rgba(255, 0, 255, 0.7)', // More opaque for visibility
+                        width: 8,               // Increased width
+                        glowWidth: 16           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1550,
+                        y: 560,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 110,
+                        color: '#FFFF00',  // Yellow
+                        glowColor: 'rgba(255, 255, 0, 0.7)', // More opaque for visibility
+                        width: 8,               // Increased width
+                        glowWidth: 16           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1800,
+                        y: 560,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 110,
+                        color: '#00FF00',  // Green
+                        glowColor: 'rgba(0, 255, 0, 0.7)',  // More opaque for visibility
+                        width: 8,               // Increased width
+                        glowWidth: 16           // Increased glow for visibility
+                    }),
+
+                    new Spike({gameEngine: this.game, x: 1250, y: 500, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
+                    new Spike({gameEngine: this.game, x: 375, y: 505, speed: 200, moving: true, direction: 'DOWN', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 968, y: 505, speed: 200, moving: true, direction: 'DOWN', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 968, y: 400, speed: 200, moving: true, direction: 'DOWN', tracking: false, reverseTime: 2}),
+
+
+                    new Spike({gameEngine: this.game, x: 515, y: 26, speed: 400, moving: true, direction: 'DOWN', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 615, y: 26, speed: 400, moving: true, direction: 'DOWN', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 715, y: 26, speed: 400, moving: true, direction: 'DOWN', tracking: false, reverseTime: 2}),
+                    new Spike({gameEngine: this.game, x: 815, y: 26, speed: 400, moving: true, direction: 'DOWN', tracking: false, reverseTime: 2}),
+
+                    new Spike({gameEngine: this.game, x: 24, y: 210, speed: 500, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 1}),
+                    new Spike({gameEngine: this.game, x: 24, y: 280, speed: 500, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 24, y: 350, speed: 500, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 2}),
+
+                    new Spike({gameEngine: this.game, x: 30, y: 910, speed: 100, moving: true, direction: 'RIGHT', tracking: false, reverseTime: 20}),
+
+
+
 
                 ]
             },
 
             16: {
                 map: () => new drawMap(this.TILE_SIZE,this.game),
-                player: () => new Player(this.game, 925, 700),
-                exitDoor: () => new exitDoor(this.game, 1190, 69, 1),
+                player: () => new Player(this.game, 124, 106),
+                exitDoor: () => new exitDoor(this.game, 1742, 743, 6),
                 hazards: () => [
-                    new Spike({gameEngine: this.game, x: 1190, y: 730, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 3}),
-                    new Spike({gameEngine: this.game, x: 375, y: 625, speed: 50, moving: true, direction: 'UP', tracking: false, reverseTime: 4}),
-                    new ProjectileLauncher({gameEngine: this.game, x: 930, y: 75,speed: 0,
+                    new Lever({gameEngine: this.game, x: 450, y: 65, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 950, y: 65, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1450, y: 65, speed: 0, moving: false, direction: null, reverseTime: 0}),
+
+                    new Lever({gameEngine: this.game, x: 700, y: 65, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1200, y: 65, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                    new Lever({gameEngine: this.game, x: 1835, y: 757, speed: 0, moving: false, direction: "LEFT", reverseTime: 0}),
+
+
+                    //top
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 30,
+                        y: 30,
+                        direction: 'HORTIZONTAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 1840,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+                    //left
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 30,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 850,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+                    //right
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1870,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'LEFT',          // Direction of particle animation
+                        length: 850,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+
+                    //bottom
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 30,
+                        y: 885,
+                        direction: 'HORTIZONTAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 1840,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 340,
+                        y: 700,
+                        direction: 'HORTIZONTAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 1530,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 340,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 400,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 578,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 400,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 835,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 400,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1078,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 400,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1337,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 400,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+                    new GlowingLaser({
+                        gameEngine: this.game,
+                        x: 1579,
+                        y: 30,
+                        direction: 'VERTICAL', // New clearer orientation system
+                        flow: 'RIGHT',          // Direction of particle animation
+                        length: 400,
+                        color: 'Black',  // Green
+                        glowColor: 'rgba(0, 0, 0, 0.7)',  // More opaque for visibility
+                        width: 12,               // Increased width
+                        glowWidth: 18           // Increased glow for visibility
+                    }),
+
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 27,
+                        y: 666,
+                        speed: 200,
+                        moving: true,
+                        direction: "RIGHT",
+                        reverseTime: 8.15,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1290,
+                        y: 823,
+                        speed: 100,
+                        moving: true,
+                        direction: "LEFT",
+                        reverseTime: 11.75,
+                        size: "WIDE"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 845,
+                        y: 620,
+                        speed: Math.floor(Math.random() * (166 - 87 + 1)) + 87,
+                        moving: true,
+                        direction: "DOWN",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 345,
+                        y: 620,
+                        speed: Math.floor(Math.random() * (166 - 87 + 1)) + 87,
+                        moving: true,
+                        direction: "DOWN",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1345,
+                        y: 620,
+                        speed: Math.floor(Math.random() * (166 - 87 + 1)) + 87, // random speed from 87 - 150
+                        moving: true,
+                        direction: "DOWN",
+                        reverseTime: 3,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 595,
+                        y: 428,
+                        speed: 0,
+                        moving: true,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 595,
+                        y: 510,
+                        speed: 0,
                         moving: false,
                         direction: null,
                         reverseTime: 0,
-                        atkspd: 2,
-                        projspd: 100,
-                        shotdirec: "DOWN"}),
-                    new Lever({gameEngine: this.game, x: 140, y: 90, speed: 0, moving: false, direction: null, reverseTime: 0}),
+                        size: "SHORT"
+                    }),
 
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1096,
+                        y: 428,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+                    new Platform({
+                        gameEngine: this.game,
+                        x: 1096,
+                        y: 510,
+                        speed: 0,
+                        moving: false,
+                        direction: null,
+                        reverseTime: 0,
+                        size: "SHORT"
+                    }),
+
+
+                    new Spike({gameEngine: this.game, x: 440, y: 435, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 935, y: 435, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+                    new Spike({gameEngine: this.game, x: 1444, y: 435, speed: 0, moving: false, direction: null, tracking: false, reverseTime: 0}),
+
+                    new Spike({gameEngine: this.game, x: 440, y: 850, speed: 75, moving: true, direction: "DOWN", tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 935, y: 850, speed: 75, moving: true, direction: "DOWN", tracking: false, reverseTime: 3}),
+                    new Spike({gameEngine: this.game, x: 1444, y: 850, speed: 75, moving: true, direction: "DOWN", tracking: false, reverseTime: 3}),
                 ]
             },
             // add more levels below

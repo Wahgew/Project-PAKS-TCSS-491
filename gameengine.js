@@ -272,21 +272,21 @@ class GameEngine {
             console.error("No context found in GameEngine");
             return;
         }
-
+    
         // Log canvas state before clearing
         /* console.log("Canvas state before clear:", {
             width: this.ctx.canvas.width,
             height: this.ctx.canvas.height,
             transform: this.ctx.getTransform()
         }); */
-
+    
         // Clear with a visible color first to verify clearing works
         this.ctx.fillStyle = 'white';
         this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-
+    
         // Reset any transformations
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-
+    
         // Draw from front to back (map first, then entities)
         // Find and draw map first
         const mapEntity = this.entities.find(entity => entity instanceof drawMap);
@@ -295,7 +295,7 @@ class GameEngine {
             mapEntity.draw(this.ctx);
             this.ctx.restore();
         }
-
+    
         // Then draw all other entities
         this.entities.forEach(entity => {
             if (!(entity instanceof drawMap)) {
@@ -311,33 +311,33 @@ class GameEngine {
                 this.ctx.restore();
             }
         });
-
+    
         // draw timer with elevator theme
         if (this.timer) {
             const displayTime = this.timer.getDisplayTime();
             const minutes = Math.floor(displayTime / 60);
             const seconds = Math.floor(displayTime % 60);
             const milliseconds = Math.floor((displayTime % 1) * 100);
-
+    
             const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`;
-
+    
             // Draw elevator-style digital display for timer
             const displayWidth = 200;
             const displayHeight = 50;
             const padding = 10;
-
+    
             // Position in top center
             const displayX = (this.ctx.canvas.width / 2) - (displayWidth / 2);
             const displayY = 20;
-
-
+    
+    
             // Draw panel background
             this.ctx.fillStyle = '#333';
             this.ctx.fillRect(displayX, displayY, displayWidth, displayHeight);
             this.ctx.strokeStyle = '#555';
             this.ctx.lineWidth = 3;
             this.ctx.strokeRect(displayX, displayY, displayWidth, displayHeight);
-
+    
             // Draw inner display
             this.ctx.fillStyle = '#000';
             this.ctx.fillRect(
@@ -346,13 +346,13 @@ class GameEngine {
                 displayWidth - padding * 2,
                 displayHeight - padding * 2
             );
-
+    
             // Add text "FLOOR TIME"
             this.ctx.font = '12px monospace';
             this.ctx.fillStyle = '#ffcc00';
             this.ctx.textAlign = 'left';
             this.ctx.fillText('FLOOR TIME', displayX + padding + 5, displayY + padding + 15);
-
+    
             // Draw time
             this.ctx.font = 'bold 18px monospace';
             this.ctx.fillStyle = '#33ff33'; // Digital green color
@@ -362,33 +362,29 @@ class GameEngine {
                 displayX + displayWidth - padding - 5,
                 displayY + displayHeight - padding - 5
             );
-
+    
             // Add small decorative LEDs
             this.ctx.fillStyle = '#3f3'; // Green LED
             this.ctx.beginPath();
             this.ctx.arc(displayX + displayWidth - 15, displayY + 10, 3, 0, Math.PI * 2);
             this.ctx.fill();
-
-            // Only start the timer if it's not explicitly stopped
-            if (this.timer.isRunning) {
-                this.timer.start();
-            }
+    
+            // REMOVED: The problematic timer auto-start code that was here
         }
-
+    
         this.levelUI.draw(this.ctx);
-
+    
         // draws the x y pos following the cursor
         if (this.options.debugging && this.mouse) {
             this.ctx.font = "12px Arial";
             this.ctx.fillStyle = "red";
-
+    
             // ADJUST THE PIXEL DISPLAY CURSOR
             let offsetX = 35; // Adjust to prevent overlap with cursor
             let offsetY = 50;
-
+    
             this.ctx.fillText(`(${this.mouse.x}, ${this.mouse.y})`, this.mouse.x + offsetX, this.mouse.y + offsetY);
         }
-
     }
 
     update() {
