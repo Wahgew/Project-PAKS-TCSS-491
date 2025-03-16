@@ -39,7 +39,8 @@ class ProjectileLauncher {
         if (this.moving) updateMovement(this.game, this);
         if (this.time >= this.atkspd) {
             this.time = 0;
-            this.game.addEntity(new Projectile(this.game, this.x, this.y, this.projspd, this.shotdirec))
+            this.game.addEntity(new Projectile(this.game, this.x + (this.width / 2) - (30 / 2), 
+                            this.y + (this.height / 2) - (30 / 2), this.projspd, this.shotdirec))
         }
         this.time += this.game.clockTick;
         this.x += this.game.clockTick * this.velocity.x; 
